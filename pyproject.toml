@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=75.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "real_estate_agency_deals_site"
+version = "0.0.0.1"
+description = "A site where real estate agencies present deals on their real estate and offer real estate services."
+requires-python = ">=3.13"
+
+dependencies = [
+  "Django == 5.1.7",
+  "Pillow == 11.1.0",
+  "python-dotenv == 1.0.1",
+  "psycopg[binary,pool] == 3.2.6",
+]
+
+[tool.setuptools]
+py-modules = []
+
+[tool.distutils.egg_info]
+egg_base = "."
