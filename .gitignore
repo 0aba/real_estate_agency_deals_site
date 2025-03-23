@@ -13,6 +13,6 @@ migrations/*.py
 media/avatars/*
 !media/backgrounds/.gitkeep
 media/backgrounds/*
-!media/photos/.gitkeep
+!media/photos/user/.gitkeep
 media/photos/*
 !media/default

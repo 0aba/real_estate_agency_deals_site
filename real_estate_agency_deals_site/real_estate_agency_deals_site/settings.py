@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'user.apps.UserConfig',
-    'admin.apps.AdminConfig',
+    'staff.apps.StaffConfig',
     'real_estate_agency.apps.RealEstateAgencyConfig',
 ]
 
