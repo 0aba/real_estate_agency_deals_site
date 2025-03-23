@@ -9,10 +9,6 @@
 !migrations/__init__.py
 migrations/*.py
 
-!media/avatars/.gitkeep
-media/avatars/*
-!media/backgrounds/.gitkeep
-media/backgrounds/*
-!media/photos/user/.gitkeep
-media/photos/*
 !media/default
+!media/default_svg
+media/*
