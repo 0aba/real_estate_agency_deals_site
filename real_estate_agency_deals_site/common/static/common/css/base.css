@@ -1,0 +1,81 @@
+@import url(variables.css);
+@import url(dropdown.css);
+
+
+body {
+    padding: 0;
+    margin: 0;
+}
+
+.element-header {
+    position: relative;
+    display: inline-block;
+}
+
+.btn-header {
+    text-decoration: none;
+    background-color: #212421;
+    color: white;
+    height: 100%;
+    padding: 0;
+    font-size: 14px;
+    border-left: 1px solid #8b8c8b;
+    border-right: 1px solid #8b8c8b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-header:hover {
+    background-color: #8b8c8b;
+}
+
+.dropdown,
+.element-header {
+    margin: 0;
+    padding: 0;
+    height: 75px;
+    width: 100px;
+    text-align: center;
+}
+
+header,
+footer {
+    max-height: 75px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--background-color);
+}
+
+footer {
+    max-height: none;
+    height: 10vh;
+}
+
+.left-block {
+    display: flex;
+}
+
+.right-block {
+    display: flex;
+}
+
+.left-block img {
+    height: 100%;
+    max-height: 70px;
+    width: auto;
+}
+
+.right-block img {
+    height: 100%;
+    max-height: 40px;
+    width: auto;
+}
+
+.right-block img,
+.right-block p,
+.left-block img,
+.right-block p {
+    padding: 0 4px 0 4px;
+}

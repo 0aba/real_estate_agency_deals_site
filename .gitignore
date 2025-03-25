@@ -10,5 +10,5 @@
 migrations/*.py
 
 !media/default
-!media/default_svg
+!real_estate_agency_deals_site/common/static/common/svg
 media/*

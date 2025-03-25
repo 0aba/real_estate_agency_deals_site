@@ -6,7 +6,7 @@ from django.utils import timezone
 from django.db import models
 from uuid import uuid4
 
-
+AbstractUser.last_login
 class User(AbstractUser):
     class Meta:
         verbose_name = 'Пользователь'

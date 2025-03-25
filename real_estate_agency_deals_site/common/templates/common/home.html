@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block title %}{{title}}{% endblock %}
+
+{% block styles %}
+<link type="text/css" rel="stylesheet" href="{% static 'common/css/home.css' %}"/>
+{% endblock %}
+{% block scripts %}
+<script>
+    function updateDealType() {
+        const realEstateTypeSelect = document.getElementById('realEstateType');
+        const dealTypeSelect = document.getElementById('dealType');
+
+        if (realEstateTypeSelect.value === "") {
+            dealTypeSelect.disabled = true;
+            dealTypeSelect.value = "";
+        } else {
+            dealTypeSelect.disabled = false;
+
+            if (realEstateTypeSelect.value === "plot") {
+                dealTypeSelect.querySelector('option[value="construction"]').disabled = true;
+            } else {
+                Array.from(dealTypeSelect.options).forEach(option => {
+                    option.disabled = false;
+                });
+            }
+        }
+    }
+</script>
+{% endblock %}
+
+{% block content %}
+
+<div class="city" style="background-image: url({% static 'common/img/city.jpg' %});">
+    <div class="found-deal">
+        <form>
+            <select id="realEstateType" onchange="updateDealType()">
+                <option value="">Тип недвижимости</option>
+                <option value="house">Дом</option>
+                <option value="apartment">Квартира</option>
+                <option value="plot">Участок</option>
+            </select>
+            <select id="dealType" disabled>
+                <option value="">Тип сделки</option>
+                <option value="sale">Продажа</option>
+                <option value="rent">Аренда</option>
+                <option value="construction">Строительство</option>
+            </select>
+            <input type="number" placeholder="Цена от">
+            <input type="number" placeholder="Цена до">
+            <button type="button">Найти</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

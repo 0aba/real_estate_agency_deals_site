@@ -30,6 +30,7 @@ DEBUG = True
 load_dotenv(BASE_DIR.parent / ('.env.dev' if DEBUG else '.env.prod'))
 
 ALLOWED_HOSTS = ['*']
+MAIN_HOST = 'http://127.0.0.1:8000' if DEBUG else 'https://todo-host.com'
 
 
 # Application definition
@@ -42,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'common.apps.CommonConfig',
     'user.apps.UserConfig',
     'staff.apps.StaffConfig',
     'real_estate_agency.apps.RealEstateAgencyConfig',

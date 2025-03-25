@@ -1,0 +1,115 @@
+<!doctype html>
+{% load static %}
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{% block title %}{% endblock %}</title>
+    <link type="text/css" rel="stylesheet" href="{% static 'common/css/base.css' %}"/>
+    {% block styles %}{% endblock %}
+    {% block scripts %}{% endblock %}
+</head>
+<body>
+    {% if messages %}
+        {% for message in messages %}
+            {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+                {% include 'includes/notification.html' with message=message message_type='error' display_time=5 %}
+            {% elif message.level == DEFAULT_MESSAGE_LEVELS.WARNING %}
+                {% include 'includes/notification.html' with message=message message_type='warning' display_time=5 %}
+            {% elif message.level == DEFAULT_MESSAGE_LEVELS.INFO %}
+                {% include 'includes/notification.html' with message=message message_type='info' display_time=5 %}
+            {% elif message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+                {% include 'includes/notification.html' with message=message message_type='success' display_time=5 %}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+    <header>
+        <div class="left-block">
+            <a href="{% url 'home' %}"><img src="{% static 'common/svg/real-estate-house.svg' %}"></a>
+            <div class="element-header">
+                <a href="{% url 'home' %}" class="btn-header">Главная</a>
+            </div>
+            <div class="dropdown">
+              <a class="dropbtn">Сделки & услуги</a>
+              <div class="dropdown-content">
+                <a href="#">Аренда</a>
+                <a href="#">Покупка</a>
+                <a href="#">Строительство</a>
+                <a href="#">Релелтер</a>
+              </div>
+            </div>
+            <div class="dropdown">
+                <a class="dropbtn">Агенство недвижимости</a>
+                <div class="dropdown-content">
+                    <a href="#">Мое агенство</a>
+                    <a href="#">Мои риелторы</a>
+                    <a href="#">Моя недвижимость</a>
+                    <a href="#">Мои сделки</a>
+                    <a href="#">Регистрация агенства</a>
+                </div>
+            </div>
+            <div class="dropdown">
+                <a class="dropbtn">Инструменты администрации</a>
+                <div class="dropdown-content">
+                    <a href="#">Жалобы</a>
+                    <a href="#">Апеляции</a>
+                    <a href="#">Блокировки</a>
+                </div>
+            </div>
+            <div class="dropdown">
+                <a class="dropbtn">...</a>
+                <div class="dropdown-content">
+                    <a href="#">Написать жалобу</a>
+                    <a href="#">Написать апелляцию</a>
+                </div>
+            </div>
+        </div>
+        <div class="right-block">
+            {% if user.is_authenticated %}
+            <div class="dropdown">
+                <a class="dropbtn"><img src="{% static 'common/svg/notify.svg' %}"></a>
+                <div class="dropdown-content">
+                    <a href="#">11111</a>
+                    <a href="#">22222</a>
+                    <a href="#">33333</a>
+                </div>
+            </div>
+            <div class="element-header">
+                <a href="#" class="btn-header">
+                    <img src="{% static 'common/svg/messages.svg' %}">
+                </a>
+            </div>
+            <div class="element-header">
+                <a href="#" class="btn-header">
+                    <img src="/">
+                </a>
+            </div>
+            <div class="element-header">
+                <a href="{% url 'logout' %}" class="btn-header">Выход</a>
+            </div>
+            {% else %}
+            <div class="element-header">
+                <a href="{% url 'login' %}" class="btn-header">Вход</a>
+            </div>
+            <div class="element-header">
+                <a href="{% url 'signup' %}" class="btn-header">Регистрация</a>
+            </div>
+            {% endif %}
+        </div>
+    </header>
+    <div id="content">
+        {% block content %}{% endblock %}
+    </div>
+    <footer>
+        <div class="left-block">
+            <p>© «ИС учета сделак агенств недвижемости» 2025</p>
+        </div>
+        <div class="right-block">
+            <a href="#"><img src="{% static 'common/svg/tg.svg' %}"></a>
+            <a href="#"><img src="{% static 'common/svg/vk.svg' %}"></a>
+        </div>
+    </footer>
+</body>
+</html>

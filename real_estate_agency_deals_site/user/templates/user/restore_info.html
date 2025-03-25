@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block title %}{{title}}{% endblock %}
+
+{% block styles %}
+<link type="text/css" rel="stylesheet" href="{% static 'common/css/information.css' %}"/>
+{% endblock %}
+{% block scripts %}
+
+{% endblock %}
+
+{% block content %}
+<div class="info-container">
+    <h1>Восстановление пароля</h1>
+    <br>
+    <p>Вам на почту пришло письмо с подтверждением почты, ссылкой для восстановления пароля.
+       Письмо может быть в «спаме», советуем посмотреть там, если долго не приходит.</p>
+</div>
+{% endblock %}

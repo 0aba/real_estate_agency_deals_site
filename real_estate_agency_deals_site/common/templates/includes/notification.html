@@ -1,0 +1,77 @@
+<div class="notification {{ message_type }}" style="z-index: 9999;">
+    <span class="message-content">{{ message }}</span>
+    <button class="close-button" onclick="closeNotification(this)">✖</button>
+</div>
+
+<style>
+    .notification {
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-radius: 8px;
+        border: 2px solid transparent;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        z-index: 9999;
+        font-size: 18px;
+    }
+
+    .notification.error {
+        background-color: red;
+        color: white;
+        border-color: darkred;
+        box-shadow: 0 0 10px darkred;
+    }
+
+    .notification.warning {
+        background-color: orange;
+        color: white;
+        border-color: darkorange;
+        box-shadow: 0 0 10px darkorange;
+    }
+
+    .notification.info {
+        background-color: royalblue;
+        color: white;
+        border-color: darkblue;
+        box-shadow: 0 0 10px darkblue;
+    }
+
+    .notification.success {
+        background-color: forestgreen;
+        color: white;
+        border-color: darkgreen;
+        box-shadow: 0 0 10px darkgreen;
+    }
+
+    .close-button {
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        font-size: 20px;
+        margin-left: 10px;
+    }
+
+    .notification.inactive {
+        pointer-events: none;
+        opacity: 0.5;
+    }
+</style>
+
+<script>
+    function closeNotification(button) {
+        const notification = button.parentElement;
+        notification.style.display = 'none';
+    }
+
+    setTimeout(function() {
+        const notification = document.querySelector('.notification');
+        if (notification) {
+            notification.style.display = 'none';
+        }
+    }, {{ display_time }} * 1000);
+</script>
