@@ -2,6 +2,7 @@
 
 
 .form-container {
+    width: 50%;
     background-color: var(--background-color);
     margin: 100px auto;
     padding: 20px;
@@ -53,7 +54,6 @@
     transition: background-color 0.3s;
 }
 
-
 .form-button:disabled {
     background-color: #D6D6D6;
     color: #A1A1A1;
@@ -61,11 +61,22 @@
 }
 
 .form-button:hover:not(:disabled) {
-    background-color: #171717;
+    background-color: #515151;
+}
+
+textarea {
+    font-size: 14px;
+    width: 98%;
+    height: 150px;
+    resize: none;
 }
 
 input {
-    width: 100%;
+    width: 95%;
+}
+
+.form-group input[type="checkbox"] {
+    width: 5%;
 }
 
 .errorlist {

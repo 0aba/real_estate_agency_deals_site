@@ -14,14 +14,13 @@ class Complaint(models.Model):
             ),
         ]
 
-
     wrote_complaint = models.ForeignKey(AUTH_USER_MODEL, null=True, on_delete=models.PROTECT,
                                         related_name='wrote_complaint_fk')
     feedback_email = models.EmailField(null=True, verbose_name='Почта обратной связи')
     message = models.CharField(max_length=256, verbose_name='Жалоба')
-    date_write = models.DateTimeField(auto_now_add=True)
     reviewed_complaint = models.ForeignKey(AUTH_USER_MODEL, null=True, on_delete=models.PROTECT,
                                            related_name='reviewed_complaint_fk')
+    date_write = models.DateTimeField(auto_now_add=True)
     verdict = models.CharField(null=True, max_length=256, verbose_name='Вердикт')
 
     objects = models.Manager()

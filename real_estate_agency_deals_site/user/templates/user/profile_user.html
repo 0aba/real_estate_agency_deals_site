@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block title %}{{title}}{% endblock %}
+
+{% block styles %}
+<link type="text/css" rel="stylesheet" href="{% static 'user/css/profile.css' %}"/>
+{% endblock %}
+{% block scripts %}
+
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="header-profile">
+        <div class="user">
+            <img src="/media/{{ user_profile.photo }}">
+            <h3>{{ user_profile.username }}</h3>
+            <p>Присоединился: {{user_profile.date_register }}</p>
+            {% if user_profile.is_staff %}
+                <p class="admin">Администрация</p>
+            {% endif %}
+            {% if user_profile.banned %}
+                <p class="banned">Заблокирован</p>
+            {% endif %}
+            {% if user_profile.is_active %}
+                {% if user_profile.online %}
+                    <p class="online">Онлайн</p>
+                {% else %}
+                    <p class="offline">Офлайн (был последний раз в {{ user_profile.last_seen }})</p>
+                {% endif %}
+            {% else %}
+                <p class="leave">Пользователь покинул нас</p>
+            {% endif %}
+        </div>
+        <div class="actions">
+            {% if user == user_profile %}
+                <a href="{% url 'my_black_list' %}" class="btn">Мой черный список</a>
+                <a href="{% url 'user_profile_change' user_profile.username %}" class="btn">Настройки учетной записи</a>
+            {% else %}
+                {% if user.is_active %}
+                    {% if user.is_staff %}
+                        {% if user_profile.banned %}
+                            <a href="{% url 'unban' user_profile.username %}" class="btn">Разблокировать</a>
+                        {% else %}
+                            <a href="{% url 'ban' user_profile.username %}" class="btn">Заблокировать</a>
+                        {% endif %}
+                    {% endif %}
+                    {% if im_in_bl == False %}
+                        <a class="btn">Написать</a>
+                    {% endif %}
+                    {% if this_user_in_bl %}
+                        <a href="{% url 'del_bl_profile' user_profile.username %}" class="btn">Убрать из ЧС</a>
+                    {% else %}
+                        <a href="{% url 'add_bl_profile' user_profile.username %}" class="btn">Добавить в ЧС</a>
+                    {% endif %}
+                {% endif %}
+
+            {% endif %}
+        </div>
+    </div>
+    <hr/>
+    <div class="about">
+        <p>ФИО: {{ user_profile.last_name|default:"(Фамилия не указана)" }}
+                {{ user_profile.first_name|default:"(Имя не указано)" }}
+                {{ user_profile.patronymic|default:"(Отчество не указано)" }}
+        </p>
+        <p>Почта:
+        {% if user_profile.view_email %}
+            {{ user_profile.email }}
+        {% else %}
+            почта скрыта
+        {% endif %}
+        </p>
+        <p>
+            Телефон: {{ user_profile.phone|default:"(Телефон не указан)" }}
+        </p>
+        <p>О себе: {{ user_profile.about|default:"(Информация о себе не указана)" }}</p>
+    </div>
+</div>
+{% endblock %}

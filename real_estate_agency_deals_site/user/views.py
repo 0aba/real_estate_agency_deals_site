@@ -1,14 +1,15 @@
-from django.views.generic import CreateView, FormView, DetailView
+from django.views.generic import CreateView, FormView, DetailView, UpdateView, ListView
 from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import ObjectDoesNotExist
 from real_estate_agency_deals_site import settings
 from django.contrib.auth.views import LoginView
-from django.contrib.auth import login, logout
 from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect
 from user.models import ConfirmationCode
 from django.core.mail import send_mail
+from django.contrib.auth import login
 from django.contrib import messages
+from django.utils import timezone
 from django.urls import reverse
 from django.views import View
 from user import models
@@ -147,6 +148,7 @@ class CreateRestorePasswordView(FormView):
                 reset_code = models.ConfirmationCode.objects.create(
                     user=user_reset,
                     type=models.ConfirmationCode.ConfirmationCodeType.PASSWORD_RESTORE,
+                    validity_time=timezone.timedelta(hours=24),
                 )
                 reset_code.save()
 
@@ -182,22 +184,6 @@ class RestoreInfoView(View):
         return context
 
     def get(self, request, *args, **kwargs):
-        # code = request.GET.get('code')
-        #
-        # if code:
-        #     try:
-        #         confirmation_code = ConfirmationCode.objects.get(
-        #             code=code,
-        #             type=models.ConfirmationCode.ConfirmationCodeType.EMAIL_CONFIRMATION
-        #         )
-        #         confirmation_code.user.verification_email = True
-        #         confirmation_code.user.save()
-        #         confirmation_code.delete()
-        #         messages.success(request, 'Ваша почта подтверждена')
-        #         return redirect('home', permanent=False)
-        #     except ObjectDoesNotExist:
-        #         messages.error(request, 'Ошибка кода подтверждения')
-
         return render(request, self.template_name, context=self.get_context_data())
 
 
@@ -225,6 +211,11 @@ class RestorePasswordView(FormView):
             messages.error(self.request, 'Ошибка кода подтверждения')
             return redirect('restore_info', permanent=False)
 
+        if code_reset.date_created + code_reset.validity_time < timezone.now():
+            messages.error(self.request, 'Ошибка срок действия кода истек, код будет удален')
+            code_reset.delete()
+            return redirect('restore_info', permanent=False)
+
         if new_pass.is_valid():
             user_reset: models.User = code_reset.user
             user_reset.set_password(new_pass.cleaned_data['new_password'])
@@ -237,10 +228,118 @@ class RestorePasswordView(FormView):
         return redirect('create_restore_password', (self.kwargs.get('code'),), permanent=False)
 
 
+class ProfileUserView(DetailView):
+    model = models.User
+    template_name = 'user/profile_user.html'
+    context_object_name = 'user_profile'
+    slug_url_kwarg = 'username'
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        base_context = super().get_context_data(**kwargs)
+        profile_user = self.get_object()
+
+        context = {
+            'im_in_bl': models.BlackList.objects.filter(
+                whose_BL=profile_user,
+                who_on_BL=self.request.user,
+            ).exists() if (self.request.user.username != self.kwargs.get('username')
+                           and self.request.user.is_authenticated) else None,
+            'this_user_in_bl': models.BlackList.objects.filter(
+                whose_BL=self.request.user,
+                who_on_BL=profile_user,
+            ).exists() if (self.request.user.username != self.kwargs.get('username')
+                           and self.request.user.is_authenticated) else None,
+            'title': f'Профиль @{self.kwargs.get('username')}',
+        }
+
+        return {**base_context, **context}
+
+    def dispatch(self, request, *args, **kwargs):
+        profile = self.get_object()
+
+        if isinstance(profile, HttpResponseRedirect):
+            return profile
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_object(self, queryset=None):
+        try:
+            object_user = models.User.objects.get(username=self.kwargs.get('username'))
+        except ObjectDoesNotExist:
+            messages.error(self.request, 'Пользователь не найден')
+            return redirect('home', permanent=False)
+
+        return object_user
 
 
-def logout_page(request):
-    if request.user.is_authenticated:
-        logout(request)
+class ChangeProfileUserView(UpdateView):
+    model = models.User
+    form_class = forms.ChangeUserProfileForm
+    template_name = 'user/profile_user_change.html'
+    slug_url_kwarg = 'username'
 
-    return redirect('home', permanent=False)
+    def get_context_data(self, **kwargs):
+        base_context = super().get_context_data(**kwargs)
+        context = {
+            'title': 'Изменить свой профиль',
+        }
+
+        return {**base_context, **context}
+
+
+    def dispatch(self, request, *args, **kwargs):
+        if self.request.user.is_anonymous:
+            messages.warning(self.request, 'Чтобы изменить профиль необходимо авторизоваться')
+            return redirect('login', permanent=False)
+
+        user_profile = self.get_object()
+
+        if isinstance(user_profile, HttpResponseRedirect):
+            return user_profile
+
+        if user_profile != self.request.user:
+            messages.error(self.request, 'У вас нет доступа к этому профилю')
+            return redirect('home', permanent=False)
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_object(self, queryset=None):
+        try:
+            user_profile = models.User.objects.get(username=self.kwargs.get('username'))
+        except ObjectDoesNotExist:
+            messages.error(self.request, 'Пользователь не найден')
+            return redirect('home', permanent=False)
+
+        return user_profile
+
+    def form_valid(self, form):
+        form.save()
+        messages.success(self.request, 'Успешный  изменение профиля')
+
+        return redirect('user_profile', self.kwargs.get('username'), permanent=False)
+
+
+class BlackListUserView(ListView):
+    paginate_by = 10
+    model = models.BlackList
+    template_name = 'user/my_black_list.html'
+    context_object_name = 'black_list'
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        base_context = super().get_context_data(**kwargs)
+        context = {
+            'title': 'Мой черный список',
+        }
+
+        return {**base_context, **context}
+
+    def dispatch(self, request, *args, **kwargs):
+        if self.request.user.is_anonymous:
+            messages.warning(self.request, 'Авторизуйтесь, чтобы просмотреть свой черный список')
+            return redirect('login', permanent=False)
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        queryset = models.BlackList.objects.filter(whose_BL=self.request.user)
+        return queryset

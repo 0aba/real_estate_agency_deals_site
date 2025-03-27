@@ -1,4 +1,4 @@
-from django.core.validators import FileExtensionValidator, RegexValidator, MinValueValidator
+from django.core.validators import FileExtensionValidator, RegexValidator, MinValueValidator, MaxValueValidator
 from real_estate_agency_deals_site.settings import AUTH_USER_MODEL
 from django.utils import timezone
 from django.db import models
@@ -33,7 +33,10 @@ class ReviewAgency(models.Model):
     wrote_review = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.PROTECT,
                                      related_name='wrote_review_fk')
     message = models.CharField(max_length=256, verbose_name='Отзыв')
-    grade = models.DecimalField(max_digits=2, decimal_places=1, default=0.0, verbose_name='Оценка')
+    grade = models.DecimalField(max_digits=2, decimal_places=1, default=0.0, validators=[
+        MinValueValidator(0.0),
+        MaxValueValidator(5.0)
+    ], verbose_name='Оценка')
     change = models.BooleanField(default=False)
     deleted = models.BooleanField(default=False)
 
@@ -52,11 +55,11 @@ class Realtor(models.Model):
 
     last_name = models.CharField(max_length=128, verbose_name='Фамилия')
     first_name = models.CharField(max_length=128, verbose_name='Имя')
-    patronymic = models.CharField(max_length=128, verbose_name='Отчество')
+    patronymic = models.CharField(null=True, blank=True, max_length=128, verbose_name='Отчество')
     photo = models.ImageField(blank=True, upload_to='photos/realtor/%Y/%m/%d/', validators=[
         FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png']),
     ], default='default/realtor.jpg', verbose_name='Фото')
-    experience = models.SmallIntegerField(default=0)
+    experience = models.SmallIntegerField(default=0, validators=[MinValueValidator(0)])
     phone = models.CharField(validators=[
         RegexValidator(r'^\+[1-9]\d{1,14}$', 'Номер телефона должен быть в международном формате E.164'
                                                   ' "+{от 2 до 15 цифр}"')
@@ -65,10 +68,10 @@ class Realtor(models.Model):
     price = models.DecimalField(
         max_digits=10,
         decimal_places=2,
-        validators=[MinValueValidator(0)],
+        validators=[MinValueValidator(0.0)],
         verbose_name='Цена услуг'
     )
-    license = models.CharField(max_length=128, verbose_name='Лицензия')
+    license = models.CharField(max_length=128, unique=True, verbose_name='Лицензия')
     agency_realtor = models.OneToOneField(RealEstateAgency, on_delete=models.PROTECT, related_name='agency_realtor_fk')
 
     objects = models.Manager()
@@ -229,8 +232,13 @@ class DataRental(models.Model):
 
     deal_rental = models.ForeignKey(Deal, on_delete=models.PROTECT, related_name='deal_rental_fk')
     price_housing_and_municipalities = models.DecimalField(null=True, blank=True, max_digits=10, decimal_places=2,
-                                                           verbose_name='Цена ЖКХ')
-    prepayment = models.DecimalField(null=True, blank=True, max_digits=10, decimal_places=2, verbose_name='Предоплата')
+                                                           validators=[
+                                                               MinValueValidator(0.0),
+                                                           ], verbose_name='Цена ЖКХ')
+    prepayment = models.DecimalField(null=True, blank=True, max_digits=10, decimal_places=2,
+                                     validators=[
+                                         MinValueValidator(0.0),
+                                     ], verbose_name='Предоплата')
     rental_period_days = models.SmallIntegerField(validators=[MinValueValidator(1)], verbose_name='Срок аренды')
     rented = models.BooleanField(default=False, verbose_name='Арендуется')
 

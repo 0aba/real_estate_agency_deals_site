@@ -82,8 +82,8 @@
                 </a>
             </div>
             <div class="element-header">
-                <a href="#" class="btn-header">
-                    <img src="/">
+                <a href="{% url 'user_profile' user.username %}" class="btn-header">
+                    <img src="/media/{{ user.photo }}">
                 </a>
             </div>
             <div class="element-header">

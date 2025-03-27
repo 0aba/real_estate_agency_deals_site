@@ -1,0 +1,27 @@
+.btn {
+    text-decoration: none;
+    background-color: #212421;
+    color: white;
+    padding: 8px 15px;
+    font-size: 14px;
+    border: 1px solid #8b8c8b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 180px;
+}
+
+.btn:hover {
+    background-color: #8b8c8b;
+}
+
+.delete-account {
+    width: 98%;
+    background-color: #ff0000;
+}
+.delete-account:hover {
+    background-color: #550000;
+}

@@ -71,3 +71,9 @@ class ResetPasswordForm(forms.Form):
             raise forms.ValidationError(_('Пароль не совпадает с подтверждением'))
 
         return cleaned_data
+
+
+class ChangeUserProfileForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ('last_name', 'first_name', 'patronymic', 'photo', 'view_email', 'phone', 'about',)

@@ -6,7 +6,7 @@ from django.utils import timezone
 from django.db import models
 from uuid import uuid4
 
-AbstractUser.last_login
+
 class User(AbstractUser):
     class Meta:
         verbose_name = 'Пользователь'
@@ -63,7 +63,7 @@ class Notification(models.Model):
     message = models.CharField(max_length=256)
     event_time = models.DateTimeField(auto_now_add=True)
     color = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(16777215)])
-    link = models.CharField(null=True, max_length=128)
+    link = models.CharField(null=True, max_length=512)
     viewed = models.BooleanField(default=False)
 
     objects = models.Manager()

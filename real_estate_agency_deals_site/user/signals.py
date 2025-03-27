@@ -5,12 +5,12 @@ from django.utils import timezone
 
 @receiver(user_logged_in)
 def set_user_online(sender, request, user, **kwargs):
-    user.is_online = True
+    user.online = True
     user.save()
 
 
 @receiver(user_logged_out)
 def set_user_offline(sender, request, user, **kwargs):
-    user.is_online = False
+    user.online = False
     user.last_seen = timezone.now()
     user.save()

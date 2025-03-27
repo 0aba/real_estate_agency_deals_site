@@ -1,0 +1,127 @@
+.profile-container {
+    width: 50%;
+    background-color: var(--background-color);
+    margin: 100px auto;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+    color: #333;
+}
+
+h3,
+p {
+    color: white;
+}
+
+.header-profile {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.user {
+    flex: 1;
+}
+
+.user img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px;
+    border: 2px solid #e0e0e0;
+}
+
+.user h3 {
+    margin: 5px 0;
+    font-size: 24px;
+}
+
+.user p {
+    margin: 5px 0;
+    font-size: 14px;
+}
+
+.actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-left: 20px;
+}
+
+.btn {
+    text-decoration: none;
+    background-color: #212421;
+    color: white;
+    padding: 8px 15px;
+    font-size: 14px;
+    border: 1px solid #8b8c8b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 180px;
+}
+
+.btn:hover {
+    background-color: #8b8c8b;
+}
+
+hr {
+    border: none;
+    height: 1px;
+    background-color: #e0e0e0;
+    margin: 20px 0;
+}
+
+.about p {
+    margin: 10px 0;
+    line-height: 1.5;
+}
+
+.about p:first-child {
+    margin-top: 0;
+}
+
+.user p:last-child {
+    font-weight: bold;
+}
+
+.online {
+    color: #4CAF50;
+}
+
+.banned {
+    color: #F44336;
+}
+
+.admin {
+    color: #2196F3;
+}
+
+@media (max-width: 768px) {
+    .profile-container {
+        width: 90%;
+        margin: 50px auto;
+    }
+
+    .header-profile {
+        flex-direction: column;
+    }
+
+    .actions {
+        margin-left: 0;
+        margin-top: 20px;
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        width: auto;
+        min-width: 120px;
+    }
+}
