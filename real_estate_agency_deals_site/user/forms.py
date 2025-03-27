@@ -4,7 +4,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.utils.translation import gettext as _
 from django.utils import timezone
 from datetime import timedelta
-from user.models import User
+from user.models import User, PrivateMessage
 from django import forms
 
 
@@ -77,3 +77,15 @@ class ChangeUserProfileForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ('last_name', 'first_name', 'patronymic', 'photo', 'view_email', 'phone', 'about',)
+
+
+class PrivateMessageForm(forms.ModelForm):
+    class Meta:
+        model = PrivateMessage
+        fields = ('message',)
+
+    message = forms.CharField(
+        widget=forms.Textarea,
+        max_length=256,
+        label='Сообщение'
+    )

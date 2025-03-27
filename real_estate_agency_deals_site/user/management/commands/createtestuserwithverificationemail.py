@@ -17,7 +17,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR('Passwords do not match'))
             return
         try:
-            User.objects.create(username=username, password=password, email=fake_email, verification_email=True)
+            User.objects.create_user(username=username, password=password, email=fake_email, verification_email=True)
         except IntegrityError as e:
             if '(username)=' in str(e):
                 self.stdout.write(self.style.ERROR('Error: username already exists'))

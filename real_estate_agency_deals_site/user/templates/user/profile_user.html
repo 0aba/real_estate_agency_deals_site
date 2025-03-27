@@ -48,7 +48,7 @@
                         {% endif %}
                     {% endif %}
                     {% if im_in_bl == False %}
-                        <a class="btn">Написать</a>
+                        <a href="{% url 'private_message_user' user_profile.username %}" class="btn">Написать</a>
                     {% endif %}
                     {% if this_user_in_bl %}
                         <a href="{% url 'del_bl_profile' user_profile.username %}" class="btn">Убрать из ЧС</a>

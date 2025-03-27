@@ -1,0 +1,51 @@
+{% extends "user/private_message.html" %}
+
+
+{% block content_private_message %}
+<div class="form-message">
+    <div class="list-messages">
+        {% for message in PM_with_user %}
+            <div class="message">
+                <div class="message-header">
+                    <img src="/media/{{ message.wrote_PM.photo }}" class="message-avatar">
+                    <div class="message-info">
+                        <span class="message-author">{{ message.wrote_PM.username }}</span>
+                        <span class="message-date">
+                            {{ message.date_write }}
+                            {% if message.change %}
+                                <span class="edited-badge">(изменено)</span>
+                            {% endif %}
+                            {% if not message.viewed %}
+                                <span class="unread-badge">(не прочитано)</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                    {% if user == message.wrote_PM %}
+                    <div class="action-message">
+                        <a href="{% url 'private_message_change' message.id %}" class="edit-btn">Изменить</a>
+                        <a href="{% url 'del_private_message' message.id %}" class="delete-btn">Удалить</a>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="message-content">
+                    <textarea readonly>{{ message.message }}</textarea>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="write-message">
+        <form method="post" class="form">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            <div class="form-group">
+                {{ form.message }}
+                {{ form.message.errors }}
+            </div>
+            <button type="submit" class="form-button">Написать</button>
+        </form>
+    </div>
+    <hr>
+    {% include 'includes/paginator.html'%}
+</div>
+{% endblock %}

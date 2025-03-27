@@ -16,7 +16,7 @@ class RealEstateAgency(models.Model):
     INN = models.CharField(max_length=12, validators=[
         RegexValidator(r'^\d{10,12}$')
     ], unique=True, verbose_name='ИНН')
-    about = models.TextField(null=True, blank=True, max_length=512, verbose_name='О агенстве')
+    about = models.CharField(null=True, blank=True, max_length=512, verbose_name='О агенстве')
     date_registered = models.DateTimeField(auto_now_add=True)
     representative = models.OneToOneField(AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='representative_fk')
 
@@ -107,7 +107,7 @@ class RealEstate(models.Model):
     ], verbose_name='Главное фото')
     square = models.SmallIntegerField(validators=[MinValueValidator(1)], verbose_name='Общая площадь')
     when_added = models.DateTimeField(auto_now_add=True)
-    about = models.TextField(null=True, blank=True, max_length=512, verbose_name='О недвижимости')
+    about = models.CharField(null=True, blank=True, max_length=512, verbose_name='О недвижимости')
     agency_real_estate = models.ForeignKey(RealEstateAgency, on_delete=models.PROTECT,
                                            related_name='agency_real_estate_fk')
     address_real_estate = models.ForeignKey(Address, null=True, blank=True, on_delete=models.PROTECT,

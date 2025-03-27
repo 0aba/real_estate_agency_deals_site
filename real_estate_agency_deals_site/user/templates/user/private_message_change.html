@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block title %}{{title}}{% endblock %}
+
+{% block styles %}
+<link type="text/css" rel="stylesheet" href="{% static 'common/css/form.css' %}"/>
+{% endblock %}
+{% block scripts %}
+
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <a href="{% url 'private_message_user' chat_with_user %}">Обратно в чат</a>
+    <h2 class="form-title">{{ title }}</h2>
+    <form method="post" class="form">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <div class="form-group">
+            {{ form.message }}
+            {{ form.message.errors }}
+        </div>
+        <button type="submit" class="form-button">Изменить</button>
+    </form>
+</div>
+{% endblock %}

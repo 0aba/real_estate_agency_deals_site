@@ -22,6 +22,7 @@ urlpatterns_actions = [
     ), name='del_bl_my_black_list'),
 
     path('disable-account/', utils.disable_account_action, name='disable_account'),
+    path('del-private-message/<int:pk>/', utils.del_private_message, name='del_private_message'),
 ]
 
 urlpatterns = [
@@ -34,4 +35,8 @@ urlpatterns = [
     path('profile/<slug:username>/', views.ProfileUserView.as_view(), name='user_profile'),
     path('profile/<slug:username>/change/', views.ChangeProfileUserView.as_view(), name='user_profile_change'),
     path('my-black-list/', views.BlackListUserView.as_view(), name='my_black_list'),
+
+    path('private-message/', views.PrivateMessageView.as_view(), name='private_message'),
+    path('private-message/<slug:username>/', views.PrivateMessageUserView.as_view(), name='private_message_user'),
+    path('private-message/<int:pk>/change/', views.ChangePrivateMessageView.as_view(), name='private_message_change'),
 ] + urlpatterns_actions

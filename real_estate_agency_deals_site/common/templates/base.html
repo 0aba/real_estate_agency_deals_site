@@ -1,5 +1,6 @@
 <!doctype html>
 {% load static %}
+{% load message_tags %}
 <html lang="en" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
@@ -77,8 +78,14 @@
                 </div>
             </div>
             <div class="element-header">
-                <a href="#" class="btn-header">
-                    <img src="{% static 'common/svg/messages.svg' %}">
+                {% get_unread_count user as unread_count %}
+                <a href="{% url 'private_message' %}" class="btn-header">
+                    {% if unread_count > 0 %}
+                        <img src="{% static 'common/svg/messages-a.svg' %}">
+                    {% else %}
+                        <img src="{% static 'common/svg/messages.svg' %}">
+                    {% endif %}
+
                 </a>
             </div>
             <div class="element-header">

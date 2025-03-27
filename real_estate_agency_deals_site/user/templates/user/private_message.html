@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block title %}{{title}}{% endblock %}
+
+{% block styles %}
+<link type="text/css" rel="stylesheet" href="{% static 'user/css/private_message.css' %}"/>
+{% endblock %}
+{% block scripts %}
+
+{% endblock %}
+
+{% block content %}
+<div class="pm-container">
+    <div class="aside-chats">
+        {% for chat in chat_list %}
+            <div class="chat {% if unread_count != 0 %}unread{% endif %}">
+                <a href="{% url 'private_message_user' chat.user.username %}" class="chat-link">
+                    <img src="{{ chat.user.photo }}" class="chat-avatar">
+                    <div class="chat-info">
+                        <span class="chat-username">{{ chat.user.username }}</span>
+                        <p class="chat-preview">{{ chat.last_message|truncatechars:64 }}</p>
+                        {% if chat.unread_count %}
+                            <span class="unread-badge">Новых сообщений {{ chat.unread_count }}</span>
+                        {% endif %}
+                    </div>
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+    <div class="messages">
+        {% block content_private_message %}
+
+        {% endblock %}
+    </div>
+</div>
+{% endblock %}

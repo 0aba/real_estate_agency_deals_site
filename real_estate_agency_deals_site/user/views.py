@@ -2,6 +2,7 @@ from django.views.generic import CreateView, FormView, DetailView, UpdateView, L
 from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import ObjectDoesNotExist
 from real_estate_agency_deals_site import settings
+from django.views.generic.edit import FormMixin
 from django.contrib.auth.views import LoginView
 from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect
@@ -11,8 +12,10 @@ from django.contrib.auth import login
 from django.contrib import messages
 from django.utils import timezone
 from django.urls import reverse
+from django.db.models import Q
 from django.views import View
 from user import models
+from user import utils
 from user import forms
 
 
@@ -343,3 +346,127 @@ class BlackListUserView(ListView):
     def get_queryset(self):
         queryset = models.BlackList.objects.filter(whose_BL=self.request.user)
         return queryset
+
+
+class PrivateMessageView(View):
+    template_name = 'user/private_message.html'
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context: dict = {
+            'title': 'Личные сообщения',
+            'chat_list': utils.get_user_chats(self.request.user),
+        }
+
+        return context
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name, context=self.get_context_data())
+
+
+class PrivateMessageUserView(FormMixin, ListView):
+    paginate_by = 5
+    model = models.PrivateMessage
+    template_name = 'user/private_message_with_user.html'
+    context_object_name = 'PM_with_user'
+    form_class = forms.PrivateMessageForm
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        base_context = super().get_context_data(**kwargs)
+        base_context[self.context_object_name] = reversed(base_context[self.context_object_name])
+        context: dict = {
+            'title': f'Личные сообщения c {self.kwargs.get('username')}',
+            'chat_list': utils.get_user_chats(self.request.user),
+        }
+
+        return {**base_context, **context}
+
+    def dispatch(self, request, *args, **kwargs):
+        if self.request.user.is_anonymous:
+            messages.warning(self.request, 'Авторизуйтесь, чтобы просмотреть личные сообщения с пользователем')
+            return redirect('login', permanent=False)
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        chat_with_user = models.User.objects.get(username=self.kwargs.get('username'))
+        queryset = models.PrivateMessage.non_deleted.filter(
+            Q(wrote_PM=self.request.user, received_PM=chat_with_user)
+            | Q(wrote_PM=chat_with_user, received_PM=self.request.user)
+        ).order_by('-date_write')
+        return queryset
+
+    def get(self, request, *args, **kwargs):
+        models.PrivateMessage.non_deleted.filter(
+            wrote_PM=models.User.objects.get(username=self.kwargs.get('username')),
+            received_PM=self.request.user,
+        ).update(viewed=True)
+
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
+    def form_valid(self, form):
+        private_message = form.save(commit=False)
+        private_message.wrote_PM = self.request.user
+        private_message.received_PM = models.User.objects.get(username=self.kwargs.get('username'))
+        private_message.save()
+
+        return redirect('private_message_user', username=self.kwargs.get('username'), permanent=False)
+
+
+class ChangePrivateMessageView(UpdateView):
+    model = models.PrivateMessage
+    form_class = forms.PrivateMessageForm
+    template_name = 'user/private_message_change.html'
+    pk_url_kwarg = 'pk'
+    chat_with_user = None
+
+    def get_context_data(self, **kwargs):
+        base_context = super().get_context_data(**kwargs)
+        context = {
+            'title': 'Изменить свое сообщение',
+            'chat_with_user': self.chat_with_user,
+        }
+
+        return {**base_context, **context}
+
+    def dispatch(self, request, *args, **kwargs):
+        if self.request.user.is_anonymous:
+            messages.warning(self.request, 'Чтобы изменить свое сообщение необходимо авторизоваться')
+            return redirect('login', permanent=False)
+
+        private_message = self.get_object()
+
+        if isinstance(private_message, HttpResponseRedirect):
+            return private_message
+
+        self.chat_with_user = private_message.received_PM.username
+
+        if private_message.wrote_PM != self.request.user:
+            messages.error(self.request, 'У вас нет доступа к этому сообщению')
+            return redirect('home', permanent=False)
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_object(self, queryset=None):
+        try:
+            private_message = models.PrivateMessage.objects.get(pk=self.kwargs.get(self.pk_url_kwarg))
+        except ObjectDoesNotExist:
+            messages.error(self.request, 'Сообщение не найден')
+            return redirect('home', permanent=False)
+
+        return private_message
+
+    def form_valid(self, form):
+        private_message = form.save(commit=False)
+        private_message.change = True
+        private_message.save()
+        messages.success(self.request, 'Успешный изменение сообщения')
+
+        return redirect('private_message_user', username=self.chat_with_user, permanent=False)
+

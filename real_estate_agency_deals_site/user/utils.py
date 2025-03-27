@@ -1,3 +1,4 @@
+from django.db.models import Count, Q, Subquery, OuterRef
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.sessions.models import Session
 from django.contrib.auth import logout
@@ -173,6 +174,67 @@ routes_my_list={
     ResultBLAction.ALREADY_IN_BL.name: ('my_black_list', True,),
     ResultBLAction.NO_IN_BL.name: ('my_black_list', True,),
 }
+
+
+def get_user_chats(user):
+    last_message_subquery = models.PrivateMessage.non_deleted.filter(
+        Q(wrote_PM=user, received_PM=OuterRef('pk')) |
+        Q(wrote_PM=OuterRef('pk'), received_PM=user)
+    ).order_by('-date_write').values('message')[:1]
+
+    last_date_subquery = models.PrivateMessage.non_deleted.filter(
+        Q(wrote_PM=user, received_PM=OuterRef('pk')) |
+        Q(wrote_PM=OuterRef('pk'), received_PM=user)
+    ).order_by('-date_write').values('date_write')[:1]
+
+    other_users = models.User.objects.filter(
+        Q(wrote_PM_fk__received_PM=user, wrote_PM_fk__deleted=False) |
+        Q(received_PM_fk__wrote_PM=user, received_PM_fk__deleted=False)
+    ).distinct().annotate(
+        unread_count=Count('wrote_PM_fk', filter=Q(
+            wrote_PM_fk__received_PM=user,
+            wrote_PM_fk__viewed=False,
+            wrote_PM_fk__deleted=False
+        )),
+        last_message=Subquery(last_message_subquery),
+        last_date=Subquery(last_date_subquery)
+    ).order_by('-last_date', '-unread_count')
+
+    chats = []
+    for other_user in other_users:
+        chats.append({
+            'user': {
+                'id': other_user.id, # TODO! del см. шаблон в макете???
+                'username': other_user.username,
+                'photo': other_user.photo.url if other_user.photo else None, # INFO! если буду делать через api, то лучше оставить url
+            },
+            'unread_count': other_user.unread_count,
+            'last_message': other_user.last_message,
+            'last_date': other_user.last_date
+        })
+
+    return chats
+
+
+def del_private_message(request, pk):
+    if request.user.is_anonymous:
+        messages.warning(request, 'Авторизуйтесь, чтобы удалить сообщение авторизуйтесь')
+        return redirect('home', permanent=False)
+
+    try:
+        message: models.PrivateMessage = models.PrivateMessage.non_deleted.get(pk=pk)
+    except ObjectDoesNotExist:
+        messages.error(request, 'Сообщение не найдено')
+        return redirect('home', permanent=False)
+
+    if message.wrote_PM != request.user:
+        messages.error(request, 'У вас нет прав на удаление чужого сообщения')
+        return redirect('home', permanent=False)
+
+    chat_with_user = message.received_PM.username
+    message.delete()
+    return redirect('private_message_user', username=chat_with_user, permanent=False)
+
 
 def disable_account_action(request):
     if request.user.is_anonymous:

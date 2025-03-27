@@ -31,7 +31,7 @@ class User(AbstractUser):
     banned = models.BooleanField(default=False)
     online = models.BooleanField(default=False)
     last_seen = models.DateTimeField(auto_now=True)
-    about = models.TextField(null=True, blank=True, max_length=512, verbose_name='О себе')
+    about = models.CharField(null=True, blank=True, max_length=512, verbose_name='О себе')
 
     objects = UserManager()
 
