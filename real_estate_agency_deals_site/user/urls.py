@@ -1,7 +1,13 @@
+from user import endpoints_micro_api
 from django.urls import path
 from user import utils
 from user import views
 
+
+urlpatterns_actions_micro_api = [
+    path('notifications/<int:notification_id>/view/', endpoints_micro_api.mark_notification_viewed, name='mark_notification_viewed'),
+    path('notifications/<int:notification_id>/del/', endpoints_micro_api.delete_notification, name='del_notification'),
+]
 
 urlpatterns_actions = [
     path('logout/', utils.logout_action, name='logout'),
@@ -25,7 +31,7 @@ urlpatterns_actions = [
     path('del-private-message/<int:pk>/', utils.del_private_message, name='del_private_message'),
 ]
 
-urlpatterns = [
+urlpatterns = ([
     path('signup/', views.SignupView.as_view(), name='signup'),
     path('email-confirmation/', views.EmailConfirmationView.as_view(), name='email_confirmation'),
     path('login/', views.MyLoginView.as_view(), name='login'),
@@ -39,4 +45,7 @@ urlpatterns = [
     path('private-message/', views.PrivateMessageView.as_view(), name='private_message'),
     path('private-message/<slug:username>/', views.PrivateMessageUserView.as_view(), name='private_message_user'),
     path('private-message/<int:pk>/change/', views.ChangePrivateMessageView.as_view(), name='private_message_change'),
-] + urlpatterns_actions
+]
++ urlpatterns_actions
++ urlpatterns_actions_micro_api
+)

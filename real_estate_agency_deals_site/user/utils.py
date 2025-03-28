@@ -34,16 +34,12 @@ def ban_user_action(request, username):
         return redirect('user_profile', username=username, permanent=False)
 
     action_user.banned = True
-    action_user.is_online = False
     action_user.save()
 
-    sessions = Session.objects.filter(expire_date__gte=timezone.now())
-
-    for session in sessions:
-        data = session.get_decoded()
-        if data.get('_auth_user_id') == str(action_user.id):
-            session.delete()
-
+    models.Notification.objects.create(
+        to_whom=action_user,
+        message='Вы были заблокированы',
+    )
 
     return redirect('user_profile', username=username, permanent=False)
 
@@ -73,6 +69,11 @@ def unban_user_action(request, username):
 
     action_user.banned = False
     action_user.save()
+
+    models.Notification.objects.create(
+        to_whom=action_user,
+        message='Вы были разблокированы',
+    )
 
     return redirect('user_profile', username=username, permanent=False)
 

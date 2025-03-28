@@ -35,6 +35,11 @@
     </div>
 
     <div class="write-message">
+        {% if user.banned %}
+            <p class="error-write">Вы не можете использовать функцию личных сообщений, когда вы заблокированы</p>
+        {% elif not user.is_staff and im_in_black_list %}
+            <p class="error-write">Пользователь внес вас черный список</p>
+        {% else %}
         <form method="post" class="form">
             {% csrf_token %}
             {{ form.non_field_errors }}
@@ -44,6 +49,7 @@
             </div>
             <button type="submit" class="form-button">Написать</button>
         </form>
+        {% endif %}
     </div>
     <hr>
     {% include 'includes/paginator.html'%}

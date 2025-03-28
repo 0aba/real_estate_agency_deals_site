@@ -1,6 +1,7 @@
 <!doctype html>
 {% load static %}
 {% load message_tags %}
+{% load notification_tags %}
 <html lang="en" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
@@ -10,7 +11,10 @@
     <title>{% block title %}{% endblock %}</title>
     <link type="text/css" rel="stylesheet" href="{% static 'common/css/base.css' %}"/>
     {% block styles %}{% endblock %}
-    {% block scripts %}{% endblock %}
+    <script src="{% static 'common/js/sendRequest.js' %}" defer></script>
+    <script src="{% static 'common/js/notificationsUser.js' %}" defer></script>
+    {% block scripts %}
+    {% endblock %}
 </head>
 <body>
     {% if messages %}
@@ -70,11 +74,44 @@
         <div class="right-block">
             {% if user.is_authenticated %}
             <div class="dropdown">
-                <a class="dropbtn"><img src="{% static 'common/svg/notify.svg' %}"></a>
-                <div class="dropdown-content">
-                    <a href="#">11111</a>
-                    <a href="#">22222</a>
-                    <a href="#">33333</a>
+                {% get_notifications user as notifications %}
+                {% if notifications|has_viewed %}
+                    <a class="dropbtn"><img id="notify-svg" src="{% static 'common/svg/notify-a.svg' %}"></a>
+                {% else %}
+                    <a class="dropbtn"><img src="{% static 'common/svg/notify.svg' %}"></a>
+                {% endif %}
+
+                <div class="dropdown-content notifications-user">
+                    {% for notification in notifications %}
+                    <div class="notification-item {% if not notification.viewed %}unread{% endif %}">
+                        <div class="notification-header">
+                            <span class="notification-time">{{ notification.event_time }}</span>
+                            {% if not notification.viewed %}
+                            <span class="notification-badge">Новое</span>
+                            {% endif %}
+                        </div>
+                        <p class="notification-message">{{ notification.message }}</p>
+                        <div class="notification-actions">
+                            {% if not notification.viewed or notification.link %}
+                            <button class="btn-mark-read"
+                                    data-notification-id="{{ notification.id }}"
+                                    {% if notification.link %} data-notification-link="{{ notification.link }}" {% endif %}>
+                                Просмотреть
+                            </button>
+                            {% endif %}
+                            <button class="notification-btn-delete" data-notification-id="{{ notification.id }}">
+                                Удалить
+                            </button>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="notification-empty">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <p>У вас нету новых уведомлений</p>
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
             <div class="element-header">

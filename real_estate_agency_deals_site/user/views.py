@@ -369,6 +369,7 @@ class PrivateMessageUserView(FormMixin, ListView):
     template_name = 'user/private_message_with_user.html'
     context_object_name = 'PM_with_user'
     form_class = forms.PrivateMessageForm
+    im_in_black_list = False
 
     def get_context_data(self, *, object_list=None, **kwargs):
         base_context = super().get_context_data(**kwargs)
@@ -376,6 +377,7 @@ class PrivateMessageUserView(FormMixin, ListView):
         context: dict = {
             'title': f'Личные сообщения c {self.kwargs.get('username')}',
             'chat_list': utils.get_user_chats(self.request.user),
+            'im_in_black_list': self.im_in_black_list,
         }
 
         return {**base_context, **context}
@@ -384,6 +386,11 @@ class PrivateMessageUserView(FormMixin, ListView):
         if self.request.user.is_anonymous:
             messages.warning(self.request, 'Авторизуйтесь, чтобы просмотреть личные сообщения с пользователем')
             return redirect('login', permanent=False)
+
+        self.im_in_black_list = models.BlackList.objects.filter(
+            whose_BL=models.User.objects.get(username=self.kwargs.get('username')),
+            who_on_BL=self.request.user,
+        ).exists()
 
         return super().dispatch(request, *args, **kwargs)
 
@@ -405,6 +412,15 @@ class PrivateMessageUserView(FormMixin, ListView):
 
     def post(self, request, *args, **kwargs):
         form = self.get_form()
+
+        if self.request.user.banned:
+            messages.error(request, 'Вы не можете использовать функцию личных сообщений, когда вы заблокированы')
+            return redirect('private_message_user', username=self.kwargs.get('username'), permanent=False)
+
+        if not self.request.user.is_staff and self.im_in_black_list:
+            messages.error(request, 'Пользователь внес вас черный список')
+            return redirect('private_message_user', username=self.kwargs.get('username'), permanent=False)
+
         if form.is_valid():
             return self.form_valid(form)
         else:

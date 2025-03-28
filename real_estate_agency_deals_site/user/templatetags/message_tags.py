@@ -8,7 +8,7 @@ UNREAD_MESSAGES_CACHE_TIMEOUT = 60
 
 @register.simple_tag
 def get_unread_count(user):
-    if not user.is_authenticated:
+    if user.is_anonymous:
         return 0
 
     cache_key = f'unread_messages_exists_{user.id}'

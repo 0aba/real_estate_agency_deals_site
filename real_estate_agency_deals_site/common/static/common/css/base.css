@@ -13,8 +13,8 @@ body {
 }
 
 .btn-header {
-    text-decoration: none;
     background-color: #212421;
+    text-decoration: none;
     color: white;
     height: 100%;
     padding: 0;
@@ -38,6 +38,8 @@ body {
     width: 100px;
     text-align: center;
 }
+
+
 
 header,
 footer {
@@ -78,4 +80,121 @@ footer {
 .left-block img,
 .right-block p {
     padding: 0 4px 0 4px;
+}
+
+
+
+.notifications-user {
+    width: 350px;
+    height: 200px;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    background: var(--background-color);
+    border: 1px solid #ddd;
+}
+
+.notifications-dropdown.show {
+    display: block;
+}
+
+.notification-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.15s ease;
+}
+
+
+.notification-item:last-child {
+    border-bottom: none;
+}
+
+.notification-item:hover {
+    background-color: rgba(71, 71, 71, 0.85);
+}
+
+.notification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.notification-time {
+    font-size: 12px;
+    color: #9f9f9f;
+    font-weight: 400;
+}
+
+.notification-badge {
+    font-size: 11px;
+    font-weight: 500;
+    color: #ffffff;
+    background: #ff5252;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.notification-message {
+    margin: 8px 0 12px;
+    color: white;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.notification-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-mark-read {
+    background: #4caf50;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-mark-read:hover {
+    background: #3d8b40;
+}
+
+.notification-btn-delete {
+    background: #c53f3f;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.notification-btn-delete:hover {
+    background: #974444;
+}
+
+.notification-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    text-align: center;
+}
+
+.notification-empty svg {
+    width: 48px;
+    height: 48px;
+    color: #cccccc;
+    margin-bottom: 12px;
+}
+
+.notification-empty p {
+    margin: 0;
+    color: #888888;
+    font-size: 14px;
 }

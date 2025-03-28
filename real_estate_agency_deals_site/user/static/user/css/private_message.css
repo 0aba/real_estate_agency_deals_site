@@ -187,6 +187,19 @@
     margin-top: 20px;
 }
 
+.error-write {
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 4px;
+    background-color: #ff1b2f;
+    color: white;
+    border: 1px solid #f5c6cb;
+    font-size: 14px;
+    text-align: center;
+    font-weight: 500;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
 .form-group textarea {
     width: 100%;
     border: 1px solid #ddd;

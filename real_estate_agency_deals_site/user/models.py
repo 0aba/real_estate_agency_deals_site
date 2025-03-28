@@ -62,7 +62,6 @@ class Notification(models.Model):
     to_whom = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='notification_fk')
     message = models.CharField(max_length=256)
     event_time = models.DateTimeField(auto_now_add=True)
-    color = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(16777215)])
     link = models.CharField(null=True, max_length=512)
     viewed = models.BooleanField(default=False)
 
