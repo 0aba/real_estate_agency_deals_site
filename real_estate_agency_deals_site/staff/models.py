@@ -13,6 +13,7 @@ class Complaint(models.Model):
                 name='complaint_related_fields_CK',
             ),
         ]
+        ordering = ('-date_write',)
 
     wrote_complaint = models.ForeignKey(AUTH_USER_MODEL, null=True, on_delete=models.PROTECT,
                                         related_name='wrote_complaint_fk')

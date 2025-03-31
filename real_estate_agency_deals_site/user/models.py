@@ -72,6 +72,7 @@ class PrivateMessage(models.Model):
     class Meta:
         verbose_name = 'Личное сообщение'
         verbose_name_plural = 'Личные сообщения'
+        ordering = ('-date_write',)
 
     wrote_PM = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='wrote_PM_fk')
     received_PM = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='received_PM_fk')

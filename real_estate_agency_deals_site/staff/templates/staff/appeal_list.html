@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block title %}{{title}}{% endblock %}
+
+{% block styles %}
+<link type="text/css" rel="stylesheet" href="{% static 'common/css/list_with_filters.css' %}"/>
+<link type="text/css" rel="stylesheet" href="{% static 'staff/css/feedback_list.css' %}"/>
+{% endblock %}
+{% block scripts %}
+
+{% endblock %}
+
+{% block content %}
+<div class="list-container">
+    <div class="list-elements">
+        {% for appeal in appeal_list %}
+            <div class="complaint {% if appeal.reviewed_appeal %} complaint-consider {% else %} complaint-not-consider {% endif %}">
+                <p class="email-write-complaint">
+                    Почта написавшего: {{ appeal.write_appeal.username }}
+                </p>
+                <p class="write-complaint">
+                    Время написания: {{ appeal.date_write }}
+                </p>
+                {% if appeal.reviewed_appeal %}
+                    <p class="consider">Рассмотрена: {{ appeal.reviewed_appeal.username }}</p>
+                    <a href="{% url 'appeal_consider' appeal.pk %}" class="btn">Просмотреть</a>
+                {% else %}
+                    <a href="{% url 'appeal_consider' appeal.pk %}" class="btn">Рассмотреть</a>
+                {% endif %}
+            </div>
+            <hr>
+        {% endfor %}
+        {% include 'includes/paginator.html'%}
+    </div>
+    <div class="filters">
+        <form method="GET" class="filter-form">
+            <div class="filter-group radio-group">
+                <label>Статус рассмотрения апелляции</label>
+
+                <div class="radio-option">
+                    <input id="considered_none" type="radio" name="considered_status" value=""
+                           {% if not request.GET.considered_status %}checked{% endif %}>
+                    <label for="considered_none">Любой</label>
+                </div>
+
+                <div class="radio-option">
+                    <input id="considered_considered" type="radio" name="considered_status" value="considered"
+                           {% if request.GET.considered_status == 'considered' %}checked{% endif %}>
+                    <label for="considered_considered">Рассмотренные</label>
+                </div>
+
+                <div class="radio-option">
+                    <input id="considered_not_considered" type="radio" name="considered_status" value="not_considered"
+                           {% if request.GET.considered_status == 'not_considered' %}checked{% endif %}>
+                    <label for="considered_not_considered">Не рассмотренные</label>
+                </div>
+            </div>
+            <div class="filter-group datetime-interval">
+                <label>Диапазон дат</label>
+                <input id="written_after" type="datetime-local" name="written_after_value" value="{{ request.GET.written_after_value }}">
+                <input id="written_before" type="datetime-local" name="written_before_value" value="{{ request.GET.written_before_value }}">
+            </div>
+            <div class="filter-group icontains-string">
+                <label>Логин (или ее часть)</label>
+                <input id="email" type="text" name="username_value" value="{{ request.GET.username_value}}">
+            </div>
+            <button type="submit" class="btn-filters">Применить фильтры</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

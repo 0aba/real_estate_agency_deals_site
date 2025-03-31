@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block title %}{{title}}{% endblock %}
+
+{% block styles %}
+<link type="text/css" rel="stylesheet" href="{% static 'common/css/form.css' %}"/>
+<link type="text/css" rel="stylesheet" href="{% static 'staff/css/consider_feedback.css' %}"/>
+{% endblock %}
+{% block scripts %}
+
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <a href="{% url 'complaint_list' %}" class="back-list">Обратно к списку жалоб</a>
+    <h2 class="form-title">{{ title }}</h2>
+    <p class="email-write-complaint">
+        Почта написавшего: {% if current_complaint.feedback_email %} {{ current_complaint.feedback_email }} {% else %} {{ current_complaint.wrote_complaint.email }} {% endif %}
+    </p>
+    <p class="write-complaint">
+        Время написания: {{ current_complaint.date_write }}
+    </p>
+    <p class="message-complaint">
+        Жалоба: {{ current_complaint.message }}
+    </p>
+    {% if not current_complaint.reviewed_complaint %}
+    <form method="post" class="form">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+
+        <div class="form-group">
+        <label>Вердикт</label>
+            {{ form.verdict }}
+            {{ form.verdict.errors }}
+        </div>
+        <button type="submit" class="form-button">Рассмотреть</button>
+    </form>
+    {% else %}
+    <p>Жалоба была рассмотрена</p>
+    <p class="consider">Рассмотрена: {{ current_complaint.reviewed_complaint.username }}</p>
+    <p class="consider-verdict">Вердикт: {{ current_complaint.verdict }}</p>
+    {% endif %}
+</div>
+{% endblock %}

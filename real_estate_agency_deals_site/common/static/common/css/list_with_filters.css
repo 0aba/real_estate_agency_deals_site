@@ -1,0 +1,101 @@
+.list-container {
+    display: flex;
+    align-items: flex-start;
+    width: 100%;
+}
+
+.list-elements {
+    width: 70%;
+    padding: 10px;
+    margin: 10px;
+    box-sizing: border-box;
+    border-radius: 5px;
+    background-color: var(--background-color);
+}
+
+.filters {
+    display: flex;
+    flex-direction: column;
+    width: 25%;
+    padding: 10px;
+    margin: 10px;
+    box-sizing: border-box;
+    border-radius: 5px;
+    background-color: var(--background-color);
+}
+
+.filter-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+}
+
+.filter-group label {
+    font-size: 14px;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: white;
+    order: -1;
+}
+
+.filter-group input {
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+.filter-group.datetime-interval input {
+    margin-top: 5px;
+}
+
+.btn-filters {
+    padding: 10px 15px;
+    background-color: var(--background-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+.btn-filters:hover {
+    background-color: #8b8c8b;
+}
+
+.filter-group.radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.radio-option input[type="radio"] {
+    margin: 0;
+    width: 16px;
+    height: 16px;
+}
+
+.radio-option label {
+    font-weight: normal;
+    margin-bottom: 0;
+    cursor: pointer;
+}
+
+.radio-option:hover label {
+    color: #ddd;
+}
+
+.radio-option input[type="radio"]:focus {
+    outline: 2px solid var(--background-color);
+}

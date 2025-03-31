@@ -48,26 +48,29 @@
             <div class="dropdown">
                 <a class="dropbtn">Агенство недвижимости</a>
                 <div class="dropdown-content">
-                    <a href="#">Мое агенство</a>
-                    <a href="#">Мои риелторы</a>
+                    <a href="#">Мое агентство</a>
+                    <a href="#">Мои риелтор</a>
                     <a href="#">Моя недвижимость</a>
                     <a href="#">Мои сделки</a>
                     <a href="#">Регистрация агенства</a>
                 </div>
             </div>
+            {% if user.is_staff %}
             <div class="dropdown">
                 <a class="dropbtn">Инструменты администрации</a>
                 <div class="dropdown-content">
-                    <a href="#">Жалобы</a>
-                    <a href="#">Апеляции</a>
-                    <a href="#">Блокировки</a>
+                    <a href="{% url 'complaint_list' %}">Жалобы</a>
+                    <a href="{% url 'appeal_list' %}">Апелляции</a>
                 </div>
             </div>
+            {% endif %}
             <div class="dropdown">
                 <a class="dropbtn">...</a>
                 <div class="dropdown-content">
-                    <a href="#">Написать жалобу</a>
-                    <a href="#">Написать апелляцию</a>
+                    <a href="{% url 'complaint_new' %}">Написать жалобу</a>
+                    {% if user.banned %}
+                        <a href="{% url 'appeal_new' %}">Написать апелляцию</a>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -127,7 +130,7 @@
             </div>
             <div class="element-header">
                 <a href="{% url 'user_profile' user.username %}" class="btn-header">
-                    <img src="/media/{{ user.photo }}">
+                    <img src="{{ user.photo.url }}">
                 </a>
             </div>
             <div class="element-header">
@@ -148,7 +151,7 @@
     </div>
     <footer>
         <div class="left-block">
-            <p>© «ИС учета сделак агенств недвижемости» 2025</p>
+            <p>© «ИС учета сделок агенств недвижимости» 2025</p>
         </div>
         <div class="right-block">
             <a href="#"><img src="{% static 'common/svg/tg.svg' %}"></a>

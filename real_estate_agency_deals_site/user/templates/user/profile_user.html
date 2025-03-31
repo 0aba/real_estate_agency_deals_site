@@ -15,7 +15,7 @@
 <div class="profile-container">
     <div class="header-profile">
         <div class="user">
-            <img src="/media/{{ user_profile.photo }}">
+            <img src="{{ user_profile.photo.url }}">
             <h3>{{ user_profile.username }}</h3>
             <p>Присоединился: {{user_profile.date_register }}</p>
             {% if user_profile.is_staff %}

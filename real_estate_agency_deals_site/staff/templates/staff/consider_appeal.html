@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block title %}{{title}}{% endblock %}
+
+{% block styles %}
+<link type="text/css" rel="stylesheet" href="{% static 'common/css/form.css' %}"/>
+<link type="text/css" rel="stylesheet" href="{% static 'staff/css/consider_feedback.css' %}"/>
+{% endblock %}
+{% block scripts %}
+
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <a href="{% url 'appeal_list' %}" class="back-list">Обратно к списку жалоб</a>
+    <h2 class="form-title">{{ title }}</h2>
+    <p class="email-write-complaint">
+        Написал: {{ current_appeal.write_appeal.username }}
+    </p>
+    <p class="write-complaint">
+        Время написания: {{ current_appeal.date_write }}
+    </p>
+    <p class="message-complaint">
+        Апелляция: {{ current_appeal.message }}
+    </p>
+    {% if not current_appeal.reviewed_appeal %}
+    <form method="post" class="form">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+
+        <div class="form-group">
+        <label>Вердикт</label>
+            {{ form.verdict }}
+            {{ form.verdict.errors }}
+        </div>
+        <button type="submit" class="form-button">Рассмотреть</button>
+    </form>
+    {% else %}
+    <p>Апелляция была рассмотрена</p>
+    <p class="consider">Рассмотрена: {{ current_appeal.reviewed_complaint.username }}</p>
+    <p class="consider-verdict">Вердикт: {{ current_appeal.verdict }}</p>
+    {% endif %}
+</div>
+{% endblock %}

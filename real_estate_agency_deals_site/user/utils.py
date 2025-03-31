@@ -1,11 +1,9 @@
 from django.db.models import Count, Q, Subquery, OuterRef
 from django.core.exceptions import ObjectDoesNotExist
-from django.contrib.sessions.models import Session
 from django.contrib.auth import logout
 from django.db import IntegrityError
 from django.shortcuts import redirect
 from django.contrib import messages
-from django.utils import timezone
 from user import models
 from enum import Enum
 
@@ -207,7 +205,7 @@ def get_user_chats(user):
             'user': {
                 'id': other_user.id, # TODO! del см. шаблон в макете???
                 'username': other_user.username,
-                'photo': other_user.photo.url if other_user.photo else None, # INFO! если буду делать через api, то лучше оставить url
+                'photo': other_user.photo.url if other_user.photo else None,
             },
             'unread_count': other_user.unread_count,
             'last_message': other_user.last_message,
@@ -232,9 +230,9 @@ def del_private_message(request, pk):
         messages.error(request, 'У вас нет прав на удаление чужого сообщения')
         return redirect('home', permanent=False)
 
-    chat_with_user = message.received_PM.username
-    message.delete()
-    return redirect('private_message_user', username=chat_with_user, permanent=False)
+    message.deleted = True
+    message.save()
+    return redirect('private_message_user', username=message.received_PM.username, permanent=False)
 
 
 def disable_account_action(request):

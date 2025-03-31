@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block title %}{{title}}{% endblock %}
+
+{% block styles %}
+<link type="text/css" rel="stylesheet" href="{% static 'common/css/form.css' %}"/>
+{% endblock %}
+{% block scripts %}
+
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2 class="form-title">{{ title }}</h2>
+    <form method="post" class="form">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        {% if user.is_anonymous %}
+        <div class="form-group">
+            <label>Почта для обратной связи</label>
+            {{ form.feedback_email }}
+            {{ form.feedback_email.errors }}
+        </div>
+        {% endif %}
+        <div class="form-group">
+            <label>Жалоба</label>
+            {{ form.message }}
+            {{ form.message.errors }}
+        </div>
+        <button type="submit" class="form-button">Написать жалобу</button>
+    </form>
+</div>
+{% endblock %}
