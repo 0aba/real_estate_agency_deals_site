@@ -32,7 +32,7 @@ class SignupView(CreateView):
         return {**base_context, **context}
 
     def form_valid(self, form):
-        new_user = form.save()
+        new_user = form.save(commit=False)
         new_user.set_password(form.cleaned_data['password1'])
         new_user.save()
 

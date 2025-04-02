@@ -6,7 +6,6 @@
 
 {% block styles %}
 <link type="text/css" rel="stylesheet" href="{% static 'common/css/form.css' %}"/>
-<link type="text/css" rel="stylesheet" href="{% static 'staff/css/consider_feedback.css' %}"/>
 {% endblock %}
 {% block scripts %}
 
@@ -14,7 +13,7 @@
 
 {% block content %}
 <div class="form-container">
-    <a href="{% url 'appeal_list' %}" class="back-list">Обратно к списку жалоб</a>
+    <a href="{% url 'appeal_list' %}" class="back-button">Обратно к списку жалоб</a>
     <h2 class="form-title">{{ title }}</h2>
     <p class="email-write-complaint">
         Написал: {{ current_appeal.write_appeal.username }}

@@ -6,7 +6,6 @@
 
 {% block styles %}
 <link type="text/css" rel="stylesheet" href="{% static 'common/css/form.css' %}"/>
-<link type="text/css" rel="stylesheet" href="{% static 'staff/css/consider_feedback.css' %}"/>
 {% endblock %}
 {% block scripts %}
 
@@ -14,7 +13,7 @@
 
 {% block content %}
 <div class="form-container">
-    <a href="{% url 'complaint_list' %}" class="back-list">Обратно к списку жалоб</a>
+    <a href="{% url 'complaint_list' %}" class="back-button">Обратно к списку жалоб</a>
     <h2 class="form-title">{{ title }}</h2>
     <p class="email-write-complaint">
         Почта написавшего: {% if current_complaint.feedback_email %} {{ current_complaint.feedback_email }} {% else %} {{ current_complaint.wrote_complaint.email }} {% endif %}

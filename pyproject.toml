@@ -13,6 +13,7 @@ dependencies = [
   "Pillow == 11.1.0",
   "python-dotenv == 1.0.1",
   "psycopg[binary,pool] == 3.2.6",
+  "transliterate == 1.10.2",
 ]
 
 [tool.setuptools]

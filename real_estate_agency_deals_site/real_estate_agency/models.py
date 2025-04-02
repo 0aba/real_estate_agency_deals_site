@@ -1,5 +1,7 @@
 from django.core.validators import FileExtensionValidator, RegexValidator, MinValueValidator, MaxValueValidator
-from real_estate_agency_deals_site.settings import AUTH_USER_MODEL
+from real_estate_agency_deals_site.settings import AUTH_USER_MODEL, LANGUAGE_CODE_TRANSLIT
+from django.utils.text import slugify
+from transliterate import translit
 from django.utils import timezone
 from django.db import models
 
@@ -12,7 +14,8 @@ class RealEstateAgency(models.Model):
     logo = models.ImageField(blank=True, upload_to='photos/real_estate_agency/%Y/%m/%d/', validators=[
         FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png']),
     ], default='default/real_estate_agency.jpg', verbose_name='Логотип')
-    name = models.CharField(max_length=256, unique=True, verbose_name='Название организации')
+    slug_name = models.CharField(max_length=256, unique=True, null=False)
+    name = models.CharField(max_length=256, unique=True, null=False , verbose_name='Название организации')
     INN = models.CharField(max_length=12, validators=[
         RegexValidator(r'^\d{10,12}$')
     ], unique=True, verbose_name='ИНН')
@@ -21,6 +24,10 @@ class RealEstateAgency(models.Model):
     representative = models.OneToOneField(AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='representative_fk')
 
     objects = models.Manager()
+
+    def save(self, *args, **kwargs):
+        self.slug_name = slugify(translit(self.name, LANGUAGE_CODE_TRANSLIT, reversed=True))
+        super().save(*args, **kwargs)
 
 
 class ReviewAgency(models.Model):
@@ -37,6 +44,7 @@ class ReviewAgency(models.Model):
         MinValueValidator(0.0),
         MaxValueValidator(5.0)
     ], verbose_name='Оценка')
+    date_write = models.DateTimeField(auto_now_add=True)
     change = models.BooleanField(default=False)
     deleted = models.BooleanField(default=False)
 
@@ -72,7 +80,7 @@ class Realtor(models.Model):
         verbose_name='Цена услуг'
     )
     license = models.CharField(max_length=128, unique=True, verbose_name='Лицензия')
-    agency_realtor = models.OneToOneField(RealEstateAgency, on_delete=models.PROTECT, related_name='agency_realtor_fk')
+    agency_realtor = models.ForeignKey(RealEstateAgency, on_delete=models.PROTECT, related_name='agency_realtor_fk')
 
     objects = models.Manager()
 

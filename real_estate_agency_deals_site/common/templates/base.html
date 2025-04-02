@@ -2,6 +2,7 @@
 {% load static %}
 {% load message_tags %}
 {% load notification_tags %}
+{% load real_estate_agency_tags %}
 <html lang="en" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
@@ -45,16 +46,22 @@
                 <a href="#">Релелтер</a>
               </div>
             </div>
+            {% if user.is_authenticated %}
+            {% get_real_estate_agency user as real_estate_agency %}
             <div class="dropdown">
                 <a class="dropbtn">Агенство недвижимости</a>
                 <div class="dropdown-content">
-                    <a href="#">Мое агентство</a>
+                    {% if real_estate_agency %}
+                    <a href="{% url 'agency_profile' real_estate_agency.slug_name %}">Мое агентство</a>
                     <a href="#">Мои риелтор</a>
                     <a href="#">Моя недвижимость</a>
                     <a href="#">Мои сделки</a>
-                    <a href="#">Регистрация агенства</a>
+                    {% else %}
+                    <a href="{% url 'signup_agency' %}">Регистрация агентства</a>
+                    {% endif %}
                 </div>
             </div>
+            {% endif %}
             {% if user.is_staff %}
             <div class="dropdown">
                 <a class="dropbtn">Инструменты администрации</a>

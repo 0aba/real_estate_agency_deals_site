@@ -1,15 +1,13 @@
-from django.core.validators import MinValueValidator, MaxValueValidator, RegexValidator, MinLengthValidator
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.forms import UserCreationForm
+from django.core.validators import RegexValidator
 from django.utils.translation import gettext as _
-from django.utils import timezone
-from datetime import timedelta
 from user.models import User, PrivateMessage
 from django import forms
 
 
 class MyUserCreationForm(UserCreationForm):
-    class Meta(UserCreationForm):
+    class Meta:
         model = User
         fields = ('username', 'email', 'password1', 'password2',)
 

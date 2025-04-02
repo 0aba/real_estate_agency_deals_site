@@ -88,3 +88,19 @@ input {
     font-size: 16px;
     margin-top: 5px;
 }
+
+
+.back-button {
+    display: inline-block;
+    margin-bottom: 15px;
+    padding: 16px 8px;
+    background-color: #0d62c9;
+    border-radius: 4px;
+    color: white;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+.back-button:hover {
+    background-color: #00d2ff;
+}

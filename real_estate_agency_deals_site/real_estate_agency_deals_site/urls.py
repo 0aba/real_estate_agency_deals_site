@@ -9,7 +9,7 @@ urlpatterns = [
     path('', include('common.urls')),
     path('user/', include('user.urls')),
     path('staff/', include('staff.urls')),
-    # path('real-estate-agency/', include('real_estate_agency.urls')),
+    path('real-estate-agency/', include('real_estate_agency.urls')),
 ]
 
 if settings.DEBUG:
