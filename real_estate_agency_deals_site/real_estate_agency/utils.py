@@ -39,4 +39,6 @@ def del_realtor(request, pk):
         messages.error(request, 'У вас нет прав на удаление риэлтора не вашего агенства')
         return redirect('realtor_list', permanent=False)
 
+    realtor.delete()
+
     return redirect('realtor_list', permanent=False)

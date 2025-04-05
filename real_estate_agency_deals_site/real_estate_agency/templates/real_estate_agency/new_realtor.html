@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block title %}{{title}}{% endblock %}
+
+{% block styles %}
+<link type="text/css" rel="stylesheet" href="{% static 'common/css/form.css' %}"/>
+{% endblock %}
+{% block scripts %}
+
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2 class="form-title">{{ title }}</h2>
+    <form method="post" class="form">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <div class="form-group">
+            <label>Фамилия</label>
+            {{ form.last_name }}
+            {{ form.last_name.errors }}
+        </div>
+        <div class="form-group">
+            <label>Имя</label>
+            {{ form.first_name }}
+            {{ form.first_name.errors }}
+        </div>
+        <div class="form-group">
+            <label>Отчество</label>
+            {{ form.patronymic }}
+            {{ form.patronymic.errors }}
+        </div>
+        <div class="form-group">
+            <label>Телефон</label>
+            {{ form.phone }}
+            {{ form.phone.errors }}
+        </div>
+        <div class="form-group">
+            <label>Почта</label>
+            {{ form.email }}
+            {{ form.email.errors }}
+        </div>
+        <div class="form-group">
+            <label>Цена</label>
+            {{ form.price }}
+            {{ form.price.errors }}
+        </div>
+        <div class="form-group">
+            <label>Лицензия</label>
+            {{ form.license }}
+            {{ form.license.errors }}
+        </div>
+        <button type="submit" class="form-button">Добавить реэлелтера</button>
+    </form>
+</div>
+{% endblock %}

@@ -32,6 +32,8 @@
                 {% endif %}
             </div>
             <hr>
+        {% empty %}
+            <hr>
         {% endfor %}
         {% include 'includes/paginator.html'%}
     </div>

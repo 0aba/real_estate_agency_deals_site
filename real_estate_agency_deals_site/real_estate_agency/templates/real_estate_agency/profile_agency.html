@@ -72,8 +72,9 @@
             <p class="error-write">Вы не можете использовать функцию отзывов, когда вы заблокированы</p>
         {% elif have_review %}
             <p class="error-write">Вы уже имеете отзыв об этом агенстве</p>
+            <a href="{% url 'review_change' have_review.id %}" class="edit-btn-have-review">Изменить</a>
         {% elif user.is_anonymous %}
-            <p class="error-write"><a href="{% url 'login' %}">Авторизуйтесь чтобы оставлять комментарии</a></p>
+            <p class="error-write"><a href="{% url 'login' %}">Авторизуйтесь, чтобы оставлять комментарии</a></p>
         {% else %}
         <form method="post" class="form">
             {% csrf_token %}

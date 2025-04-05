@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block title %}{{title}}{% endblock %}
+
+{% block styles %}
+<link type="text/css" rel="stylesheet" href="{% static 'common/css/list_with_filters.css' %}"/>
+<link type="text/css" rel="stylesheet" href="{% static 'real_estate_agency/css/realtor_list.css' %}"/>
+{% endblock %}
+{% block scripts %}
+
+{% endblock %}
+
+{% block content %}
+<div class="list-container">
+    <div class="list-elements">
+        {% if have_agency %}
+            <a href="{% url 'realtor_new' %}" class="btn">Добавить риэлтера</a>
+        {% endif %}
+        {% for realtor in realtor_list %}
+            <div class="realtor">
+                <img src="{{ realtor.photo.url }}">
+                <p class="realtor-full-name">
+                    ФИО: {{ realtor.last_name }} {{ realtor.first_name }} {{ realtor.patronymic }}
+                </p>
+                <p class="realtor-experience">
+                    Опыт: {{ realtor.experience }} месяцев
+                </p>
+                <p class="realtor-experience">
+                    Цена: {{ realtor.price }}
+                </p>
+                <a href="{% url 'realtor' realtor.pk %}" class="btn">Просмотреть</a>
+            </div>
+            <hr>
+        {% empty %}
+            <hr>
+        {% endfor %}
+        {% include 'includes/paginator.html'%}
+    </div>
+    <div class="filters">
+        <form method="GET" class="filter-form">
+            {% if have_agency %}
+            <div class="filter-group">
+                <label>Только риэлтеры моего агенство</label>
+                <input id="only_my_realtors" type="checkbox" name="only_my_realtors_value"
+                       {% if request.GET.only_my_realtors_value == 'y' %}checked{% endif %}
+                       value="y">
+            </div>
+            {% endif %}
+            <div class="filter-group">
+                <label>ФИО риэлтера</label>
+                <input id="full_name" type="text" name="full_name_value" value="{{ request.GET.full_name_value }}">
+            </div>
+            <div class="filter-group">
+                <label>Диапазон опыта риэлтера</label>
+                <input id="experience_min" type="number" min="0" name="experience_min_value" value="{{ request.GET.experience_min_value }}">
+                <input id="experience_max" type="number" min="0" name="experience_max_value" value="{{ request.GET.experience_max_value }}">
+            </div>
+            <div class="filter-group">
+                <label>Диапазон опыта риэлтера</label>
+                <input id="price_min" type="number" min="0" name="price_min_value" value="{{ request.GET.price_min_value }}">
+                <input id="price_max" type="number" min="0" name="price_max_value" value="{{ request.GET.price_max_value }}">
+            </div>
+            <div class="filter-group datetime-interval">
+                <label>Название агентства риэлтера</label>
+                <input id="name_agency_realtor" type="text" name="name_agency_realtor_value" value="{{ request.GET.name_agency_realtor_value }}">
+            </div>
+            <button type="submit" class="btn-filters">Применить фильтры</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

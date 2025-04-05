@@ -6,7 +6,6 @@
 
 {% block styles %}
 <link type="text/css" rel="stylesheet" href="{% static 'common/css/form.css' %}"/>
-<link type="text/css" rel="stylesheet" href="{% static 'user/css/delete_account.css' %}"/>
 {% endblock %}
 {% block scripts %}
 
@@ -39,25 +38,31 @@
             {{ form.photo.errors }}
         </div>
         <div class="form-group">
-            <label>Отображать почту</label>
-            {{ form.view_email }}
-            {{ form.view_email.errors }}
-        </div>
-        <div class="form-group">
-            <label>Номер телефона</label>
+            <label>Телефон</label>
             {{ form.phone }}
             {{ form.phone.errors }}
         </div>
         <div class="form-group">
-            <label>О себе</label>
-            {{ form.about }}
-            {{ form.about.errors }}
+            <label>Почта</label>
+            {{ form.email }}
+            {{ form.email.errors }}
         </div>
-        <button type="submit" class="form-button">Изменить профиль</button>
+        <div class="form-group">
+            <label>Цена</label>
+            {{ form.price }}
+            {{ form.price.errors }}
+        </div>
+        <div class="form-group">
+            <label>Опыт в месяцах</label>
+            {{ form.experience }}
+            {{ form.experience.errors }}
+        </div>
+        <div class="form-group">
+            <label>Лицензия</label>
+            {{ form.license }}
+            {{ form.license.errors }}
+        </div>
+        <button type="submit" class="form-button">Изменить данные риэлтера</button>
     </form>
-    <hr>
-    <a id="delete-account-btn" class="btn delete-account">Отключить учетную запись</a>
 </div>
-{% url 'disable_account' as tmp_href %}
-{% include 'includes/popup_confirmation.html' with modal_id="delete-account-modal" trigger_element_id="#delete-account-btn" title="Подтвердите отключение ученой записи" text="Вы уверены, что хотите выполнить это необратимое действие?" button_html_code='<a href="'|add:tmp_href|add:'" class="btn delete-account">Подтвердить удаление</a>' cancel_text="Отменить" %}
 {% endblock %}

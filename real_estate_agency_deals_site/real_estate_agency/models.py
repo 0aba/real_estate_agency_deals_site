@@ -66,7 +66,8 @@ class Realtor(models.Model):
     patronymic = models.CharField(null=True, blank=True, max_length=128, verbose_name='Отчество')
     photo = models.ImageField(blank=True, upload_to='photos/realtor/%Y/%m/%d/', validators=[
         FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png']),
-    ], default='default/realtor.jpg', verbose_name='Фото')
+    ], default='default/realtor.jpg',
+       verbose_name='Фото')
     experience = models.SmallIntegerField(default=0, validators=[MinValueValidator(0)])
     phone = models.CharField(validators=[
         RegexValidator(r'^\+[1-9]\d{1,14}$', 'Номер телефона должен быть в международном формате E.164'
@@ -83,6 +84,11 @@ class Realtor(models.Model):
     agency_realtor = models.ForeignKey(RealEstateAgency, on_delete=models.PROTECT, related_name='agency_realtor_fk')
 
     objects = models.Manager()
+
+    def save(self, *args, **kwargs):
+        if not self.photo:
+            self.photo = 'default/realtor.jpg'
+        super().save(*args, **kwargs)
 
 
 class Address(models.Model):

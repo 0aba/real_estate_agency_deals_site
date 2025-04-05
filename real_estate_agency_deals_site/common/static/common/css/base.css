@@ -2,6 +2,10 @@
 @import url(dropdown.css);
 
 
+#content {
+    min-height: 100vh;
+}
+
 body {
     padding: 0;
     margin: 0;
@@ -38,8 +42,6 @@ body {
     width: 100px;
     text-align: center;
 }
-
-
 
 header,
 footer {
@@ -82,8 +84,6 @@ footer {
     padding: 0 4px 0 4px;
 }
 
-
-
 .notifications-user {
     width: 350px;
     height: 200px;
@@ -103,7 +103,6 @@ footer {
     border-bottom: 1px solid #f0f0f0;
     transition: background 0.15s ease;
 }
-
 
 .notification-item:last-child {
     border-bottom: none;

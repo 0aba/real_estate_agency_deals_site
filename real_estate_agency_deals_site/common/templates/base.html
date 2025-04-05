@@ -43,7 +43,7 @@
                 <a href="#">Аренда</a>
                 <a href="#">Покупка</a>
                 <a href="#">Строительство</a>
-                <a href="#">Релелтер</a>
+                <a href="{% url 'realtor_list'%}">Релелтер</a>
               </div>
             </div>
             {% if user.is_authenticated %}
@@ -53,7 +53,7 @@
                 <div class="dropdown-content">
                     {% if real_estate_agency %}
                     <a href="{% url 'agency_profile' real_estate_agency.slug_name %}">Мое агентство</a>
-                    <a href="#">Мои риелтор</a>
+                    <a href="{% url 'realtor_list'%}?only_my_realtors_value=y">Мои риелтор</a>
                     <a href="#">Моя недвижимость</a>
                     <a href="#">Мои сделки</a>
                     {% else %}
@@ -153,7 +153,7 @@
             {% endif %}
         </div>
     </header>
-    <div id="content">
+    <div id="content" style="background-image: url({% static 'common/img/city.jpg' %});">
         {% block content %}{% endblock %}
     </div>
     <footer>

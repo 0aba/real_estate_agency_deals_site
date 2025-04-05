@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block title %}{{title}}{% endblock %}
+
+{% block styles %}
+<link type="text/css" rel="stylesheet" href="{% static 'common/css/profile.css' %}"/>
+<link type="text/css" rel="stylesheet" href="{% static 'real_estate_agency/css/realtor_view.css' %}"/>
+{% endblock %}
+{% block scripts %}
+
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="header-profile">
+        <div class="realtor">
+            <img src="{{ realtor_view.photo.url }}">
+            <p>ФИО: {{ realtor_view.last_name }} {{ realtor_view.first_name }} {{ realtor_view.patronymic }}</p>
+            <p>Опыт: {{ realtor_view.experience }} месяцев</p>
+            <p>Цена: {{ realtor_view.price }}</p>
+            <p>Телефон: {{ realtor_view.phone }}</p>
+            <p>Почта: {{ realtor_view.email }}</p>
+            <p>Лицензия: {{ realtor_view.license }}</p>
+            <p>агенство: {{ realtor_view.agency_realtor.name }}</p>
+        </div>
+        <div class="actions">
+            {% if user == realtor_view.agency_realtor.representative %}
+                <a href="{% url 'review_change' realtor_view.pk %}" class="btn">Изменить данные риэлтера</a>
+                <a href="{% url 'del_realtor' realtor_view.pk %}" class="delete-btn">Удалить риэлтера</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
