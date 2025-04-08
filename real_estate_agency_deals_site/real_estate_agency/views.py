@@ -1,102 +1,11 @@
 from django.views.generic import CreateView, DetailView, UpdateView, ListView
 from django.core.exceptions import ObjectDoesNotExist
-from django.views.generic.edit import FormMixin
 from django.db.models.functions import Concat
 from django.http import HttpResponseRedirect
 from real_estate_agency import models, forms
-from django.core.paginator import Paginator
-from django.db.models import Avg, F, Value # todo!!!!!!!!!!!!!!!!!!!!!!!! Avg Avg Avg
 from django.shortcuts import redirect
-from django.db import IntegrityError
 from django.contrib import messages
-
-#
-# class ProfileRealEstateAgencyView(FormMixin, DetailView):
-#     model = models.RealEstateAgency
-#     paginate_by = 5
-#     form_class = forms.ReviewAgencyCreationForm
-#     template_name = 'real_estate_agency/profile_agency.html'
-#     context_object_name = 'profile_agency'
-#     slug_url_kwarg = 'slug_name'
-#     have_review = None
-#     profile_agency = None
-#
-#     def get_context_data(self, *, object_list=None, **kwargs):
-#         base_context = super().get_context_data(**kwargs)
-#         page = self.request.GET.get('page')
-#         paginator = Paginator(
-#             models.ReviewAgency.non_deleted.filter(
-#                 review_agency=models.RealEstateAgency.objects.get(slug_name=self.kwargs.get('slug_name')),
-#             ), self.paginate_by
-#         ).get_page(page if page else 1)
-#
-#         context = {
-#             'reviews_agency': paginator,
-#             'title': f'Профиль @{self.profile_agency.name}',
-#             'have_review': self.have_review,
-#             'grade_real_estate_agency': models.ReviewAgency.non_deleted.filter(
-#                 review_agency=self.get_object()
-#             ).aggregate(Avg('grade'))['grade__avg'],
-#             'form': forms.ReviewAgencyCreationForm(),
-#         }
-#
-#         return {**base_context, **context}
-#
-#     def dispatch(self, request, *args, **kwargs):
-#         if self.request.user.is_authenticated:
-#             try:
-#                 self.have_review = models.ReviewAgency.non_deleted.get(
-#                     wrote_review=self.request.user,
-#                 )
-#             except ObjectDoesNotExist:
-#                 self.have_review = None
-#
-#         self.profile_agency = self.get_object()
-#
-#         if isinstance(self.profile_agency, HttpResponseRedirect):
-#             messages.error(request, 'Агенство не найдено')
-#             return redirect('home', permanent=False)
-#
-#         return super().dispatch(request, *args, **kwargs)
-#
-#     def get_object(self, queryset=None):
-#         try:
-#             object_real_estate_agency = models.RealEstateAgency.objects.get(slug_name=self.kwargs.get(self.slug_url_kwarg))
-#         except ObjectDoesNotExist:
-#             messages.error(self.request, 'Агенство не найден')
-#             return redirect('home', permanent=False)
-#
-#         return object_real_estate_agency
-#
-#     def post(self, request, *args, **kwargs):
-#         if self.request.user.is_anonymous:
-#             messages.error(request, 'Отзыв может оставить только авторизованный пользователь')
-#             return redirect('home', permanent=False)
-#
-#         if self.request.user.banned:
-#             messages.error(request, 'Вы не можете использовать функцию отзывов, когда вы заблокированы')
-#             return redirect('agency_profile', slug_name=self.kwargs.get(self.slug_url_kwarg), permanent=False)
-#         form = self.get_form()
-#
-#         if self.have_review:
-#             messages.error(request, 'Вы можете оставить только один отзыв у агентстве')
-#             return redirect('agency_profile', slug_name=self.kwargs.get(self.slug_url_kwarg), permanent=False)
-#
-#         if form.is_valid():
-#             return self.form_valid(form)
-#         else:
-#             return self.form_invalid(form)
-#
-#     def form_valid(self, form):
-#         review_agency = form.save(commit=False)
-#         review_agency.review_agency = models.RealEstateAgency.objects.get(slug_name=self.kwargs.get(self.slug_url_kwarg))
-#         review_agency.wrote_review = self.request.user
-#         review_agency.save()
-#
-#         messages.success(self.request, 'Вы успешно оставили отзыв')
-#
-#         return redirect('agency_profile', slug_name=self.kwargs.get(self.slug_url_kwarg), permanent=False)
-#
+from django.db.models import F
 
 
 class ChangeReviewAgencyView(UpdateView):
