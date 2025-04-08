@@ -29,5 +29,5 @@ class NewAppealForm(forms.ModelForm):
 class ConsiderAppealForm(forms.ModelForm):
     class Meta:
         model = models.Appeal
-        fields = ('verdict',)
+        fields = ('rejected', 'verdict',)
         exclude = ('reviewed_appeal',)

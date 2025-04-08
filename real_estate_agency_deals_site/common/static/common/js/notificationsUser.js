@@ -1,9 +1,11 @@
+const baseUrl = window.location.origin;
+
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.btn-mark-read').forEach(button => {
         button.addEventListener('click', function() {
             const notificationId = this.dataset.notificationId;
             const notificationLink = this.dataset.notificationLink;
-            const url = `user/notifications/${notificationId}/view/`;
+            const url = `${baseUrl}/user/notifications/${notificationId}/view/`;
 
             sendRequest(url, 'POST', function(data) {
                 if (data.message === 'Notification marked as viewed') {
@@ -34,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
         button.addEventListener('click', function() {
 
             const notificationId = this.dataset.notificationId;
-            const url = `user/notifications/${notificationId}/del/`;
+            const url = `${baseUrl}/user/notifications/${notificationId}/del/`;
 
             sendRequest(url, 'POST', function(data) {
                 console.log(data)

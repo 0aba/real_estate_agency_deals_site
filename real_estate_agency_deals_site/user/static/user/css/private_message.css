@@ -31,11 +31,11 @@
 }
 
 .chat:hover {
-    background-color: #ebebeb;
+    background-color: rgba(75, 66, 113, 0.61);
 }
 
 .chat.unread {
-    background-color: #e6f2ff;
+    background-color: rgba(11, 74, 78, 0.84);
 }
 
 .chat-link {
@@ -88,6 +88,22 @@
     align-self: flex-start;
 }
 
+.deleted-badge {
+    display: inline-block;
+    background-color: #ff0016;
+    color: white;
+    font-size: 0.75em;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-top: 4px;
+    align-self: flex-start;
+}
+
+.edited-badge {
+    color: #515151;
+    font-size: 0.9em;
+}
+
 .form-message {
     margin: 0 auto;
     padding: 20px;
@@ -124,7 +140,8 @@
     flex-grow: 1;
 }
 
-.message-author {
+.message-author,
+.message-received {
     font-weight: 600;
     color: #333;
 }
@@ -133,11 +150,6 @@
     font-size: 0.8em;
     color: #777;
     margin-left: 8px;
-}
-
-.edited-badge {
-    color: #515151;
-    font-size: 0.9em;
 }
 
 .action-message {

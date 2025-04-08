@@ -13,7 +13,7 @@
 
 {% block content %}
 <div class="form-container">
-    <a class="back-button" href="{% url 'agency_profile' current_review.review_agency.slug_name %}">Обратно к профилю агенства</a>
+    <a class="back-button" href="{% url 'home' %}">Обратно на главную</a>
     <h2 class="form-title">{{ title }}</h2>
     <form method="post" class="form">
         {% csrf_token %}

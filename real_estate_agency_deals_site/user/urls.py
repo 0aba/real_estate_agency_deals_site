@@ -29,6 +29,9 @@ urlpatterns_actions = [
 
     path('disable-account/', utils.disable_account_action, name='disable_account'),
     path('del-private-message/<int:pk>/', utils.del_private_message, name='del_private_message'),
+
+    path('give-rights-staff/<slug:username>/', utils.give_rights_staff, name='give_rights_staff'),
+    path('revoke-rights-staff/<slug:username>/', utils.revoke_rights_staff, name='revoke_rights_staff'),
 ]
 
 urlpatterns = ([

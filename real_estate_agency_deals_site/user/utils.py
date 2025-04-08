@@ -23,11 +23,11 @@ def ban_user_action(request, username):
         messages.error(request, 'Пользователь уже заблокирован')
         return redirect('user_profile', username=username, permanent=False)
 
-    if action_user.is_staff:
-        messages.error(request, 'Нельзя заблокировать администрацию')
+    if action_user.is_staff or action_user.is_superuser:
+        messages.error(request, 'Нельзя заблокировать персонал, перед этим нужно удалить права')
         return redirect('user_profile', username=username, permanent=False)
 
-    if not request.user.is_staff:
+    if not request.user.is_superuser:
         messages.error(request, 'Только администратор может заблокировать пользователя')
         return redirect('user_profile', username=username, permanent=False)
 
@@ -57,11 +57,11 @@ def unban_user_action(request, username):
         messages.error(request, 'Пользователь не заблокирован')
         return redirect('user_profile', username=username, permanent=False)
 
-    if action_user.is_staff:
-        messages.error(request, 'Администрация не может быть заблокирован')
+    if action_user.is_staff or action_user.is_superuser:
+        messages.error(request, 'Персонал не может быть заблокирован')
         return redirect('user_profile', username=username, permanent=False)
 
-    if not request.user.is_staff:
+    if not request.user.is_superuser:
         messages.error(request, 'Только администратор может разблокировать пользователя')
         return redirect('user_profile', username=username, permanent=False)
 
@@ -71,6 +71,66 @@ def unban_user_action(request, username):
     models.Notification.objects.create(
         to_whom=action_user,
         message='Вы были разблокированы',
+    )
+
+    return redirect('user_profile', username=username, permanent=False)
+
+
+def give_rights_staff(request, username):
+    if request.user.is_anonymous:
+        messages.warning(request, 'Авторизуйтесь, чтобы дать права агента недвижимости пользователю')
+        return redirect('login', permanent=False)
+
+    try:
+        action_user = models.User.objects.get(username=username)
+    except ObjectDoesNotExist:
+        messages.error(request, 'Невозможно дать права агента недвижимости не существующему пользователя')
+        return redirect('home', permanent=False)
+
+    if action_user.is_staff:
+        messages.error(request, 'Пользователь уже агент недвижимости')
+        return redirect('user_profile', username=username, permanent=False)
+
+    if not request.user.is_superuser:
+        messages.error(request, 'Только администратор может дать права агента недвижимости пользователю')
+        return redirect('user_profile', username=username, permanent=False)
+
+    action_user.is_staff = True
+    action_user.save()
+
+    models.Notification.objects.create(
+        to_whom=action_user,
+        message='Вам выдали права агента недвижимости',
+    )
+
+    return redirect('user_profile', username=username, permanent=False)
+
+
+def revoke_rights_staff(request, username):
+    if request.user.is_anonymous:
+        messages.warning(request, 'Авторизуйтесь, чтобы лишить права агента недвижимости пользователя')
+        return redirect('login', permanent=False)
+
+    try:
+        action_user = models.User.objects.get(username=username)
+    except ObjectDoesNotExist:
+        messages.error(request, 'Невозможно лишить права агента недвижимости не существующего пользователя')
+        return redirect('home', permanent=False)
+
+    if not action_user.is_staff:
+        messages.error(request, 'Пользователь не является агентом недвижимости')
+        return redirect('user_profile', username=username, permanent=False)
+
+    if not request.user.is_superuser:
+        messages.error(request, 'Только администратор может лишить права агента недвижимости пользователю')
+        return redirect('user_profile', username=username, permanent=False)
+
+    action_user.is_staff = False
+    action_user.save()
+
+    models.Notification.objects.create(
+        to_whom=action_user,
+        message='Вас лишили прав агента недвижимости',
     )
 
     return redirect('user_profile', username=username, permanent=False)

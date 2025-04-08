@@ -6,37 +6,11 @@ from django.utils import timezone
 from django.db import models
 
 
-class RealEstateAgency(models.Model):
-    class Meta:
-        verbose_name = 'Агенство недвижимости'
-        verbose_name_plural = 'Агентства недвижимости'
-
-    logo = models.ImageField(blank=True, upload_to='photos/real_estate_agency/%Y/%m/%d/', validators=[
-        FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png']),
-    ], default='default/real_estate_agency.jpg', verbose_name='Логотип')
-    slug_name = models.CharField(max_length=256, unique=True, null=False)
-    name = models.CharField(max_length=256, unique=True, null=False , verbose_name='Название организации')
-    INN = models.CharField(max_length=12, validators=[
-        RegexValidator(r'^\d{10,12}$')
-    ], unique=True, verbose_name='ИНН')
-    about = models.CharField(null=True, blank=True, max_length=512, verbose_name='О агенстве')
-    date_registered = models.DateTimeField(auto_now_add=True)
-    representative = models.OneToOneField(AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='representative_fk')
-
-    objects = models.Manager()
-
-    def save(self, *args, **kwargs):
-        self.slug_name = slugify(translit(self.name, LANGUAGE_CODE_TRANSLIT, reversed=True))
-        super().save(*args, **kwargs)
-
-
 class ReviewAgency(models.Model):
     class Meta:
         verbose_name = 'Отзыв агентства'
         verbose_name_plural = 'Отзывы агенств'
 
-    review_agency = models.ForeignKey(RealEstateAgency, on_delete=models.PROTECT,
-                                      related_name='review_agency_fk')
     wrote_review = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.PROTECT,
                                      related_name='wrote_review_fk')
     message = models.CharField(max_length=256, verbose_name='Отзыв')
@@ -81,7 +55,6 @@ class Realtor(models.Model):
         verbose_name='Цена услуг'
     )
     license = models.CharField(max_length=128, unique=True, verbose_name='Лицензия')
-    agency_realtor = models.ForeignKey(RealEstateAgency, on_delete=models.PROTECT, related_name='agency_realtor_fk')
 
     objects = models.Manager()
 
@@ -122,8 +95,6 @@ class RealEstate(models.Model):
     square = models.SmallIntegerField(validators=[MinValueValidator(1)], verbose_name='Общая площадь')
     when_added = models.DateTimeField(auto_now_add=True)
     about = models.CharField(null=True, blank=True, max_length=512, verbose_name='О недвижимости')
-    agency_real_estate = models.ForeignKey(RealEstateAgency, on_delete=models.PROTECT,
-                                           related_name='agency_real_estate_fk')
     address_real_estate = models.ForeignKey(Address, null=True, blank=True, on_delete=models.PROTECT,
                                             related_name='address_real_estate_fk')
     deleted = models.BooleanField(default=False)
@@ -141,7 +112,7 @@ class PhotoRealEstate(models.Model):
         verbose_name = 'Фото недвижимости'
         verbose_name_plural = 'Фотографии недвижимости'
 
-    additional_photo_real_estate = models.ForeignKey(RealEstateAgency, on_delete=models.PROTECT,
+    additional_photo_real_estate = models.ForeignKey(RealEstate, on_delete=models.PROTECT,
                                                      related_name='additional_photo_RE_fk')
     photo = models.ImageField(upload_to='photos/real_estate/%Y/%m/%d/', validators=[
         FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png']),
@@ -155,7 +126,7 @@ class DataPlot(models.Model):
         verbose_name = 'Данные участка'
         verbose_name_plural = 'Данные участков'
 
-    real_estate_DP = models.OneToOneField(RealEstateAgency, on_delete=models.PROTECT, related_name='real_estate_DP_fk')
+    real_estate_DP = models.OneToOneField(RealEstate, on_delete=models.PROTECT, related_name='real_estate_DP_fk')
     buildings = models.BooleanField(verbose_name='Есть постройки')
     communications = models.BooleanField(verbose_name='Есть коммуникации')
 
@@ -167,13 +138,27 @@ class DataApartment(models.Model):
         verbose_name = 'Данные квартиры'
         verbose_name_plural = 'Данные квартир'
 
-    real_estate_DA = models.OneToOneField(RealEstateAgency, on_delete=models.PROTECT, related_name='real_estate_DA_fk')
+    class RoomType(models.IntegerChoices):
+        OTHER = 0, 'другое'
+        COMMUNAL = 1, 'коммуналка'
+        ONE_ROOM = 2, 'однокомнатная'
+        TWO_ROOMS = 3, 'двухкомнатная'
+        THREE_ROOMS = 4, 'трехкомнатная'
+        FOUR_ROOMS = 5, 'четырехкомнатная'
+        FOUR_PLUS_ROOMS = 6, 'четыре+ комнат'
+        STUDIO = 7, 'студия'
+        MAISONETTE = 8, 'мезонет'
+        LOFT = 9, 'лофт'
+        PENTHOUSE = 10, 'пентхаус'
+
+    real_estate_DA = models.OneToOneField(RealEstate, on_delete=models.PROTECT, related_name='real_estate_DA_fk')
     number_storeys = models.IntegerField(validators=[MinValueValidator(1)], verbose_name='Количество этажей')
     floor = models.IntegerField(validators=[MinValueValidator(1)], verbose_name='Этаж')
     balcony = models.BooleanField(verbose_name='Есть балкон')
     furniture = models.BooleanField(verbose_name='Есть мебель')
     year_construction = models.SmallIntegerField(validators=[MinValueValidator(1900)], verbose_name='Год постройки')
     accident_rate = models.BooleanField(verbose_name='Здание аварийное')
+    room_type = models.IntegerField(choices=RoomType.choices, default=RoomType.OTHER, verbose_name='Тип комнаты')
 
     objects = models.Manager()
 
@@ -183,7 +168,7 @@ class DataHouse(models.Model):
         verbose_name = 'Данные дома'
         verbose_name_plural = 'Данные домов'
 
-    real_estate_DH = models.ForeignKey(RealEstateAgency, on_delete=models.PROTECT, related_name='real_estate_DH_fk')
+    real_estate_DH = models.ForeignKey(RealEstate, on_delete=models.PROTECT, related_name='real_estate_DH_fk')
     number_storeys = models.IntegerField(validators=[MinValueValidator(1)], verbose_name='Количество этажей')
     house_area = models.SmallIntegerField(validators=[MinValueValidator(1)], verbose_name='Площадь дома')
     year_construction = models.SmallIntegerField(validators=[MinValueValidator(1900)], verbose_name='Год постройки дома')
@@ -203,6 +188,7 @@ class Deal(models.Model):
         RENT = 1
         CONSTRUCTION = 2
 
+    title_slug = models.CharField(max_length=256, unique=True, null=False)
     title = models.CharField(max_length=256, unique=True, verbose_name='Заголовок сделки')
     type = models.SmallIntegerField(choices=DealType.choices, verbose_name='Тип сделки')
     phone = models.CharField(validators=[
@@ -212,6 +198,7 @@ class Deal(models.Model):
     email = models.EmailField(verbose_name='Почта')
     date_create = models.DateTimeField(auto_now_add=True)
     real_estate_deal = models.ForeignKey(RealEstate, on_delete=models.PROTECT, related_name='real_estate_deal_fk')
+    agent = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='agent_fk')
     deleted = models.BooleanField(default=False)
 
     class NonDeletedManager(models.Manager):
@@ -221,6 +208,9 @@ class Deal(models.Model):
     non_deleted = NonDeletedManager()
     objects = models.Manager()
 
+    def save(self, *args, **kwargs):
+        self.title_slug = slugify(translit(self.title, LANGUAGE_CODE_TRANSLIT, reversed=True))
+        super().save(*args, **kwargs)
 
 class DataConstruction(models.Model):
     class Meta:

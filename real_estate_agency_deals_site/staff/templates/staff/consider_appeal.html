@@ -34,11 +34,21 @@
             {{ form.verdict }}
             {{ form.verdict.errors }}
         </div>
+        <div class="form-group">
+        <label>Отклонить</label>
+            {{ form.rejected }}
+            {{ form.rejected.errors }}
+        </div>
         <button type="submit" class="form-button">Рассмотреть</button>
     </form>
     {% else %}
-    <p>Апелляция была рассмотрена</p>
-    <p class="consider">Рассмотрена: {{ current_appeal.reviewed_complaint.username }}</p>
+    {% if appeal.rejected %}
+        <p class="appeal_rejected">Апелляция была отклонена</p>
+    {% else %}
+        <p class="appeal_accepted">Апелляция была принята</p>
+    {% endif %}
+    <p class="consider">Рассмотрена: {{ current_appeal.reviewed_appeal.username }}</p>
+
     <p class="consider-verdict">Вердикт: {{ current_appeal.verdict }}</p>
     {% endif %}
 </div>

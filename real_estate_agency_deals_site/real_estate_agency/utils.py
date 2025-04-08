@@ -21,7 +21,7 @@ def del_review_agency(request, pk):
 
     review.deleted = True
     review.save()
-    return redirect('agency_profile', slug_name=review.review_agency.slug_name, permanent=False)
+    return redirect('home', permanent=False)
 
 
 def del_realtor(request, pk):
@@ -35,8 +35,8 @@ def del_realtor(request, pk):
         messages.error(request, 'Риэлтор не найдено')
         return redirect('home', permanent=False)
 
-    if realtor.agency_realtor.representative != request.user:
-        messages.error(request, 'У вас нет прав на удаление риэлтора не вашего агенства')
+    if not request.user.is_staff:
+        messages.error(request, 'У вас нет прав на удаление риелтора, вы должны быть агент недвижимости')
         return redirect('realtor_list', permanent=False)
 
     realtor.delete()

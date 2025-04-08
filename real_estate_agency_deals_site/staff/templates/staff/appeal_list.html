@@ -24,6 +24,11 @@
                     Время написания: {{ appeal.date_write }}
                 </p>
                 {% if appeal.reviewed_appeal %}
+                    {% if appeal.rejected %}
+                        <p class="appeal_rejected">Отклонена</p>
+                    {% else %}
+                        <p class="appeal_accepted">Принята</p>
+                    {% endif %}
                     <p class="consider">Рассмотрена: {{ appeal.reviewed_appeal.username }}</p>
                     <a href="{% url 'appeal_consider' appeal.pk %}" class="btn">Просмотреть</a>
                 {% else %}
@@ -48,15 +53,27 @@
                 </div>
 
                 <div class="radio-option">
-                    <input id="considered_considered" type="radio" name="considered_status" value="considered"
+                    <input id="considered" type="radio" name="considered_status" value="considered"
                            {% if request.GET.considered_status == 'considered' %}checked{% endif %}>
-                    <label for="considered_considered">Рассмотренные</label>
+                    <label for="considered">Рассмотренные</label>
                 </div>
 
                 <div class="radio-option">
-                    <input id="considered_not_considered" type="radio" name="considered_status" value="not_considered"
+                    <input id="not_considered" type="radio" name="considered_status" value="not_considered"
                            {% if request.GET.considered_status == 'not_considered' %}checked{% endif %}>
-                    <label for="considered_not_considered">Не рассмотренные</label>
+                    <label for="not_considered">Не рассмотренные</label>
+                </div>
+
+                <div class="radio-option">
+                    <input id="considered_rejected" type="radio" name="considered_status" value="considered_rejected"
+                           {% if request.GET.considered_status == 'considered_rejected' %}checked{% endif %}>
+                    <label for="considered_rejected">Рассмотренная отклоненная</label>
+                </div>
+
+                <div class="radio-option">
+                    <input id="considered_accepted" type="radio" name="considered_status" value="considered_accepted"
+                           {% if request.GET.considered_status == 'considered_accepted' %}checked{% endif %}>
+                    <label for="considered_accepted">Рассмотренная принятая</label>
                 </div>
             </div>
             <div class="filter-group datetime-interval">

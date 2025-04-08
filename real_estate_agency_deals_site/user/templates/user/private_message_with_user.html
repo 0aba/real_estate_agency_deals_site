@@ -37,7 +37,7 @@
     <div class="write-message">
         {% if user.banned %}
             <p class="error-write">Вы не можете использовать функцию личных сообщений, когда вы заблокированы</p>
-        {% elif not user.is_staff and im_in_black_list %}
+        {% elif not user.is_superuser and im_in_black_list %}
             <p class="error-write">Пользователь внес вас черный список</p>
         {% else %}
         <form method="post" class="form">

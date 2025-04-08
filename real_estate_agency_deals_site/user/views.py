@@ -417,7 +417,7 @@ class PrivateMessageUserView(FormMixin, ListView):
             messages.error(request, 'Вы не можете использовать функцию личных сообщений, когда вы заблокированы')
             return redirect('private_message_user', username=self.kwargs.get('username'), permanent=False)
 
-        if not self.request.user.is_staff and self.im_in_black_list:
+        if not self.request.user.is_superuser and self.im_in_black_list:
             messages.error(request, 'Пользователь внес вас черный список')
             return redirect('private_message_user', username=self.kwargs.get('username'), permanent=False)
 

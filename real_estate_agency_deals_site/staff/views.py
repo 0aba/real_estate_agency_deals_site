@@ -62,7 +62,7 @@ class ComplaintList(ListView):
             messages.warning(self.request, 'Чтобы просматривать жалобы вы должны быть авторизованы')
             return redirect('login', permanent=False)
 
-        if not self.request.user.is_staff:
+        if not self.request.user.is_superuser:
             messages.error(self.request, 'Просматривать жалобы могут только администрация')
             return redirect('home', permanent=False)
 
@@ -115,7 +115,7 @@ class ConsiderComplaint(UpdateView):
             messages.warning(self.request, 'Чтобы рассмотреть жалобу вы должны быть авторизованы')
             return redirect('login', permanent=False)
 
-        if not self.request.user.is_staff:
+        if not self.request.user.is_superuser:
             messages.error(self.request, 'Рассматривать жалобы могут только администрация')
             return redirect('home', permanent=False)
 
@@ -223,7 +223,7 @@ class AppealList(ListView):
             messages.warning(self.request, 'Чтобы просматривать апелляции вы должны быть авторизованы')
             return redirect('login', permanent=False)
 
-        if not self.request.user.is_staff:
+        if not self.request.user.is_superuser:
             messages.error(self.request, 'Просматривать апелляции могут только администрация')
             return redirect('home', permanent=False)
 
@@ -237,8 +237,12 @@ class AppealList(ListView):
         written_before_value = self.request.GET.get('written_before_value')
         username_value = self.request.GET.get('username_value')
 
-        if considered_status:
+        if considered_status and considered_status not in ('considered_rejected', 'considered_accepted',):
             queryset = queryset.filter(reviewed_appeal__isnull=False if considered_status == 'considered' else True)
+
+        if considered_status in ('considered_rejected', 'considered_accepted',):
+            queryset = queryset.filter(Q(reviewed_appeal__isnull=False)
+                                       & Q(rejected=True if considered_status == 'considered_rejected' else False))
 
         if written_after_value:
             queryset = queryset.filter(date_write__gte=written_after_value)
@@ -273,7 +277,7 @@ class ConsiderAppeal(UpdateView):
             messages.warning(self.request, 'Чтобы рассмотреть апелляцию вы должны быть авторизованы')
             return redirect('login', permanent=False)
 
-        if not self.request.user.is_staff:
+        if not self.request.user.is_superuser:
             messages.error(self.request, 'Рассматривать апелляции могут только администрация')
             return redirect('home', permanent=False)
 
@@ -304,18 +308,84 @@ class ConsiderAppeal(UpdateView):
         consider_appeal = form.save(commit=False)
         consider_appeal.reviewed_appeal = self.request.user
         consider_appeal.save()
-        email_user = self.current_appeal.write_appeal.email
+        action_user = consider_appeal.write_appeal
 
         subject = 'Вердикт апелляции'
         message = (f'Рассмотрена администратором: {self.request.user.username}.\n'
                    f'Вердикт: {consider_appeal.verdict}.')
 
+        if consider_appeal.rejected:
+            user_models.Notification.objects.create(
+                to_whom=action_user,
+                message='Вам отказано в апелляции, вердикт был отправлен на почту',
+            )
+        else:
+            action_user.banned = False
+            action_user.save()
+
+            user_models.Notification.objects.create(
+                to_whom=action_user,
+                message='Вашу апелляцию приняли, вердикт был отправлен на почту',
+            )
+
         send_mail(
             subject,
             message,
             settings.EMAIL_HOST_USER,
-            [email_user],
+            [action_user.email],
             fail_silently=False,
         )
 
         return redirect('appeal_list', permanent=False)
+
+
+class LogsPrivateMessage(ListView):
+    paginate_by = 10
+    model = user_models.PrivateMessage
+    template_name = 'staff/private_message_list_for_admin.html'
+    context_object_name = 'logs_PM'
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        base_context = super().get_context_data(**kwargs)
+        context = {
+            'title': 'Логи личных сообщений',
+        }
+
+        return {**base_context, **context}
+
+    def dispatch(self, request, *args, **kwargs):
+        if self.request.user.is_anonymous:
+            messages.warning(self.request, 'Чтобы просматривать логи личных сообщений вы должны быть авторизованы')
+            return redirect('login', permanent=False)
+
+        if not self.request.user.is_superuser:
+            messages.error(self.request, 'Просматривать логи личных сообщений могут только администрация')
+            return redirect('home', permanent=False)
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        queryset = user_models.PrivateMessage.objects.filter()
+
+        wrote_PM_username_value = self.request.GET.get('wrote_PM_username_value')
+        received_PM_username_value = self.request.GET.get('received_PM_username_value')
+        date_write_min_value = self.request.GET.get('date_write_min_value')
+        date_write_max_value = self.request.GET.get('date_write_max_value')
+        only_deleted_value = self.request.GET.get('only_deleted_value')
+
+        if wrote_PM_username_value:
+            queryset = queryset.filter(wrote_PM__username__icontains=wrote_PM_username_value)
+
+        if received_PM_username_value:
+            queryset = queryset.filter(received_PM__username__icontains=received_PM_username_value)
+
+        if date_write_min_value:
+            queryset = queryset.filter(date_write__gte=date_write_min_value)
+
+        if date_write_max_value:
+            queryset = queryset.filter(date_write__lte=date_write_max_value)
+
+        if only_deleted_value:
+            queryset = queryset.filter(deleted=True)
+
+        return queryset

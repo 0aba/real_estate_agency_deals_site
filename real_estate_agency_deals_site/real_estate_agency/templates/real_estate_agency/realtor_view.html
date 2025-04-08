@@ -23,11 +23,10 @@
             <p>Телефон: {{ realtor_view.phone }}</p>
             <p>Почта: {{ realtor_view.email }}</p>
             <p>Лицензия: {{ realtor_view.license }}</p>
-            <p>агенство: {{ realtor_view.agency_realtor.name }}</p>
         </div>
         <div class="actions">
-            {% if user == realtor_view.agency_realtor.representative %}
-                <a href="{% url 'review_change' realtor_view.pk %}" class="btn">Изменить данные риэлтера</a>
+            {% if user.is_staff %}
+                <a href="{% url 'realtor_change' realtor_view.pk %}" class="btn">Изменить данные риэлтера</a>
                 <a href="{% url 'del_realtor' realtor_view.pk %}" class="delete-btn">Удалить риэлтера</a>
             {% endif %}
         </div>

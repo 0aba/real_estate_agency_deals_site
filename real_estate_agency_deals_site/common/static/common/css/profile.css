@@ -102,8 +102,12 @@ hr {
     color: #F44336;
 }
 
-.admin {
+.staff {
     color: #2196F3;
+}
+
+.admin {
+    color: #8600f4;
 }
 
 @media (max-width: 768px) {

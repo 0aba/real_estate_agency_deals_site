@@ -2,7 +2,6 @@
 {% load static %}
 {% load message_tags %}
 {% load notification_tags %}
-{% load real_estate_agency_tags %}
 <html lang="en" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
@@ -38,36 +37,25 @@
                 <a href="{% url 'home' %}" class="btn-header">Главная</a>
             </div>
             <div class="dropdown">
-              <a class="dropbtn">Сделки & услуги</a>
-              <div class="dropdown-content">
-                <a href="#">Аренда</a>
-                <a href="#">Покупка</a>
-                <a href="#">Строительство</a>
-                <a href="{% url 'realtor_list'%}">Релелтер</a>
-              </div>
-            </div>
-            {% if user.is_authenticated %}
-            {% get_real_estate_agency user as real_estate_agency %}
-            <div class="dropdown">
-                <a class="dropbtn">Агенство недвижимости</a>
+                <a class="dropbtn">Сделки & услуги</a>
                 <div class="dropdown-content">
-                    {% if real_estate_agency %}
-                    <a href="{% url 'agency_profile' real_estate_agency.slug_name %}">Мое агентство</a>
-                    <a href="{% url 'realtor_list'%}?only_my_realtors_value=y">Мои риелтор</a>
-                    <a href="#">Моя недвижимость</a>
-                    <a href="#">Мои сделки</a>
-                    {% else %}
-                    <a href="{% url 'signup_agency' %}">Регистрация агентства</a>
+                    {% if user.is_staff %}
+                        <a href="#">Недвижимость</a>
                     {% endif %}
+                    <a href="#">Аренда</a>
+                    <a href="#">Покупка</a>
+                    <a href="#">Строительство</a>
+                    <a href="{% url 'realtor_list'%}">Риэлтер</a>
                 </div>
             </div>
-            {% endif %}
-            {% if user.is_staff %}
+            {% if user.is_superuser %}
             <div class="dropdown">
                 <a class="dropbtn">Инструменты администрации</a>
                 <div class="dropdown-content">
                     <a href="{% url 'complaint_list' %}">Жалобы</a>
                     <a href="{% url 'appeal_list' %}">Апелляции</a>
+                    <a href="{% url 'logs_private_message' %}">Логи личных сообщений</a>
+                    <a href="#">Статистика сделок</a>
                 </div>
             </div>
             {% endif %}

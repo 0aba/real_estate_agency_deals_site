@@ -31,11 +31,13 @@ class Appeal(models.Model):
     class Meta:
         verbose_name = 'Апелляция'
         verbose_name_plural = 'Апелляции'
+        ordering = ('-date_write',)
 
     write_appeal = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='write_appeal_fk')
     message = models.CharField(max_length=256, verbose_name='Апелляции')
     reviewed_appeal = models.ForeignKey(AUTH_USER_MODEL, null=True, on_delete=models.PROTECT,
                                         related_name='reviewed_appeal_fk')
+    rejected = models.BooleanField(default=False)
     date_write = models.DateTimeField(auto_now_add=True)
     verdict = models.CharField(null=True, max_length=256, verbose_name='Вердикт')
 
