@@ -41,28 +41,28 @@
             {% if user == user_profile %}
                 <a href="{% url 'my_black_list' %}" class="btn">Мой черный список</a>
                 <a href="{% url 'user_profile_change' user_profile.username %}" class="btn">Настройки учетной записи</a>
-            {% else %}
-            {% if user.is_active %}
-                {% if user.is_superuser %}
-                    {% if user_profile.banned %}
-                        <a href="{% url 'unban' user_profile.username %}" class="btn">Разблокировать</a>
-                    {% else %}
-                        <a href="{% url 'ban' user_profile.username %}" class="btn">Заблокировать</a>
-                    {% endif %}
-                    {% if user_profile.is_staff %}
-                        <a href="{% url 'revoke_rights_staff' user_profile.username %}" class="btn">Лишить права агента недвижимости</a>
-                    {% else %}
-                        <a href="{% url 'give_rights_staff' user_profile.username %}" class="btn">Дать права агента недвижимости</a>
-                    {% endif %}
-                {% endif %}
-                {% if im_in_bl == False %}
-                    <a href="{% url 'private_message_user' user_profile.username %}" class="btn">Написать</a>
-                {% endif %}
-                {% if this_user_in_bl %}
-                    <a href="{% url 'del_bl_profile' user_profile.username %}" class="btn">Убрать из ЧС</a>
+                {% if user_profile.is_staff and user.is_superuser %}
+                    <a href="{% url 'revoke_rights_staff' user_profile.username %}" class="btn">Лишить права агента недвижимости</a>
                 {% else %}
-                    <a href="{% url 'add_bl_profile' user_profile.username %}" class="btn">Добавить в ЧС</a>
+                    <a href="{% url 'give_rights_staff' user_profile.username %}" class="btn">Дать права агента недвижимости</a>
                 {% endif %}
+            {% else %}
+                {% if user.is_active %}
+                    {% if user.is_superuser %}
+                        {% if user_profile.banned %}
+                            <a href="{% url 'unban' user_profile.username %}" class="btn">Разблокировать</a>
+                        {% else %}
+                            <a href="{% url 'ban' user_profile.username %}" class="btn">Заблокировать</a>
+                        {% endif %}
+                    {% endif %}
+                    {% if im_in_bl == False %}
+                        <a href="{% url 'private_message_user' user_profile.username %}" class="btn">Написать</a>
+                    {% endif %}
+                    {% if this_user_in_bl %}
+                        <a href="{% url 'del_bl_profile' user_profile.username %}" class="btn">Убрать из ЧС</a>
+                    {% else %}
+                        <a href="{% url 'add_bl_profile' user_profile.username %}" class="btn">Добавить в ЧС</a>
+                    {% endif %}
                 {% endif %}
             {% endif %}
         </div>

@@ -16,8 +16,10 @@ class Command(BaseCommand):
         if password != confirm_password:
             self.stdout.write(self.style.ERROR('Passwords do not match'))
             return
+
         try:
             User.objects.create_user(username=username, password=password, email=fake_email, verification_email=True)
+            self.stdout.write(self.style.SUCCESS('User created successfully'))
         except IntegrityError as e:
             if '(username)=' in str(e):
                 self.stdout.write(self.style.ERROR('Error: username already exists'))
@@ -25,6 +27,3 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.ERROR('Error: email already exists'))
             else:
                 self.stdout.write(self.style.ERROR('Error: could not create user due to an integrity error'))
-            return
-
-        self.stdout.write(self.style.SUCCESS('User created successfully'))
