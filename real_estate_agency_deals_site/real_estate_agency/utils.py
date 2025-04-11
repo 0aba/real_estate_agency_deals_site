@@ -23,7 +23,6 @@ def del_review_agency(request, pk):
     review.save()
     return redirect('home', permanent=False)
 
-
 def del_realtor(request, pk):
     if request.user.is_anonymous:
         messages.warning(request, 'Авторизуйтесь, чтобы удалить риэлтора')
@@ -42,3 +41,23 @@ def del_realtor(request, pk):
     realtor.delete()
 
     return redirect('realtor_list', permanent=False)
+
+def del_real_estate(request, pk):
+    if request.user.is_anonymous:
+        messages.warning(request, 'Авторизуйтесь, чтобы удалить недвижимость')
+        return redirect('home', permanent=False)
+
+    try:
+        real_estate = models.RealEstate.objects.get(pk=pk)
+    except ObjectDoesNotExist:
+        messages.error(request, 'Недвижимость не найдено')
+        return redirect('home', permanent=False)
+
+    if not request.user.is_staff:
+        messages.error(request, 'У вас нет прав на удаление недвижимости, вы должны быть агент недвижимости')
+        return redirect('real_estate_list', permanent=False)
+
+    real_estate.deleted = True
+    real_estate.save()
+
+    return redirect('real_estate_list', permanent=False)

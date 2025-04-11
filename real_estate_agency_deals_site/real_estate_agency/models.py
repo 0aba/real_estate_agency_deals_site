@@ -152,7 +152,7 @@ class DataApartment(models.Model):
         PENTHOUSE = 10, 'пентхаус'
 
     real_estate_DA = models.OneToOneField(RealEstate, on_delete=models.PROTECT, related_name='real_estate_DA_fk')
-    number_storeys = models.IntegerField(validators=[MinValueValidator(1)], verbose_name='Количество этажей')
+    number_storeys = models.IntegerField(validators=[MinValueValidator(1)], verbose_name='Количество этажей у дома')
     floor = models.IntegerField(validators=[MinValueValidator(1)], verbose_name='Этаж')
     balcony = models.BooleanField(verbose_name='Есть балкон')
     furniture = models.BooleanField(verbose_name='Есть мебель')

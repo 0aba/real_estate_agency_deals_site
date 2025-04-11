@@ -32,7 +32,8 @@ p {
     margin-bottom: 15px;
 }
 
-.form-group label {
+.form-group label,
+legend {
     margin-bottom: 5px;
     font-weight: bold;
     color: white;
@@ -106,4 +107,13 @@ input {
 
 .back-button:hover {
     background-color: #00d2ff;
+}
+
+.view-group {
+    display: none;
+    width: 100%;
+}
+
+hr {
+    margin-bottom: 20px;
 }

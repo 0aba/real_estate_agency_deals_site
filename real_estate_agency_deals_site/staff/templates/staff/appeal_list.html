@@ -43,9 +43,8 @@
     </div>
     <div class="filters">
         <form method="GET" class="filter-form">
-            <div class="filter-group radio-group">
-                <label>Статус рассмотрения апелляции</label>
-
+            <fieldset>
+                <legend>Статус рассмотрения апелляции</legend>
                 <div class="radio-option">
                     <input id="considered_none" type="radio" name="considered_status" value=""
                            {% if not request.GET.considered_status %}checked{% endif %}>
@@ -75,7 +74,7 @@
                            {% if request.GET.considered_status == 'considered_accepted' %}checked{% endif %}>
                     <label for="considered_accepted">Рассмотренная принятая</label>
                 </div>
-            </div>
+            </fieldset>
             <div class="filter-group datetime-interval">
                 <label>Диапазон дат</label>
                 <input id="written_after" type="datetime-local" name="written_after_value" value="{{ request.GET.written_after_value }}">

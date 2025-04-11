@@ -35,7 +35,8 @@
     margin-bottom: 15px;
 }
 
-.filter-group label {
+.filter-group label,
+legend {
     font-size: 14px;
     margin-bottom: 5px;
     font-weight: bold;
@@ -87,15 +88,26 @@
 }
 
 .radio-option label {
+    color: white;
     font-weight: normal;
     margin-bottom: 0;
     cursor: pointer;
 }
 
 .radio-option:hover label {
-    color: #ddd;
+    color: gray;
 }
 
 .radio-option input[type="radio"]:focus {
-    outline: 2px solid var(--background-color);
+    outline: 2px solid white;
+}
+
+.view-group {
+    color: white;
+    display: none;
+    width: 100%;
+}
+
+hr {
+    margin-bottom: 20px;
 }

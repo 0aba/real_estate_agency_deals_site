@@ -1,0 +1,346 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block title %}{{title}}{% endblock %}
+
+{% block styles %}
+<link type="text/css" rel="stylesheet" href="{% static 'common/css/list_with_filters.css' %}"/>
+<link type="text/css" rel="stylesheet" href="{% static 'real_estate_agency/css/real_estate_list.css' %}"/>
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'real_estate_agency/js/selectedRealEstate.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="list-container">
+    <div class="list-elements">
+        <a href="{% url 'real_estate_new' %}" class="btn">Добавить недвижимость</a>
+        <hr>
+        {% for real_estate in real_estate_list %}
+            <div class="real-estate">
+                <img src="{{ real_estate.main_photo.url }}">
+                <p class="real-estate-when_added">
+                    Тип: {{ real_estate.when_added }}
+                </p>
+                {% if real_estate.address_real_estate %}
+                <p class="real-estate-full-address">
+                    адрес: {{ real_estate.address_real_estate.city }} {{ real_estate.address_real_estate.district }}|default:"" }} {{ real_estate.address_real_estate.street }} {{ real_estate.address_real_estate.apartment|default:"" }}
+                </p>
+                {% else %}
+                <p class="real-estate-layout">
+                    Это шаблон недвижимости
+                </p>
+                {% endif %}
+                <p class="real-estate-type">
+                    Тип: {% if real_estate.type == real_estate.RealEstateType.APARTMENT %} квартира {% elif real_estate.type == real_estate.RealEstateType.HOUSE  %} дом {% elif real_estate.type == real_estate.RealEstateType.PLOT %} участок {% endif %}
+                </p>
+                <p class="real-estate-square">
+                    Цена: {{ real_estate.square }} м²
+                </p>
+                <a href="{% url 'real_estate' real_estate.pk %}" class="btn">Просмотреть</a>
+            </div>
+            <hr>
+        {% empty %}
+            <hr>
+        {% endfor %}
+        {% include 'includes/paginator.html'%}
+    </div>
+    <div class="filters">
+        <form method="GET" class="filter-form">
+            <div class="filter-group">
+                <label>Диапазон площади (м²)</label>
+                <input id="square_min" type="number" min="1" name="square_min_value" value="{{ request.GET.square_min_value }}">
+                <input id="square_max" type="number" min="1" name="square_max_value" value="{{ request.GET.square_max_value }}">
+            </div>
+            <div class="filter-group">
+                <label>Диапазон даты добавления</label>
+                <input id="when_added_min" type="datetime-local" name="when_added_min_value" value="{{ request.GET.when_added_min_value }}">
+                <input id="when_added_max" type="datetime-local" name="when_added_max_value" value="{{ request.GET.when_added_max_value }}">
+            </div>
+
+            <fieldset>
+                <legend>Адрес</legend>
+                <div class="radio-option">
+                    <input id="address_real_estate_any" type="radio" name="address_real_estate" value="address_real_estate_any"
+                           onchange="selectedAddressRealEstate()"
+                           {% if not request.GET.address_real_estate or request.GET.address_real_estate == 'address_real_estate_any'  %}checked{% endif %}>
+                    <label for="address_real_estate_any">Любой адрес или шаблон</label>
+                </div>
+                <div class="radio-option">
+                    <input id="address_real_estate_exist" type="radio" name="address_real_estate" value="address_real_estate_exist"
+                           onchange="selectedAddressRealEstate()"
+                           {% if request.GET.address_real_estate == 'address_real_estate_exist' %}checked{% endif %}>
+                    <label for="address_real_estate_exist">Недвижимость с адресом (существующая)</label>
+                </div>
+                <div class="radio-option">
+                    <input id="address_real_estate_none" type="radio" name="address_real_estate" value="address_real_estate_none"
+                           onchange="selectedAddressRealEstate()"
+                           {% if request.GET.address_real_estate == 'address_real_estate_none' %}checked{% endif %}>
+                    <label for="address_real_estate_none">Шаблон (без адреса)</label>
+                </div>
+            </fieldset>
+            <div id="address" class="view-group">
+                <div class="filter-group icontains-string">
+                    <label>Город</label>
+                    <input id="address_city" type="text" name="address_city_value" value="{{ request.GET.address_city_value}}">
+                </div>
+                <div class="filter-group icontains-string">
+                    <label>Район</label>
+                    <input id="address_district" type="text" name="address_district_value" value="{{ request.GET.address_district_value}}">
+                </div>
+                <div class="filter-group icontains-string">
+                    <label>Улица</label>
+                    <input id="address_street" type="text" name="address_street_value" value="{{ request.GET.address_street_value}}">
+                </div>
+                <div class="filter-group icontains-string">
+                    <label>Квартира</label>
+                    <input id="address_apartment" type="number" min="1" name="address_apartment_value" value="{{ request.GET.address_apartment_value}}">
+                </div>
+            </div>
+
+            <fieldset>
+                <legend>Тип недвижимости</legend>
+                <div class="radio-option">
+                    <input id="type_real_estate_any" type="radio" name="type_real_estate" value="real_estate_any"
+                           onchange="selectedRealEstate()"
+                           {% if not request.GET.type_real_estate or request.GET.type_real_estate == 'real_estate_any' %}checked{% endif %}>
+                    <label for="type_real_estate_any">Любой</label>
+                </div>
+                <div class="radio-option">
+                    <input id="type_real_estate_apartment_only" type="radio" name="type_real_estate" value="apartment_only"
+                           onchange="selectedRealEstate()"
+                           {% if request.GET.type_real_estate == 'apartment_only' %}checked{% endif %}>
+                    <label for="type_real_estate_apartment_only">Квартиры</label>
+                </div>
+                <div class="radio-option">
+                    <input id="type_real_estate_house_only" type="radio" name="type_real_estate" value="house_only"
+                           onchange="selectedRealEstate()"
+                           {% if request.GET.type_real_estate == 'house_only' %}checked{% endif %}>
+                    <label for="type_real_estate_house_only">Дома</label>
+                </div>
+                <div class="radio-option">
+                    <input id="type_real_estate_plot_only" type="radio" name="type_real_estate" value="plot_only"
+                           onchange="selectedRealEstate()"
+                           {% if request.GET.type_real_estate == 'plot_only' %}checked{% endif %}>
+                    <label for="type_real_estate_plot_only">Участки</label>
+                </div>
+            </fieldset>
+
+            <div id="apartment" class="view-group">
+                <div class="filter-group">
+                    <label>Диапазон количества этажей у дома</label>
+                    <input id="number_storeys_min" type="number" min="1" name="number_storeys_min_value" value="{{ request.GET.number_storeys_min_value }}">
+                    <input id="number_storeys_max" type="number" min="1" name="number_storeys_max_value" value="{{ request.GET.number_storeys_max_value }}">
+                </div>
+                <div class="filter-group">
+                    <label>Диапазон этаж квартиры</label>
+                    <input id="floor_min" type="number" min="1" name="floor_min_value" value="{{ request.GET.floor_min_value }}">
+                    <input id="floor_max" type="number" min="1" name="floor_max_value" value="{{ request.GET.floor_max_value }}">
+                </div>
+                <fieldset>
+                    <legend>Наличи балкона</legend>
+                    <div class="radio-option">
+                        <input id="balcony_real_estate_none" type="radio" name="balcony_real_estate" value=""
+                               {% if not request.GET.balcony_real_estate or request.GET.balcony_real_estate == '' %}checked{% endif %}>
+                        <label for="balcony_real_estate_none">Не важно</label>
+                    </div>
+                    <div class="radio-option">
+                        <input id="balcony_real_estate_yes" type="radio" name="balcony_real_estate" value="yes"
+                               {% if request.GET.balcony_real_estate == 'yes' %}checked{% endif %}>
+                        <label for="balcony_real_estate_yes">Есть</label>
+                    </div>
+                    <div class="radio-option">
+                        <input id="balcony_real_estate_no" type="radio" name="balcony_real_estate" value="no"
+                               {% if request.GET.balcony_real_estate == 'no' %}checked{% endif %}>
+                        <label for="balcony_real_estate_no">Нету</label>
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <legend>Наличи мебели</legend>
+                    <div class="radio-option">
+                        <input id="furniture_real_estate_none" type="radio" name="furniture_real_estate" value=""
+                               {% if not request.GET.furniture_real_estate or request.GET.furniture_real_estate == '' %}checked{% endif %}>
+                        <label for="furniture_real_estate_none">Не важно</label>
+                    </div>
+                    <div class="radio-option">
+                        <input id="furniture_real_estate_yes" type="radio" name="furniture_real_estate" value="yes"
+                               {% if request.GET.furniture_real_estate == 'yes' %}checked{% endif %}>
+                        <label for="furniture_real_estate_yes">Есть</label>
+                    </div>
+                    <div class="radio-option">
+                        <input id="furniture_real_estate_no" type="radio" name="furniture_real_estate" value="no"
+                               {% if request.GET.furniture_real_estate == 'no' %}checked{% endif %}>
+                        <label for="furniture_real_estate_no">Нету</label>
+                    </div>
+                </fieldset>
+                <div class="filter-group">
+                    <label>Диапазон этаж квартиры</label>
+                    <input id="year_construction_min" type="number" min="1900" name="year_construction_min_value" value="{{ request.GET.year_construction_min_value }}">
+                    <input id="year_construction_max" type="number" min="1900" name="year_construction_max_value" value="{{ request.GET.year_construction_max_value }}">
+                </div>
+                <div class="filter-group">
+                    <label>Аварийное здание</label>
+                    <input id="accident_rate_state" type="checkbox" name="accident_rate_value" value="accident_rate_value"
+                           {% if request.GET.accident_rate_value %}checked{% endif %}>
+                </div>
+                <fieldset>
+                    <legend>Тип комнаты/квартиры</legend>
+                    <div class="radio-option">
+                        <input id="room_type_any" type="radio" name="room_type" value="any"
+                               {% if not request.GET.room_type or request.GET.room_type == 'any' %}checked{% endif %}>
+                        <label for="room_type_any">Не важно</label>
+                    </div>
+                    <div class="radio-option">
+                        <input id="room_type_other" type="radio" name="room_type" value="other"
+                               {% if request.GET.room_type == 'other' %}checked{% endif %}>
+                        <label for="room_type_other">Другое</label>
+                    </div>
+                    <div class="radio-option">
+                        <input id="room_type_one_room" type="radio" name="room_type" value="one_room"
+                               {% if request.GET.room_type == 'one_room' %}checked{% endif %}>
+                        <label for="room_type_one_room">Однокомнатная</label>
+                    </div>
+                    <div class="radio-option">
+                        <input id="room_type_two_room" type="radio" name="room_type" value="two_room"
+                               {% if request.GET.room_type == 'two_room' %}checked{% endif %}>
+                        <label for="room_type_two_room">Двухкомнатная</label>
+                    </div>
+                    <div class="radio-option">
+                        <input id="room_type_three_room" type="radio" name="room_type" value="three_room"
+                               {% if request.GET.room_type == 'three_room' %}checked{% endif %}>
+                        <label for="room_type_three_room">Трехкомнатная</label>
+                    </div>
+                    <div class="radio-option">
+                        <input id="room_type_four_room" type="radio" name="room_type" value="four_room"
+                               {% if request.GET.room_type == 'four_room' %}checked{% endif %}>
+                        <label for="room_type_four_room">Четырехкомнатная</label>
+                    </div>
+                    <div class="radio-option">
+                        <input id="room_type_four_plus_room" type="radio" name="room_type" value="four_plus_room"
+                               {% if request.GET.room_type == 'four_plus_room' %}checked{% endif %}>
+                        <label for="room_type_four_plus_room">Четыре+ комнат</label>
+                    </div>
+                    <div class="radio-option">
+                        <input id="room_type_studio" type="radio" name="room_type" value="studio"
+                               {% if request.GET.room_type == 'studio' %}checked{% endif %}>
+                        <label for="room_type_studio">Студия</label>
+                    </div>
+                    <div class="radio-option">
+                        <input id="room_type_maisonette" type="radio" name="room_type" value="maisonette"
+                               {% if request.GET.room_type == 'maisonette' %}checked{% endif %}>
+                        <label for="room_type_maisonette">Мезонет</label>
+                    </div>
+                    <div class="radio-option">
+                        <input id="room_type_loft" type="radio" name="room_type" value="loft"
+                               {% if request.GET.room_type == 'loft' %}checked{% endif %}>
+                        <label for="room_type_loft">Лофт</label>
+                    </div>
+                    <div class="radio-option">
+                        <input id="room_type_penthouse" type="radio" name="room_type" value="penthouse"
+                               {% if request.GET.room_type == 'penthouse' %}checked{% endif %}>
+                        <label for="room_type_penthouse">Не важно</label>
+                    </div>
+                </fieldset>
+            </div>
+            <div id="house" class="view-group">
+                <div class="filter-group">
+                    <label>Диапазон этаж квартиры</label>
+                    <input id="house_number_storeys_min" type="number" min="1" name="house_number_storeys_min" value="{{ request.GET.house_number_storeys_min }}">
+                    <input id="house_number_storeys_max" type="number" min="1" name="house_number_storeys_max" value="{{ request.GET.house_number_storeys_max }}">
+                </div>
+                <div class="filter-group">
+                    <label>Площадь дома (м²)</label>
+                    <input id="house_area_min" type="number" min="1" name="house_area_min" value="{{ request.GET.house_area_min }}">
+                    <input id="house_area_max" type="number" min="1" name="house_area_max" value="{{ request.GET.house_area_max }}">
+                </div>
+                <div class="filter-group">
+                    <label>Год постройки домаы</label>
+                    <input id="house_year_construction_min" type="number" min="1900" name="house_year_construction_min" value="{{ request.GET.house_year_construction_min }}">
+                    <input id="house_year_construction_max" type="number" min="1900" name="house_year_construction_max" value="{{ request.GET.house_year_construction_max }}">
+                </div>
+                <fieldset>
+                    <legend>Наличи гаража</legend>
+                    <div class="radio-option">
+                        <input id="garage_house_none" type="radio" name="garage_house" value=""
+                               {% if not request.GET.garage_house or request.GET.garage_house == '' %}checked{% endif %}>
+                        <label for="garage_house_none">Не важно</label>
+                    </div>
+                    <div class="radio-option">
+                        <input id="garage_house_yes" type="radio" name="garage_house" value="yes"
+                               {% if request.GET.garage_house == 'yes' %}checked{% endif %}>
+                        <label for="garage_house_yes">Есть</label>
+                    </div>
+                    <div class="radio-option">
+                        <input id="garage_house_no" type="radio" name="garage_house" value="no"
+                               {% if request.GET.garage_house == 'no' %}checked{% endif %}>
+                        <label for="garage_house_no">Нету</label>
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <legend>Наличи коммуникаций</legend>
+                    <div class="radio-option">
+                        <input id="communications_house_none" type="radio" name="communications_house" value=""
+                               {% if not request.GET.communications_house or request.GET.communications_house == '' %}checked{% endif %}>
+                        <label for="communications_house_none">Не важно</label>
+                    </div>
+                    <div class="radio-option">
+                        <input id="communications_house_yes" type="radio" name="communications_house" value="yes"
+                               {% if request.GET.communications_house == 'yes' %}checked{% endif %}>
+                        <label for="communications_house_yes">Есть</label>
+                    </div>
+                    <div class="radio-option">
+                        <input id="communications_house_no" type="radio" name="communications_house" value="no"
+                               {% if request.GET.communications_house == 'no' %}checked{% endif %}>
+                        <label for="communications_house_no">Нету</label>
+                    </div>
+                </fieldset>
+            </div>
+            <div id="plot" class="view-group">
+                <fieldset>
+                    <legend>Наличи построек</legend>
+                    <div class="radio-option">
+                        <input id="buildings_plot_none" type="radio" name="buildings_plot" value=""
+                               {% if not request.GET.buildings_plot or request.GET.buildings_plot == '' %}checked{% endif %}>
+                        <label for="buildings_plot_none">Не важно</label>
+                    </div>
+                    <div class="radio-option">
+                        <input id="buildings_plot_yes" type="radio" name="buildings_plot" value="yes"
+                               {% if request.GET.buildings_plot == 'yes' %}checked{% endif %}>
+                        <label for="buildings_plot_yes">Есть</label>
+                    </div>
+                    <div class="radio-option">
+                        <input id="buildings_plot_no" type="radio" name="buildings_plot" value="no"
+                               {% if request.GET.buildings_plot == 'no' %}checked{% endif %}>
+                        <label for="buildings_plot_no">Нету</label>
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <legend>Наличи коммуникаций</legend>
+                    <div class="radio-option">
+                        <input id="communications_plot_none" type="radio" name="communications_plot" value=""
+                               {% if not request.GET.communications_plot or request.GET.communications_plot == '' %}checked{% endif %}>
+                        <label for="communications_plot_none">Не важно</label>
+                    </div>
+                    <div class="radio-option">
+                        <input id="communications_plot_yes" type="radio" name="communications_plot" value="yes"
+                               {% if request.GET.communications_plot == 'yes' %}checked{% endif %}>
+                        <label for="communications_plot_yes">Есть</label>
+                    </div>
+                    <div class="radio-option">
+                        <input id="communications_plot_no" type="radio" name="communications_plot" value="no"
+                               {% if request.GET.communications_plot == 'no' %}checked{% endif %}>
+                        <label for="communications_plot_no">Нету</label>
+                    </div>
+                </fieldset>
+            </div>
+            <button type="submit" class="btn-filters">Применить фильтры</button>
+        </form>
+    </div>
+</div>
+
+<script defer>
+    selectedAddressRealEstate();
+    selectedRealEstate();
+</script>
+{% endblock %}
