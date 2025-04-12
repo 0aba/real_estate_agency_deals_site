@@ -560,14 +560,20 @@ class ChangeRealEstateView(FormView):
         return object_real_estate
 
     def get(self, request, *args, **kwargs):
-        # TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        if models.Deal.non_deleted.filter(
+            real_estate_deal=self.old_real_estate,
+        ).exists():
+            messages.warning(request, 'С данной недвижимость связаны активные сделки, изменения будут отражены на них')
         return super().get(request, *args, **kwargs)
 
-    def post(self, request, *args, **kwargs):
-        # TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        return super().post(request, *args, **kwargs)
-
     def form_valid(self, form):
+        if (form.cleaned_data.get('have_address') == bool(self.old_real_estate.address_real_estate)
+            and models.Deal.non_deleted.filter(
+                real_estate_deal=self.old_real_estate,
+            ).exists()):
+            messages.error(self.request, 'При попытки изменить типа с шаблона на объект или наоборот, текущие связанные сделки имеют неправильны тип')
+            return redirect('real_estate_change', pk=self.kwargs.get(self.pk_url_kwarg), permanent=False)
+
         address = None
 
         if form.cleaned_data.get('have_address') and self.old_real_estate.address_real_estate:
