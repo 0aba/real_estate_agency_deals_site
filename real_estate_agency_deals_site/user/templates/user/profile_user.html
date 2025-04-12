@@ -38,14 +38,14 @@
             {% endif %}
         </div>
         <div class="actions">
+            {% if user_profile.is_staff and user.is_superuser %}
+                <a href="{% url 'revoke_rights_staff' user_profile.username %}" class="btn">Лишить права агента недвижимости</a>
+            {% else %}
+                <a href="{% url 'give_rights_staff' user_profile.username %}" class="btn">Дать права агента недвижимости</a>
+            {% endif %}
             {% if user == user_profile %}
                 <a href="{% url 'my_black_list' %}" class="btn">Мой черный список</a>
                 <a href="{% url 'user_profile_change' user_profile.username %}" class="btn">Настройки учетной записи</a>
-                {% if user_profile.is_staff and user.is_superuser %}
-                    <a href="{% url 'revoke_rights_staff' user_profile.username %}" class="btn">Лишить права агента недвижимости</a>
-                {% else %}
-                    <a href="{% url 'give_rights_staff' user_profile.username %}" class="btn">Дать права агента недвижимости</a>
-                {% endif %}
             {% else %}
                 {% if user.is_active %}
                     {% if user.is_superuser %}

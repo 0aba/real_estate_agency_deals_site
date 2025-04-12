@@ -289,7 +289,6 @@ class ChangeProfileUserView(UpdateView):
 
         return {**base_context, **context}
 
-
     def dispatch(self, request, *args, **kwargs):
         if self.request.user.is_anonymous:
             messages.warning(self.request, 'Чтобы изменить профиль необходимо авторизоваться')

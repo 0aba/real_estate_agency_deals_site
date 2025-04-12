@@ -40,7 +40,7 @@ class Realtor(models.Model):
     patronymic = models.CharField(null=True, blank=True, max_length=128, verbose_name='Отчество')
     photo = models.ImageField(blank=True, upload_to='photos/realtor/%Y/%m/%d/', validators=[
         FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png']),
-    ], default='default/realtor.jpg',
+    ], default='default/realtor.png',
        verbose_name='Фото')
     experience = models.SmallIntegerField(default=0, validators=[MinValueValidator(0)])
     phone = models.CharField(validators=[
@@ -60,7 +60,7 @@ class Realtor(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.photo:
-            self.photo = 'default/realtor.jpg'
+            self.photo = 'default/realtor.png'
         super().save(*args, **kwargs)
 
 
@@ -72,6 +72,7 @@ class Address(models.Model):
     city = models.CharField(max_length=128, verbose_name='Город')
     district = models.CharField(null=True, blank=True, max_length=128, verbose_name='Район')
     street = models.CharField(max_length=128, verbose_name='Улица')
+    house = models.SmallIntegerField(validators=[MinValueValidator(1)], verbose_name='Номер дома')
     apartment = models.SmallIntegerField(null=True, blank=True, validators=[MinValueValidator(1)],
                                          verbose_name='Квартира')
 
@@ -84,18 +85,19 @@ class RealEstate(models.Model):
         verbose_name_plural = 'Недвижимости'
 
     class RealEstateType(models.IntegerChoices):
-        APARTMENT = 0
-        HOUSE = 1
-        PLOT = 2
+        APARTMENT = 0, 'Квартира'
+        HOUSE = 1, 'Дом'
+        PLOT = 2, 'Участок'
 
     type = models.SmallIntegerField(choices=RealEstateType.choices, verbose_name='Тип недвижимости')
     main_photo = models.ImageField(upload_to='photos/real_estate/%Y/%m/%d/', validators=[
         FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png']),
-    ], verbose_name='Главное фото')
-    square = models.SmallIntegerField(validators=[MinValueValidator(1)], verbose_name='Общая площадь')
+    ], default='default/real_estate.png',
+       verbose_name='Главное фото')
+    square = models.IntegerField(validators=[MinValueValidator(1)], verbose_name='Общая площадь')
     when_added = models.DateTimeField(auto_now_add=True)
     about = models.CharField(null=True, blank=True, max_length=512, verbose_name='О недвижимости')
-    address_real_estate = models.ForeignKey(Address, null=True, blank=True, on_delete=models.PROTECT,
+    address_real_estate = models.ForeignKey(Address, null=True, blank=True, on_delete=models.SET_NULL,
                                             related_name='address_real_estate_fk')
     deleted = models.BooleanField(default=False)
 
@@ -105,6 +107,12 @@ class RealEstate(models.Model):
 
     non_deleted = NonDeletedManager()
     objects = models.Manager()
+
+    def save(self, *args, **kwargs):
+        if not self.main_photo:
+            self.main_photo = 'default/real_estate.png'
+
+        super().save(*args, **kwargs)
 
 
 class PhotoRealEstate(models.Model):
@@ -170,7 +178,7 @@ class DataHouse(models.Model):
 
     real_estate_DH = models.ForeignKey(RealEstate, on_delete=models.PROTECT, related_name='real_estate_DH_fk')
     number_storeys = models.IntegerField(validators=[MinValueValidator(1)], verbose_name='Количество этажей')
-    house_area = models.SmallIntegerField(validators=[MinValueValidator(1)], verbose_name='Площадь дома')
+    house_area = models.IntegerField(validators=[MinValueValidator(1)], verbose_name='Площадь дома')
     year_construction = models.SmallIntegerField(validators=[MinValueValidator(1900)], verbose_name='Год постройки дома')
     garage = models.BooleanField(verbose_name='Есть гараж')
     communications = models.BooleanField(verbose_name='Есть коммуникации')
@@ -211,6 +219,7 @@ class Deal(models.Model):
     def save(self, *args, **kwargs):
         self.title_slug = slugify(translit(self.title, LANGUAGE_CODE_TRANSLIT, reversed=True))
         super().save(*args, **kwargs)
+
 
 class DataConstruction(models.Model):
     class Meta:

@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block title %}{{title}}{% endblock %}
+
+{% block styles %}
+<link type="text/css" rel="stylesheet" href="{% static 'common/css/form.css' %}"/>
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'real_estate_agency/js/selectedRealEstateForm.js' %}" defer></script>
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2 class="form-title">{{ title }}</h2>
+    <form method="post" class="form" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <div class="form-group">
+            <label>{{ form.type.label }}</label>
+            {{ form.type }}
+            {{ form.type.errors }}
+        </div>
+        <div id="plot" class="view-group">
+            <div class="form-group">
+                <label>{{ form.data_plot_buildings.label }}</label>
+                {{ form.data_plot_buildings }}
+                {{ form.data_plot_buildings.errors }}
+            </div>
+            <div class="form-group">
+                <label>{{ form.data_plot_communications.label }}</label>
+                {{ form.data_plot_communications }}
+                {{ form.data_plot_communications.errors }}
+            </div>
+        </div>
+        <div id="apartment" class="view-group">
+            <div class="form-group">
+                <label>{{ form.data_apartment_number_storeys.label }}</label>
+                {{ form.data_apartment_number_storeys }}
+                {{ form.data_apartment_number_storeys.errors }}
+            </div>
+            <div class="form-group">
+                <label>{{ form.data_apartment_floor.label }}</label>
+                {{ form.data_apartment_floor }}
+                {{ form.data_apartment_floor.errors }}
+            </div>
+            <div class="form-group">
+                <label>{{ form.data_apartment_balcony.label }}</label>
+                {{ form.data_apartment_balcony }}
+                {{ form.data_apartment_balcony.errors }}
+            </div>
+            <div class="form-group">
+                <label>{{ form.data_apartment_furniture.label }}</label>
+                {{ form.data_apartment_furniture }}
+                {{ form.data_apartment_furniture.errors }}
+            </div>
+            <div class="form-group">
+                <label>{{ form.data_apartment_year_construction.label }}</label>
+                {{ form.data_apartment_year_construction }}
+                {{ form.data_apartment_year_construction.errors }}
+            </div>
+            <div class="form-group">
+                <label>{{ form.data_apartment_accident_rate.label }}</label>
+                {{ form.data_apartment_accident_rate }}
+                {{ form.data_apartment_accident_rate.errors }}
+            </div>
+            <div class="form-group">
+                <label>{{ form.data_apartment_room_type.label }}</label>
+                {{ form.data_apartment_room_type }}
+                {{ form.data_apartment_room_type.errors }}
+            </div>
+        </div>
+        <div id="house" class="view-group">
+            <div class="form-group">
+                <label>{{ form.data_house_number_storeys.label }}</label>
+                {{ form.data_house_number_storeys }}
+                {{ form.data_house_number_storeys.errors }}
+            </div>
+            <div class="form-group">
+                <label>{{ form.data_house_house_area.label }}</label>
+                {{ form.data_house_house_area }}
+                {{ form.data_house_house_area.errors }}
+            </div>
+            <div class="form-group">
+                <label>{{ form.data_house_year_construction.label }}</label>
+                {{ form.data_house_year_construction }}
+                {{ form.data_house_year_construction.errors }}
+            </div>
+            <div class="form-group">
+                <label>{{ form.data_house_garage.label }}</label>
+                {{ form.data_house_garage }}
+                {{ form.data_house_garage.errors }}
+            </div>
+            <div class="form-group">
+                <label>{{ form.data_house_communications.label }}</label>
+                {{ form.data_house_communications }}
+                {{ form.data_house_communications.errors }}
+            </div>
+        </div>
+        <div class="form-group">
+            <label>{{ form.main_photo.label }}</label>
+            {{ form.main_photo }}
+            {{ form.main_photo.errors }}
+        </div>
+        <div class="form-group">
+            <label>{{ form.square.label }}</label>
+            {{ form.square }}
+            {{ form.square.errors }}
+        </div>
+        <div class="form-group">
+            <label>{{ form.about.label }}</label>
+            {{ form.about }}
+            {{ form.about.errors }}
+        </div>
+        <div class="form-group">
+            <label>{{ form.have_address.label }}</label>
+            {{ form.have_address }}
+            {{ form.have_address.errors }}
+        </div>
+        <div id="address_real_estate" class="view-group">
+            <div class="form-group">
+                <label>{{ form.city.label }}</label>
+                {{ form.city }}
+                {{ form.city.errors }}
+            </div>
+            <div class="form-group">
+                <label>{{ form.district.label }}</label>
+                {{ form.district }}
+                {{ form.district.errors }}
+            </div>
+            <div class="form-group">
+                <label>{{ form.street.label }}</label>
+                {{ form.street }}
+                {{ form.street.errors }}
+            </div>
+            <div class="form-group">
+                <label>{{ form.house.label }}</label>
+                {{ form.house }}
+                {{ form.house.errors }}
+            </div>
+            <div class="form-group">
+                <label>{{ form.apartment.label }}</label>
+                {{ form.apartment }}
+                {{ form.apartment.errors }}
+            </div>
+        </div>
+        <button type="submit" class="form-button">Добавить реэилелтера</button>
+    </form>
+</div>
+{% endblock %}

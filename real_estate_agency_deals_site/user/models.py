@@ -18,7 +18,7 @@ class User(AbstractUser):
 
     photo = models.ImageField(blank=True, upload_to='photos/user/%Y/%m/%d/', validators=[
         FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png']),
-    ], default='default/photo.jpg', verbose_name='Фото')
+    ], default='default/photo.png', verbose_name='Фото')
 
     email = models.EmailField(unique=True, verbose_name='Почта')
     verification_email = models.BooleanField(default=False)
@@ -34,6 +34,11 @@ class User(AbstractUser):
     about = models.CharField(null=True, blank=True, max_length=512, verbose_name='О себе')
 
     objects = UserManager()
+
+    def save(self, *args, **kwargs):
+        if not self.photo:
+            self.photo = 'default/photo.png'
+        super().save(*args, **kwargs)
 
 
 class ConfirmationCode(models.Model):

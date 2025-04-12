@@ -54,15 +54,11 @@ footer {
     background-color: var(--background-color);
 }
 
-footer {
-    max-height: none;
-    height: 10vh;
+footer > * {
+    padding: 10px;
 }
 
-.left-block {
-    display: flex;
-}
-
+.left-block,
 .right-block {
     display: flex;
 }

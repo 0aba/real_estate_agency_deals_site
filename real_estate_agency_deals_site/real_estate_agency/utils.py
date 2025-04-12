@@ -57,6 +57,12 @@ def del_real_estate(request, pk):
         messages.error(request, 'У вас нет прав на удаление недвижимости, вы должны быть агент недвижимости')
         return redirect('real_estate_list', permanent=False)
 
+    if models.Deal.non_deleted.filter(
+            real_estate_deal=real_estate,
+    ).exists():
+        messages.error(request, 'Нельзя удалить недвижимость, если с ней связана активная сделка')
+        return redirect('real_estate_list', permanent=False)
+
     real_estate.deleted = True
     real_estate.save()
 

@@ -46,6 +46,10 @@ legend {
     transition: border-color 0.3s;
 }
 
+.form-group input[type="file"] {
+    color: white;
+}
+
 .form-group input:focus {
     border-color: white;
     outline: none;

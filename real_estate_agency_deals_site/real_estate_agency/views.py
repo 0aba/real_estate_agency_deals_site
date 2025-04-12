@@ -1,4 +1,4 @@
-from django.views.generic import CreateView, DetailView, UpdateView, ListView
+from django.views.generic import CreateView, DetailView, UpdateView, ListView, FormView
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.functions import Concat
 from django.http import HttpResponseRedirect
@@ -230,15 +230,30 @@ class RealEstateListView(ListView):
 
         return {**base_context, **context}
 
+    def dispatch(self, request, *args, **kwargs):
+        if self.request.user.is_anonymous:
+            messages.warning(request, 'Что бы просмотреть недвижимость, нужно авторизоваться')
+            return redirect('real_estate_list', permanent=False)
+
+        if not self.request.user.is_staff:
+            messages.error(request, 'Что бы просмотреть недвижимость, нужно быть агентом недвижимости')
+            return redirect('real_estate_list', permanent=False)
+
+        return super().dispatch(request, *args, **kwargs)
+
     def get_queryset(self):
         queryset = models.RealEstate.non_deleted.filter()
 
+        id_real_estate = self.request.GET.get('id_real_estate')
         square_min_value = self.request.GET.get('square_min_value')
         square_max_value = self.request.GET.get('square_max_value')
         when_added_min_value = self.request.GET.get('when_added_min_value')
         when_added_max_value = self.request.GET.get('when_added_max_value')
         address_real_estate = self.request.GET.get('address_real_estate')
         type_real_estate = self.request.GET.get('type_real_estate')
+
+        if id_real_estate:
+            queryset = queryset.filter(pk=id_real_estate)
 
         if square_min_value:
             queryset = queryset.filter(square__gte=square_min_value)
@@ -381,41 +396,82 @@ class RealEstateListView(ListView):
         return queryset
 
 
-class NewRealEstateView(CreateView):
-    1
-    # form_class = forms.RealtorCreationForm
-    # template_name = 'real_estate_agency/new_realtor.html'
-    #
-    # def get_context_data(self, *, object_list=None, **kwargs):
-    #     base_context = super().get_context_data(**kwargs)
-    #     context: dict = {
-    #         'title': 'Добавить риэлтера',
-    #     }
-    #
-    #     return {**base_context, **context}
-    #
-    # def dispatch(self, request, *args, **kwargs):
-    #     if self.request.user.is_anonymous:
-    #         messages.warning(request, 'Что бы добавить риэлтера, нужно авторизоваться')
-    #         return redirect('realtor_list', permanent=False)
-    #
-    #     if not self.request.user.is_staff:
-    #         messages.error(request, 'Что бы добавить риэлтера, нужно быть администратором')
-    #         return redirect('realtor_list', permanent=False)
-    #
-    #     return super().dispatch(request, *args, **kwargs)
-    #
-    # def form_valid(self, form):
-    #     form.save()
-    #
-    #     messages.success(self.request, 'Успешное создан новый риэлтер')
-    #
-    #     return redirect('realtor_list', permanent=False)
+class NewRealEstateView(FormView):
+    form_class = forms.RealEstateForm
+    template_name = 'real_estate_agency/new_real_estate.html'
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        base_context = super().get_context_data(**kwargs)
+        context: dict = {
+            'title': 'Добавить недвижимость',
+        }
+
+        return {**base_context, **context}
+
+    def dispatch(self, request, *args, **kwargs):
+        if self.request.user.is_anonymous:
+            messages.warning(request, 'Что бы добавить недвижимость, нужно авторизоваться')
+            return redirect('real_estate_list', permanent=False)
+
+        if not self.request.user.is_staff:
+            messages.error(request, 'Что бы добавить недвижимость, нужно быть администратором')
+            return redirect('real_estate_list', permanent=False)
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        address = None
+
+        if form.cleaned_data.get('have_address'):
+            address = models.Address.objects.create(
+                city=city if len(city := form.cleaned_data.get('city')) else None,
+                district=district if len(district := form.cleaned_data.get('district')) else None,
+                street=street if len(street := form.cleaned_data.get('street')) else None,
+                house=int(form.cleaned_data.get('house')),
+                apartment=int(apartment) if (apartment := form.cleaned_data.get('apartment')) else apartment,
+            )
+
+        type_real_estate = int(form.cleaned_data.get('type'))
+        new_real_estate = models.RealEstate.objects.create(
+            type=type_real_estate,
+            main_photo=form.cleaned_data.get('main_photo'),
+            square=int(form.cleaned_data.get('square')),
+            about=form.cleaned_data.get('about'),
+            address_real_estate=address,
+        )
+
+        if type_real_estate == models.RealEstate.RealEstateType.APARTMENT:
+            models.DataApartment.objects.create(
+                real_estate_DA=new_real_estate,
+                number_storeys=int(form.cleaned_data.get('data_apartment_number_storeys')),
+                floor=int(form.cleaned_data.get('data_apartment_floor')),
+                balcony=form.cleaned_data.get('data_apartment_balcony'),
+                furniture=form.cleaned_data.get('data_apartment_furniture'),
+                year_construction=int(form.cleaned_data.get('data_apartment_year_construction')),
+                accident_rate=form.cleaned_data.get('data_apartment_accident_rate'),
+                room_type=form.cleaned_data.get('data_apartment_room_type'),
+            )
+        elif type_real_estate == models.RealEstate.RealEstateType.HOUSE:
+            models.DataHouse.objects.create(
+                real_estate_DH=new_real_estate,
+                number_storeys=int(form.cleaned_data.get('data_house_number_storeys')),
+                house_area=int(form.cleaned_data.get('data_house_house_area')),
+                year_construction=int(form.cleaned_data.get('data_house_year_construction')),
+                garage=form.cleaned_data.get('data_house_garage'),
+                communications=form.cleaned_data.get('data_house_communications'),
+            )
+        elif type_real_estate == models.RealEstate.RealEstateType.PLOT:
+            models.DataPlot.objects.create(
+                real_estate_DP=new_real_estate,
+                buildings=form.cleaned_data.get('data_plot_buildings'),
+                communications=form.cleaned_data.get('data_plot_communications'),
+            )
+
+        return redirect('real_estate_list', permanent=False)
 
 
 class RealEstateView(DetailView):
-    1
-    # model = models.Realtor
+    model = models.RealEstate
     # template_name = 'real_estate_agency/realtor_view.html'
     # context_object_name = 'realtor_view'
     # pk_url_kwarg = 'pk'
@@ -446,6 +502,7 @@ class RealEstateView(DetailView):
     #
     #     return object_user
     #
+
 
 class ChangeRealEstateView(UpdateView):
     1

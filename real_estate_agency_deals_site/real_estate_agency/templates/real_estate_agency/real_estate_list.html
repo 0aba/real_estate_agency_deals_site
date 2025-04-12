@@ -20,25 +20,38 @@
         {% for real_estate in real_estate_list %}
             <div class="real-estate">
                 <img src="{{ real_estate.main_photo.url }}">
-                <p class="real-estate-when_added">
-                    Тип: {{ real_estate.when_added }}
-                </p>
-                {% if real_estate.address_real_estate %}
-                <p class="real-estate-full-address">
-                    адрес: {{ real_estate.address_real_estate.city }} {{ real_estate.address_real_estate.district }}|default:"" }} {{ real_estate.address_real_estate.street }} {{ real_estate.address_real_estate.apartment|default:"" }}
-                </p>
-                {% else %}
-                <p class="real-estate-layout">
-                    Это шаблон недвижимости
-                </p>
-                {% endif %}
-                <p class="real-estate-type">
-                    Тип: {% if real_estate.type == real_estate.RealEstateType.APARTMENT %} квартира {% elif real_estate.type == real_estate.RealEstateType.HOUSE  %} дом {% elif real_estate.type == real_estate.RealEstateType.PLOT %} участок {% endif %}
-                </p>
-                <p class="real-estate-square">
-                    Цена: {{ real_estate.square }} м²
-                </p>
-                <a href="{% url 'real_estate' real_estate.pk %}" class="btn">Просмотреть</a>
+                <div class="real-estate-content">
+                    <p class="real-estate-id">
+                        Номер: {{ real_estate.pk }}
+                    </p>
+                    <p class="real-estate-when_added">
+                        Был добавлен: {{ real_estate.when_added }}
+                    </p>
+                    {% if real_estate.address_real_estate %}
+                    <p class="real-estate-full-address">
+                        Город: {{ real_estate.address_real_estate.city }}
+                        {% if real_estate.address_real_estate.district %}
+                            Район: {{ real_estate.address_real_estate.district }}
+                        {% endif %}
+                        Улица: {{ real_estate.address_real_estate.street }}
+                        Дом: {{ real_estate.address_real_estate.house }}
+                        {% if real_estate.address_real_estate.apartment %}
+                            Квартира: {{ real_estate.address_real_estate.apartment }}
+                        {% endif %}
+                    </p>
+                    {% else %}
+                    <p class="real-estate-layout">
+                        Это шаблон недвижимости
+                    </p>
+                    {% endif %}
+                    <p class="real-estate-type">
+                        Тип: {% if real_estate.type == real_estate.RealEstateType.APARTMENT %} квартира {% elif real_estate.type == real_estate.RealEstateType.HOUSE  %} дом {% elif real_estate.type == real_estate.RealEstateType.PLOT %} участок {% endif %}
+                    </p>
+                    <p class="real-estate-square">
+                        Площадь: {{ real_estate.square }} м²
+                    </p>
+                    <a href="{% url 'real_estate' real_estate.pk %}" class="btn">Просмотреть</a>
+                </div>
             </div>
             <hr>
         {% empty %}
@@ -49,6 +62,10 @@
     <div class="filters">
         <form method="GET" class="filter-form">
             <div class="filter-group">
+                <label>Номер</label>
+                <input id="id_real_estate" type="number" min="1" name="id_real_estate" value="{{ request.GET.id_real_estate }}">
+            </div>
+            <div class="filter-group">
                 <label>Диапазон площади (м²)</label>
                 <input id="square_min" type="number" min="1" name="square_min_value" value="{{ request.GET.square_min_value }}">
                 <input id="square_max" type="number" min="1" name="square_max_value" value="{{ request.GET.square_max_value }}">
@@ -58,7 +75,6 @@
                 <input id="when_added_min" type="datetime-local" name="when_added_min_value" value="{{ request.GET.when_added_min_value }}">
                 <input id="when_added_max" type="datetime-local" name="when_added_max_value" value="{{ request.GET.when_added_max_value }}">
             </div>
-
             <fieldset>
                 <legend>Адрес</legend>
                 <div class="radio-option">
