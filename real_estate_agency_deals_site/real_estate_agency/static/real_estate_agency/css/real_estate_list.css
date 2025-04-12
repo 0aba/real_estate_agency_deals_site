@@ -19,6 +19,7 @@
     width: 200px;
     height: 100%;
     object-fit: cover;
+    border: 1px solid #333131;
     border-radius: 5px;
 }
 

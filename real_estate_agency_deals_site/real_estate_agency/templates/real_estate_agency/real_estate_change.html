@@ -104,6 +104,11 @@
             {{ form.main_photo.errors }}
         </div>
         <div class="form-group">
+            <label>{{ form.del_main_photo.label }}</label>
+            {{ form.del_main_photo }}
+            {{ form.del_main_photo.errors }}
+        </div>
+        <div class="form-group">
             <label>{{ form.square.label }}</label>
             {{ form.square }}
             {{ form.square.errors }}
@@ -145,7 +150,7 @@
                 {{ form.apartment.errors }}
             </div>
         </div>
-        <button type="submit" class="form-button">Добавить недвижимость</button>
+        <button type="submit" class="form-button">Изменить данные недвижимости</button>
     </form>
 </div>
 {% endblock %}

@@ -1,8 +1,9 @@
 .real_estate img {
     max-width: 200px;
     max-height: 200px;
-    border-radius: 10px;
     object-fit: cover;
+    border: 3px solid #333131;
+    border-radius: 5px;
 }
 
 .extend-data {

@@ -509,60 +509,158 @@ class RealEstateView(DetailView):
 
     def get_object(self, queryset=None):
         try:
-            object_user = self.model.objects.get(pk=self.kwargs.get(self.pk_url_kwarg))
+            object_real_estate = self.model.objects.get(pk=self.kwargs.get(self.pk_url_kwarg))
         except ObjectDoesNotExist:
             messages.error(self.request, 'Недвижимость не найден')
             return redirect('real_estate_list', permanent=False)
 
-        return object_user
+        return object_real_estate
 
 
-class ChangeRealEstateView(UpdateView):
-    1
-    # model = models.Realtor
-    # form_class = forms.RealtorUpdateForm
-    # template_name = 'real_estate_agency/realtor_change.html'
-    # pk_url_kwarg = 'pk'
-    # relater_view = None
-    #
-    # def get_context_data(self, **kwargs):
-    #     base_context = super().get_context_data(**kwargs)
-    #     context = {
-    #         'title': f'Изменить данные риэлтера {self.relater_view.last_name} {self.relater_view.first_name} {self.relater_view.patronymic}',
-    #     }
-    #
-    #     return {**base_context, **context}
-    #
-    #
-    # def dispatch(self, request, *args, **kwargs):
-    #     if self.request.user.is_anonymous:
-    #         messages.warning(self.request, 'Чтобы изменить риэлтера необходимо авторизоваться')
-    #         return redirect('login', permanent=False)
-    #
-    #     self.relater_view = self.get_object()
-    #
-    #     if isinstance(self.relater_view, HttpResponseRedirect):
-    #         return self.relater_view
-    #
-    #     if not self.request.user.is_staff:
-    #         messages.error(self.request, 'У вас нет прав для изменения данных этого риэлетора, вы должны быть администратором')
-    #         return redirect('realtor_list', permanent=False)
-    #
-    #     return super().dispatch(request, *args, **kwargs)
-    #
-    # def get_object(self, queryset=None):
-    #     try:
-    #         relater = models.Realtor.objects.get(pk=self.kwargs.get(self.pk_url_kwarg))
-    #     except ObjectDoesNotExist:
-    #         messages.error(self.request, 'Реэлетор не найден')
-    #         return redirect('realtor_list', permanent=False)
-    #
-    #     return relater
-    #
-    # def form_valid(self, form):
-    #     form.save()
-    #     messages.success(self.request, 'Успешный изменение реэлетера')
-    #
-    #     return redirect('realtor', self.kwargs.get(self.pk_url_kwarg), permanent=False)
+class ChangeRealEstateView(FormView):
+    model = models.RealEstate
+    form_class = forms.RealEstateForm
+    template_name = 'real_estate_agency/real_estate_change.html'
+    pk_url_kwarg = 'pk'
+    old_real_estate = None
+
+    def get_context_data(self, **kwargs):
+        base_context = super().get_context_data(**kwargs)
+
+        context = {
+            'title': f'Недвижимость {self.old_real_estate.pk}',
+        }
+
+        return {**base_context, **context}
+
+    def dispatch(self, request, *args, **kwargs):
+        if self.request.user.is_anonymous:
+            messages.warning(request, 'Что бы изменить данные о недвижимости, нужно авторизоваться')
+            return redirect('real_estate_list', permanent=False)
+
+        if not self.request.user.is_staff:
+            messages.error(request, 'Что бы изменить данные о недвижимости, нужно быть агентом недвижимости')
+            return redirect('real_estate_list', permanent=False)
+
+        self.old_real_estate = self.get_object()
+
+        if isinstance(self.old_real_estate, HttpResponseRedirect):
+            return self.old_real_estate
+
+        return super().dispatch(request, *args, **kwargs)
 
 
+    def get_object(self, queryset=None):
+        try:
+            object_real_estate = self.model.objects.get(pk=self.kwargs.get(self.pk_url_kwarg))
+        except ObjectDoesNotExist:
+            messages.error(self.request, 'Недвижимость не найден')
+            return redirect('real_estate_list', permanent=False)
+
+        return object_real_estate
+
+    def get(self, request, *args, **kwargs):
+        # TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        # TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        return super().post(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        address = None
+
+        if form.cleaned_data.get('have_address') and self.old_real_estate.address_real_estate:
+            object_address = self.old_real_estate.address_real_estate
+            object_address.city = city if len(city := form.cleaned_data.get('city')) else None
+            object_address.district = district if len(district := form.cleaned_data.get('district')) else None
+            object_address.street = street if len(street := form.cleaned_data.get('street')) else None
+            object_address.house = int(form.cleaned_data.get('house'))
+            object_address.apartment = int(apartment) if (apartment := form.cleaned_data.get('apartment')) else apartment
+            object_address.save()
+            address = object_address
+        elif not form.cleaned_data.get('have_address') and self.old_real_estate.address_real_estate:
+            self.old_real_estate.address_real_estate.delete()
+        elif form.cleaned_data.get('have_address') and not self.old_real_estate.address_real_estate:
+            address = models.Address.objects.create(
+                city=city if len(city := form.cleaned_data.get('city')) else None,
+                district=district if len(district := form.cleaned_data.get('district')) else None,
+                street=street if len(street := form.cleaned_data.get('street')) else None,
+                house=int(form.cleaned_data.get('house')),
+                apartment=int(apartment) if (apartment := form.cleaned_data.get('apartment')) else apartment,
+            )
+
+        type_real_estate = int(form.cleaned_data.get('type'))
+        old_type = self.old_real_estate.type
+        self.old_real_estate.type = type_real_estate
+        self.old_real_estate.main_photo = form.cleaned_data.get('main_photo')
+        self.old_real_estate.square = int(form.cleaned_data.get('square'))
+        self.old_real_estate.about = form.cleaned_data.get('about')
+        self.old_real_estate.address_real_estate = address
+        self.old_real_estate.save()
+
+        if type_real_estate == models.RealEstate.RealEstateType.APARTMENT:
+            if type_real_estate == old_type:
+                old_data_apartment = models.DataApartment.objects.get(real_estate_DA=self.old_real_estate)
+                old_data_apartment.number_storeys = int(form.cleaned_data.get('data_apartment_number_storeys'))
+                old_data_apartment.floor = int(form.cleaned_data.get('data_apartment_floor'))
+                old_data_apartment.balcony = form.cleaned_data.get('data_apartment_balcony')
+                old_data_apartment.furniture = form.cleaned_data.get('data_apartment_furniture')
+                old_data_apartment.year_construction = int(form.cleaned_data.get('data_apartment_year_construction'))
+                old_data_apartment.accident_rate = form.cleaned_data.get('data_apartment_accident_rate')
+                old_data_apartment.room_type = form.cleaned_data.get('data_apartment_room_type')
+                old_data_apartment.save()
+            else:
+                self.__del_extend_data(old_type)
+                models.DataApartment.objects.create(
+                    real_estate_DA=self.old_real_estate,
+                    number_storeys=int(form.cleaned_data.get('data_apartment_number_storeys')),
+                    floor=int(form.cleaned_data.get('data_apartment_floor')),
+                    balcony=form.cleaned_data.get('data_apartment_balcony'),
+                    furniture=form.cleaned_data.get('data_apartment_furniture'),
+                    year_construction=int(form.cleaned_data.get('data_apartment_year_construction')),
+                    accident_rate=form.cleaned_data.get('data_apartment_accident_rate'),
+                    room_type=form.cleaned_data.get('data_apartment_room_type'),
+                )
+        elif type_real_estate == models.RealEstate.RealEstateType.HOUSE:
+            if type_real_estate == old_type:
+                old_data_house = models.DataHouse.objects.get(real_estate_DH=self.old_real_estate)
+                old_data_house.number_storeys = int(form.cleaned_data.get('data_house_number_storeys'))
+                old_data_house.house_area = int(form.cleaned_data.get('data_house_house_area'))
+                old_data_house.year_construction = int(form.cleaned_data.get('data_house_year_construction'))
+                old_data_house.garage = form.cleaned_data.get('data_house_garage')
+                old_data_house.communications = form.cleaned_data.get('data_house_communications')
+                old_data_house.save()
+            else:
+                self.__del_extend_data(old_type)
+                models.DataHouse.objects.create(
+                    real_estate_DH=self.old_real_estate,
+                    number_storeys=int(form.cleaned_data.get('data_house_number_storeys')),
+                    house_area=int(form.cleaned_data.get('data_house_house_area')),
+                    year_construction=int(form.cleaned_data.get('data_house_year_construction')),
+                    garage=form.cleaned_data.get('data_house_garage'),
+                    communications=form.cleaned_data.get('data_house_communications'),
+                )
+        elif type_real_estate == models.RealEstate.RealEstateType.PLOT:
+            if type_real_estate == old_type:
+                old_data_plot = models.DataPlot.objects.get(real_estate_DP=self.old_real_estate)
+                old_data_plot.buildings = form.cleaned_data.get('data_plot_buildings')
+                old_data_plot.communications = form.cleaned_data.get('data_plot_communications')
+                old_data_plot.save()
+            else:
+                self.__del_extend_data(old_type)
+                models.DataPlot.objects.create(
+                    real_estate_DP=self.old_real_estate,
+                    buildings=form.cleaned_data.get('data_plot_buildings'),
+                    communications=form.cleaned_data.get('data_plot_communications'),
+                )
+
+        return redirect('real_estate', pk=self.kwargs.get(self.pk_url_kwarg), permanent=False)
+
+    def __del_extend_data(self, type_data):
+        if type_data == models.RealEstate.RealEstateType.APARTMENT:
+            models.DataApartment.objects.get(real_estate_DA=self.old_real_estate).delete()
+        elif type_data == models.RealEstate.RealEstateType.HOUSE:
+            models.DataHouse.objects.get(real_estate_DH=self.old_real_estate).delete()
+        elif type_data == models.RealEstate.RealEstateType.PLOT:
+            models.DataPlot.objects.get(real_estate_DP=self.old_real_estate).delete()
