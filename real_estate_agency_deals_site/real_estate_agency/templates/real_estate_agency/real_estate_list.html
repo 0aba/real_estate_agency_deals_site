@@ -21,14 +21,10 @@
             <div class="real-estate">
                 <img src="{{ real_estate.main_photo.url }}">
                 <div class="real-estate-content">
-                    <p class="real-estate-id">
-                        Номер: {{ real_estate.pk }}
-                    </p>
-                    <p class="real-estate-when_added">
-                        Был добавлен: {{ real_estate.when_added }}
-                    </p>
+                    <p>Номер: {{ real_estate.pk }}</p>
+                    <p>Был добавлен: {{ real_estate.when_added }}</p>
                     {% if real_estate.address_real_estate %}
-                    <p class="real-estate-full-address">
+                    <p>
                         Город: {{ real_estate.address_real_estate.city }}
                         {% if real_estate.address_real_estate.district %}
                             Район: {{ real_estate.address_real_estate.district }}
@@ -40,16 +36,10 @@
                         {% endif %}
                     </p>
                     {% else %}
-                    <p class="real-estate-layout">
-                        Это шаблон недвижимости
-                    </p>
+                    <p>Это шаблон недвижимости</p>
                     {% endif %}
-                    <p class="real-estate-type">
-                        Тип: {% if real_estate.type == real_estate.RealEstateType.APARTMENT %} квартира {% elif real_estate.type == real_estate.RealEstateType.HOUSE  %} дом {% elif real_estate.type == real_estate.RealEstateType.PLOT %} участок {% endif %}
-                    </p>
-                    <p class="real-estate-square">
-                        Площадь: {{ real_estate.square }} м²
-                    </p>
+                    <p>Тип: {% if real_estate.type == real_estate.RealEstateType.APARTMENT %} квартира {% elif real_estate.type == real_estate.RealEstateType.HOUSE  %} дом {% elif real_estate.type == real_estate.RealEstateType.PLOT %} участок {% endif %}</p>
+                    <p>Площадь: {{ real_estate.square }} м²</p>
                     <a href="{% url 'real_estate' real_estate.pk %}" class="btn">Просмотреть</a>
                 </div>
             </div>

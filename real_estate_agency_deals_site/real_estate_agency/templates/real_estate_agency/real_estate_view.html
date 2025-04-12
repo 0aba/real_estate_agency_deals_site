@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block title %}{{title}}{% endblock %}
+
+{% block styles %}
+<link type="text/css" rel="stylesheet" href="{% static 'common/css/profile.css' %}"/>
+<link type="text/css" rel="stylesheet" href="{% static 'real_estate_agency/css/real_estate_view.css' %}"/>
+{% endblock %}
+{% block scripts %}
+
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="header-profile">
+        <div class="real_estate">
+            <img src="{{ real_estate_view.main_photo.url }}">
+            <p>Номер: {{ real_estate_view.pk }}</p>
+            <p>Был добавлен: {{ real_estate_view.when_added }}</p>
+            {% if real_estate_view.address_real_estate %}
+            <p>
+                Город: {{ real_estate_view.address_real_estate.city }}
+                {% if real_estate_view.address_real_estate.district %}
+                    Район: {{ real_estate_view.address_real_estate.district }}
+                {% endif %}
+                Улица: {{ real_estate_view.address_real_estate.street }}
+                Дом: {{ real_estate_view.address_real_estate.house }}
+                {% if real_estate_view.address_real_estate.apartment %}
+                    Квартира: {{ real_estate_view.address_real_estate.apartment }}
+                {% endif %}
+            </p>
+            {% else %}
+            <p>Это шаблон недвижимости</p>
+            {% endif %}
+            <p>Тип: {% if real_estate_view.type == real_estate_view.RealEstateType.APARTMENT %} квартира {% elif real_estate_view.type == real_estate_view.RealEstateType.HOUSE  %} дом {% elif real_estate_view.type == real_estate_view.RealEstateType.PLOT %} участок {% endif %}</p>
+            <p>Площадь: {{ real_estate_view.square }} м²</p>
+        </div>
+        <div class="actions">
+            <a href="{% url 'real_estate_change' real_estate_view.pk %}" class="btn">Изменить данные риэлтера</a>
+            <a href="{% url 'del_real_estate' real_estate_view.pk %}" class="delete-btn">Удалить риэлтера</a>
+        </div>
+    </div>
+    <div class="extend-data">
+        {% if real_estate_view.type == real_estate_view.RealEstateType.APARTMENT %}
+            <h3>Данные квартиры</h3>
+            <p>Этажность дома: {{ data_apartment.number_storeys }}</p>
+            <p>Этаж: {{ data_apartment.floor }}</p>
+            <p>Балкон: {% if data_apartment.balcony %} есть {% else %} нету {% endif %}</p>
+            <p>Мебель: {% if data_apartment.furniture %} есть {% else %} нету {% endif %}</p>
+            <p>Год постройки дома: {{ data_apartment.year_construction }}</p>
+            <p>Аварийность: {% if data_apartment.accident_rate %} есть {% else %} нету {% endif %}</p>
+            <p>Тип комнат: {% if data_apartment.room_type == data_apartment.RoomType.OTHER %} другое {% elif data_apartment.room_type == data_apartment.RoomType.COMMUNAL %} коммуналка {% elif data_apartment.room_type == data_apartment.RoomType.ONE_ROOM %} однокомнатная {% elif data_apartment.room_type == data_apartment.RoomType.TWO_ROOMS %} двухкомнатная {% elif data_apartment.room_type == data_apartment.RoomType.THREE_ROOMS %} трехкомнатная {% elif data_apartment.room_type == data_apartment.RoomType.FOUR_ROOMS %} четырехкомнатная {% elif data_apartment.room_type == data_apartment.RoomType.FOUR_PLUS_ROOMS %} четыре+ комнат {% elif data_apartment.room_type == data_apartment.RoomType.STUDIO %} студия {% elif data_apartment.room_type == data_apartment.RoomType.MAISONETTE %} мезонет {% elif data_apartment.room_type == data_apartment.RoomType.LOFT %} лофт {% elif data_apartment.room_type == data_apartment.RoomType.PENTHOUSE %} пентхаус {% endif %}
+        {% elif real_estate_view.type == real_estate_view.RealEstateType.HOUSE  %}
+            <h3>Данные дома</h3>
+            <p>Этажность дома: {{ data_house.number_storeys }}</p>
+            <p>Площадь дома: {{ data_house.house_area }} м²</p>
+            <p>Год постройки дома: {{ data_house.year_construction }}</p>
+            <p>Гараж: {% if data_house.garage %} есть {% else %} нету {% endif %}</p>
+            <p>Коммуникации: {% if data_house.communications %} есть {% else %} нету {% endif %}</p>
+        {% elif real_estate_view.type == real_estate_view.RealEstateType.PLOT %}
+            <h3>Данные участка</h3>
+            <p>Постройки на участке: {% if data_plot.buildings %} есть {% else %} нету {% endif %}</p>
+            <p>Коммуникации: {% if data_plot.communications %} есть {% else %} нету {% endif %}</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

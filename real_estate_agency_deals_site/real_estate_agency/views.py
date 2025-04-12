@@ -214,7 +214,6 @@ class ChangeRealtorView(UpdateView):
         return redirect('realtor', self.kwargs.get(self.pk_url_kwarg), permanent=False)
 
 
-
 class RealEstateListView(ListView):
     paginate_by = 5
     model = models.RealEstate
@@ -472,36 +471,50 @@ class NewRealEstateView(FormView):
 
 class RealEstateView(DetailView):
     model = models.RealEstate
-    # template_name = 'real_estate_agency/realtor_view.html'
-    # context_object_name = 'realtor_view'
-    # pk_url_kwarg = 'pk'
-    #
-    # def get_context_data(self, *, object_list=None, **kwargs):
-    #     base_context = super().get_context_data(**kwargs)
-    #
-    #     context = {
-    #         'title': f'Риэлтер {self.object.last_name} {self.object.first_name} {self.object.patronymic}',
-    #     }
-    #
-    #     return {**base_context, **context}
-    #
-    # def dispatch(self, request, *args, **kwargs):
-    #     realtor_view = self.get_object()
-    #
-    #     if isinstance(realtor_view, HttpResponseRedirect):
-    #         return realtor_view
-    #
-    #     return super().dispatch(request, *args, **kwargs)
-    #
-    # def get_object(self, queryset=None):
-    #     try:
-    #         object_user = models.Realtor.objects.get(pk=self.kwargs.get(self.pk_url_kwarg))
-    #     except ObjectDoesNotExist:
-    #         messages.error(self.request, 'Риэлтор не найден')
-    #         return redirect('realtor_list', permanent=False)
-    #
-    #     return object_user
-    #
+    template_name = 'real_estate_agency/real_estate_view.html'
+    context_object_name = 'real_estate_view'
+    pk_url_kwarg = 'pk'
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        base_context = super().get_context_data(**kwargs)
+
+        context = {
+            'title': f'Недвижимость {self.object.pk}',
+        }
+
+        if self.object.type == models.RealEstate.RealEstateType.APARTMENT:
+            context['data_apartment'] = models.DataApartment.objects.get(real_estate_DA=self.object)
+        elif self.object.type == models.RealEstate.RealEstateType.HOUSE:
+            context['data_house'] = models.DataHouse.objects.get(real_estate_DH=self.object)
+        elif self.object.type == models.RealEstate.RealEstateType.PLOT:
+            context['data_plot'] = models.DataPlot.objects.get(real_estate_DP=self.object)
+
+        return {**base_context, **context}
+
+    def dispatch(self, request, *args, **kwargs):
+        if self.request.user.is_anonymous:
+            messages.warning(request, 'Что бы просмотреть данные о недвижимости, нужно авторизоваться')
+            return redirect('real_estate_list', permanent=False)
+
+        if not self.request.user.is_staff:
+            messages.error(request, 'Что бы просмотреть данные о недвижимости, нужно быть агентом недвижимости')
+            return redirect('real_estate_list', permanent=False)
+
+        real_estate = self.get_object()
+
+        if isinstance(real_estate, HttpResponseRedirect):
+            return real_estate
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_object(self, queryset=None):
+        try:
+            object_user = self.model.objects.get(pk=self.kwargs.get(self.pk_url_kwarg))
+        except ObjectDoesNotExist:
+            messages.error(self.request, 'Недвижимость не найден')
+            return redirect('real_estate_list', permanent=False)
+
+        return object_user
 
 
 class ChangeRealEstateView(UpdateView):

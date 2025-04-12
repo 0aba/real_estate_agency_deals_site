@@ -33,28 +33,8 @@
     color: #333;
     font-size: 14px;
     line-height: 1.4;
-}
-
-.real-estate-when_added {
-    color: #666;
-    font-size: 12px;
-    font-style: italic;
-}
-
-.real-estate-full-address,
-.real-estate-when_added,
-.real-estate-layout,
-.real-estate-type,
-.real-estate-id {
     font-weight: bold;
-    color: #444;
     border-bottom: 1px dashed #e0e0e0;
-}
-
-.real-estate-square {
-    font-size: 16px;
-    font-weight: bold;
-    color: #2c3e50;
 }
 
 .btn {
