@@ -8,6 +8,7 @@ urlpatterns_actions = [
     path('del-realtor/<int:pk>/', utils.del_realtor, name='del_realtor'),
 
     path('del-real-estate/<int:pk>/', utils.del_real_estate, name='del_real_estate'),
+    # path('del-deal/<int:pk>/', utils.del_deal, name='del_deal'),
 ]
 
 urlpatterns = ([
@@ -22,6 +23,11 @@ urlpatterns = ([
     path('real-estate-new/', views.NewRealEstateView.as_view(), name='real_estate_new'),
     path('real-estate/<int:pk>/', views.RealEstateView.as_view(), name='real_estate'),
     path('real-estate/<int:pk>/change/', views.ChangeRealEstateView.as_view(), name='real_estate_change'),
+
+    path('deal-list/', views.DealListView.as_view(), name='deal_list'),
+    # path('real-estate-new/', views.NewRealEstateView.as_view(), name='real_estate_new'),
+    # path('real-estate/<int:pk>/', views.RealEstateView.as_view(), name='real_estate'),
+    # path('real-estate/<int:pk>/change/', views.ChangeRealEstateView.as_view(), name='real_estate_change'),
 ]
 + urlpatterns_actions
 )

@@ -64,6 +64,7 @@
             <p>Постройки на участке: {% if data_plot.buildings %} есть {% else %} нету {% endif %}</p>
             <p>Коммуникации: {% if data_plot.communications %} есть {% else %} нету {% endif %}</p>
         {% endif %}
+            <p>О недвижимости: {{ real_estate_view.about }}</p>
     </div>
 </div>
 {% endblock %}

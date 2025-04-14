@@ -1,4 +1,4 @@
-function selectedRealEstateForm() {
+function selectedRealEstateAgencyForm() {
     const select = document.getElementById('id_type');
     console.log(select)
     const arraySelect = [
@@ -31,8 +31,8 @@ function selectedAddressRealEstateForm() {
     }
 }
 
-document.getElementById('id_type').addEventListener('change', selectedRealEstateForm);
+document.getElementById('id_type').addEventListener('change', selectedRealEstateAgencyForm);
 document.getElementById('id_have_address').addEventListener('change', selectedAddressRealEstateForm);
 
 selectedAddressRealEstateForm();
-selectedRealEstateForm();
+selectedRealEstateAgencyForm();

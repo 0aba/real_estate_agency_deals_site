@@ -271,20 +271,23 @@ class RealEstateListView(ListView):
             address_city_value = self.request.GET.get('address_city_value')
             address_district_value = self.request.GET.get('address_district_value')
             address_street_value = self.request.GET.get('address_street_value')
+            address_house_value = self.request.GET.get('address_house_value')
             address_apartment_value = self.request.GET.get('address_apartment_value')
 
             if address_city_value:
-                queryset = queryset.filter(address_real_estate__city=address_city_value)
+                queryset = queryset.filter(address_real_estate__city__icontains=address_city_value)
 
             if address_district_value:
-                queryset = queryset.filter(address_real_estate__district=address_district_value)
+                queryset = queryset.filter(address_real_estate__district__icontains=address_district_value)
 
             if address_street_value:
-                queryset = queryset.filter(address_real_estate__street=address_street_value)
+                queryset = queryset.filter(address_real_estate__street__icontains=address_street_value)
+
+            if address_house_value:
+                queryset = queryset.filter(address_real_estate__house=address_house_value)
 
             if address_apartment_value:
                 queryset = queryset.filter(address_real_estate__apartment=address_apartment_value)
-
 
         if type_real_estate == 'apartment_only':
             queryset = queryset.filter(type=models.RealEstate.RealEstateType.APARTMENT)
@@ -354,8 +357,8 @@ class RealEstateListView(ListView):
             house_area_max = self.request.GET.get('house_area_max')
             house_year_construction_min = self.request.GET.get('house_year_construction_min')
             house_year_construction_max = self.request.GET.get('house_year_construction_max')
-            garage_house = self.request.GET.get('garage_house')  # TODO DEF {'' 'yes' 'no'}
-            communications_house = self.request.GET.get('communications_house')  # TODO DEF {'' 'yes' 'no'}
+            garage_house = self.request.GET.get('garage_house')
+            communications_house = self.request.GET.get('communications_house')
 
             if house_number_storeys_min:
                 queryset = queryset.filter(real_estate_DH_fk__number_storeys__gte=house_number_storeys_min)
@@ -380,12 +383,11 @@ class RealEstateListView(ListView):
 
             if communications_house in ('yes', 'no',):
                 queryset = queryset.filter(real_estate_DH_fk__communications=True if communications_house == 'yes' else False)
-
         elif type_real_estate == 'plot_only':
             queryset = queryset.filter(type=models.RealEstate.RealEstateType.PLOT)
 
-            buildings_plot = self.request.GET.get('buildings_plot')  # TODO DEF {'' 'yes' 'no'}
-            communications_plot = self.request.GET.get('communications_plot')  # TODO DEF {'' 'yes' 'no'}
+            buildings_plot = self.request.GET.get('buildings_plot')
+            communications_plot = self.request.GET.get('communications_plot')
             if buildings_plot in ('yes', 'no',):
                 queryset = queryset.filter(real_estate_DH_fk__buildings=True if buildings_plot == 'yes' else False)
 
@@ -670,3 +672,243 @@ class ChangeRealEstateView(FormView):
             models.DataHouse.objects.get(real_estate_DH=self.old_real_estate).delete()
         elif type_data == models.RealEstate.RealEstateType.PLOT:
             models.DataPlot.objects.get(real_estate_DP=self.old_real_estate).delete()
+
+
+class DealListView(ListView):
+    paginate_by = 5
+    model = models.Deal
+    template_name = 'real_estate_agency/deal_list.html'
+    context_object_name = 'deal_list'
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        base_context = super().get_context_data(**kwargs)
+
+        context = {
+            'title': 'Список сделок',
+        }
+
+        return {**base_context, **context}
+
+    def get_queryset(self):
+        queryset = models.Deal.non_deleted.filter()
+
+        if self.request.user.is_staff:
+            id_real_estate_deal = self.request.GET.get('id_real_estate_deal')
+            if id_real_estate_deal:
+                queryset = queryset.filter(real_estate_deal__pk=id_real_estate_deal)
+        else:
+            queryset = queryset.filter(completed=False)
+
+        title_deal_value = self.request.GET.get('title_deal_value')
+        price_deal_min_value = self.request.GET.get('price_deal_min_value')
+        price_deal_max_value = self.request.GET.get('price_deal_max_value')
+
+        if title_deal_value:
+            queryset = queryset.filter(title__icontains=title_deal_value)
+
+        if price_deal_min_value:
+            queryset = queryset.filter(current_price__gte=price_deal_min_value)
+
+        if price_deal_max_value:
+            queryset = queryset.filter(current_price__lte=price_deal_max_value)
+
+        type_deal = self.request.GET.get('type_deal')
+        if type_deal == 'deal_sale_only':
+            queryset = queryset.filter(type=models.Deal.DealType.SALE)
+        elif type_deal == 'deal_rent_only':
+            queryset = queryset.filter(type=models.Deal.DealType.RENT)
+
+            price_housing_and_municipalities_min = self.request.GET.get('price_housing_and_municipalities_min')
+            price_housing_and_municipalities_max = self.request.GET.get('price_housing_and_municipalities_max')
+            prepayment_min = self.request.GET.get('prepayment_min')
+            prepayment_max = self.request.GET.get('prepayment_max')
+            rental_period_days_min = self.request.GET.get('rental_period_days_min')
+            rental_period_days_max = self.request.GET.get('rental_period_days_max')
+
+            if price_housing_and_municipalities_min:
+                queryset = queryset.filter(deal_rental_fk__price_housing_and_municipalities__gte=price_housing_and_municipalities_min)
+
+            if price_housing_and_municipalities_max:
+                queryset = queryset.filter(deal_rental_fk__price_housing_and_municipalities__lte=price_housing_and_municipalities_max)
+
+            if prepayment_min:
+                queryset = queryset.filter(deal_rental_fk__prepayment__gte=prepayment_min)
+
+            if prepayment_max:
+                queryset = queryset.filter(deal_rental_fk__prepayment__lte=prepayment_max)
+
+            if rental_period_days_min:
+                queryset = queryset.filter(deal_rental_fk__rental_period_days__gte=rental_period_days_min)
+
+            if rental_period_days_max:
+                queryset = queryset.filter(deal_rental_fk__rental_period_days__lte=rental_period_days_max)
+
+        elif type_deal == 'deal_construction_only':
+            queryset = queryset.filter(type=models.Deal.DealType.CONSTRUCTION)
+
+            construction_company = self.request.GET.get('construction_company')
+            approximate_dates_min = self.request.GET.get('approximate_dates_min')
+            approximate_dates_max = self.request.GET.get('approximate_dates_max')
+
+            if construction_company:
+                queryset = queryset.filter(deal_construction_fk__construction_company__icontains=construction_company)
+
+            if approximate_dates_min:
+                queryset = queryset.filter(deal_rental_fk__approximate_dates__gte=approximate_dates_min)
+
+            if approximate_dates_max:
+                queryset = queryset.filter(deal_rental_fk__approximate_dates__lte=approximate_dates_max)
+
+        square_min_value = self.request.GET.get('square_min_value')
+        square_max_value = self.request.GET.get('square_max_value')
+        when_added_min_value = self.request.GET.get('when_added_min_value')
+        when_added_max_value = self.request.GET.get('when_added_max_value')
+        address_real_estate = self.request.GET.get('address_real_estate')
+        type_real_estate = self.request.GET.get('type_real_estate')
+
+        if square_min_value:
+            queryset = queryset.filter(real_estate_deal__square__gte=square_min_value)
+
+        if square_max_value:
+            queryset = queryset.filter(real_estate_deal__square__lte=square_max_value)
+
+        address_city_value = self.request.GET.get('address_city_value')
+        address_district_value = self.request.GET.get('address_district_value')
+        address_street_value = self.request.GET.get('address_street_value')
+        address_house_value = self.request.GET.get('address_house_value')
+        address_apartment_value = self.request.GET.get('address_apartment_value')
+
+        if address_city_value:
+            queryset = queryset.filter(real_estate_deal__address_real_estate__city__icontains=address_city_value)
+
+        if address_district_value:
+            queryset = queryset.filter(real_estate_deal__address_real_estate__district__icontains=address_district_value)
+
+        if address_street_value:
+            queryset = queryset.filter(real_estate_deal__address_real_estate__street__icontains=address_street_value)
+
+        if address_house_value:
+            queryset = queryset.filter(real_estate_deal__address_real_estate__house=address_house_value)
+
+        if address_apartment_value:
+            queryset = queryset.filter(real_estate_deal__address_real_estate__apartment=address_apartment_value)
+
+        if type_real_estate == 'apartment_only':
+            queryset = queryset.filter(real_estate_deal__type=models.RealEstate.RealEstateType.APARTMENT)
+
+            number_storeys_min_value = self.request.GET.get('number_storeys_min_value')
+            number_storeys_max_value = self.request.GET.get('number_storeys_max_value')
+            floor_min_value = self.request.GET.get('floor_min_value')
+            floor_max_value = self.request.GET.get('floor_max_value')
+            balcony_real_estate = self.request.GET.get('balcony_real_estate')
+            furniture_real_estate = self.request.GET.get('furniture_real_estate')
+            year_construction_min_value = self.request.GET.get('year_construction_min_value')
+            year_construction_max_value = self.request.GET.get('year_construction_max_value')
+            accident_rate_value = self.request.GET.get('accident_rate_value')
+            room_type = self.request.GET.get('room_type')
+
+            if number_storeys_min_value:
+                queryset = queryset.filter(real_estate_deal__real_estate_DA_fk__number_storeys__gte=number_storeys_min_value)
+
+            if number_storeys_max_value:
+                queryset = queryset.filter(real_estate_deal__real_estate_DA_fk__number_storeys__lte=number_storeys_max_value)
+
+            if floor_min_value:
+                queryset = queryset.filter(real_estate_deal__real_estate_DA_fk__floor__gte=floor_min_value)
+
+            if floor_max_value:
+                queryset = queryset.filter(real_estate_deal__real_estate_DA_fk__floor__lte=floor_max_value)
+
+            if balcony_real_estate in ('yes', 'no',):
+                queryset = queryset.filter(real_estate_deal__real_estate_DA_fk__balcony=True if balcony_real_estate == 'yes' else False)
+
+            if furniture_real_estate in ('yes', 'no',):
+                queryset = queryset.filter(real_estate_deal__real_estate_DA_fk__furniture=True if furniture_real_estate == 'yes' else False)
+
+            if year_construction_min_value:
+                queryset = queryset.filter(real_estate_deal__real_estate_DA_fk__year_construction__gte=year_construction_min_value)
+
+            if year_construction_max_value:
+                queryset = queryset.filter(real_estate_deal__real_estate_DA_fk__year_construction__lte=year_construction_max_value)
+
+            if accident_rate_value:
+                queryset = queryset.filter(real_estate_deal__real_estate_DA_fk__accident_rate=True)
+
+            if room_type and room_type != 'any':
+                if room_type == 'other':
+                    queryset = queryset.filter(real_estate_deal__real_estate_DA_fk__room_type=models.DataApartment.RoomType.OTHER)
+                elif room_type == 'one_room':
+                    queryset = queryset.filter(real_estate_deal__real_estate_DA_fk__room_type=models.DataApartment.RoomType.ONE_ROOM)
+                elif room_type == 'two_room':
+                    queryset = queryset.filter(real_estate_deal__real_estate_DA_fk__room_type=models.DataApartment.RoomType.TWO_ROOMS)
+                elif room_type == 'three_room':
+                    queryset = queryset.filter(real_estate_deal__real_estate_DA_fk__room_type=models.DataApartment.RoomType.THREE_ROOMS)
+                elif room_type == 'four_room':
+                    queryset = queryset.filter(real_estate_deal__real_estate_DA_fk__room_type=models.DataApartment.RoomType.FOUR_ROOMS)
+                elif room_type == 'four_plus_room':
+                    queryset = queryset.filter(real_estate_deal__real_estate_DA_fk__room_type=models.DataApartment.RoomType.FOUR_PLUS_ROOMS)
+                elif room_type == 'maisonette':
+                    queryset = queryset.filter(real_estate_deal__real_estate_DA_fk__room_type=models.DataApartment.RoomType.MAISONETTE)
+                elif room_type == 'loft':
+                    queryset = queryset.filter(real_estate_deal__real_estate_DA_fk__room_type=models.DataApartment.RoomType.LOFT)
+                elif room_type == 'penthouse':
+                    queryset = queryset.filter(real_estate_deal__real_estate_DA_fk__room_type=models.DataApartment.RoomType.PENTHOUSE)
+        elif type_real_estate == 'house_only':
+            queryset = queryset.filter(real_estate_deal__type=models.RealEstate.RealEstateType.HOUSE)
+            house_number_storeys_min = self.request.GET.get('house_number_storeys_min')
+            house_number_storeys_max = self.request.GET.get('house_number_storeys_max')
+            house_area_min = self.request.GET.get('house_area_min')
+            house_area_max = self.request.GET.get('house_area_max')
+            house_year_construction_min = self.request.GET.get('house_year_construction_min')
+            house_year_construction_max = self.request.GET.get('house_year_construction_max')
+            garage_house = self.request.GET.get('garage_house')
+            communications_house = self.request.GET.get('communications_house')
+
+            if house_number_storeys_min:
+                queryset = queryset.filter(real_estate_deal__real_estate_DH_fk__number_storeys__gte=house_number_storeys_min)
+
+            if house_number_storeys_max:
+                queryset = queryset.filter(real_estate_deal__real_estate_DH_fk__number_storeys__lte=house_number_storeys_max)
+
+            if house_area_min:
+                queryset = queryset.filter(real_estate_deal__real_estate_DH_fk__house_area__gte=house_area_min)
+
+            if house_area_max:
+                queryset = queryset.filter(real_estate_deal__real_estate_DH_fk__house_area__lte=house_area_max)
+
+            if house_year_construction_min:
+                queryset = queryset.filter(real_estate_deal__real_estate_DH_fk__year_construction__gte=house_year_construction_min)
+
+            if house_year_construction_max:
+                queryset = queryset.filter(real_estate_deal__real_estate_DH_fk__year_construction__lte=house_year_construction_max)
+
+            if garage_house in ('yes', 'no',):
+                queryset = queryset.filter(real_estate_deal__real_estate_DH_fk__garage=True if garage_house == 'yes' else False)
+
+            if communications_house in ('yes', 'no',):
+                queryset = queryset.filter(real_estate_deal__real_estate_DH_fk__communications=True if communications_house == 'yes' else False)
+
+        elif type_real_estate == 'plot_only':
+            queryset = queryset.filter(real_estate_deal__type=models.RealEstate.RealEstateType.PLOT)
+
+            buildings_plot = self.request.GET.get('buildings_plot')
+            communications_plot = self.request.GET.get('communications_plot')
+            if buildings_plot in ('yes', 'no',):
+                queryset = queryset.filter(real_estate_deal__real_estate_DH_fk__buildings=True if buildings_plot == 'yes' else False)
+
+            if communications_plot in ('yes', 'no',):
+                queryset = queryset.filter(real_estate_deal__real_estate_DH_fk__communications=True if communications_plot == 'yes' else False)
+
+        return queryset
+
+
+class NewDealView(CreateView):
+    ...
+
+
+class DealDetailView(DetailView):
+    ...
+
+
+class ChangeDealView(UpdateView):
+    ...

@@ -6,7 +6,7 @@
 
 {% block styles %}
 <link type="text/css" rel="stylesheet" href="{% static 'common/css/list_with_filters.css' %}"/>
-<link type="text/css" rel="stylesheet" href="{% static 'real_estate_agency/css/real_estate_list.css' %}"/>
+<link type="text/css" rel="stylesheet" href="{% static 'real_estate_agency/css/deal_list.css' %}"/>
 {% endblock %}
 {% block scripts %}
 <script src="{% static 'real_estate_agency/js/selectedRealEstateAgency.js' %}"></script>
@@ -15,32 +15,21 @@
 {% block content %}
 <div class="list-container">
     <div class="list-elements">
-        <a href="{% url 'real_estate_new' %}" class="btn">Добавить недвижимость</a>
+        {% if user.is_staff %}
+            <a href="% url 'real_estate_new' %}" class="btn">Добавить сделку</a>
+        {% endif %}
         <hr>
-        {% for real_estate in real_estate_list %}
-            <div class="real-estate">
-                <img src="{{ real_estate.main_photo.url }}">
-                <div class="real-estate-content">
-                    <p>Номер: {{ real_estate.pk }}</p>
-                    <p>Был добавлен: {{ real_estate.when_added }}</p>
-                    {% if real_estate.address_real_estate %}
-                    <p>
-                        Город: {{ real_estate.address_real_estate.city }}
-                        {% if real_estate.address_real_estate.district %}
-                            Район: {{ real_estate.address_real_estate.district }}
-                        {% endif %}
-                        Улица: {{ real_estate.address_real_estate.street }}
-                        Дом: {{ real_estate.address_real_estate.house }}
-                        {% if real_estate.address_real_estate.apartment %}
-                            Квартира: {{ real_estate.address_real_estate.apartment }}
-                        {% endif %}
-                    </p>
-                    {% else %}
-                    <p>Это шаблон недвижимости</p>
-                    {% endif %}
-                    <p>Тип: {% if real_estate.type == real_estate.RealEstateType.APARTMENT %} квартира {% elif real_estate.type == real_estate.RealEstateType.HOUSE  %} дом {% elif real_estate.type == real_estate.RealEstateType.PLOT %} участок {% endif %}</p>
-                    <p>Площадь: {{ real_estate.square }} м²</p>
-                    <a href="{% url 'real_estate' real_estate.pk %}" class="btn">Просмотреть</a>
+        {% for deal in deal_list %}
+            <div class="deal">
+                <img src="{{ deal.real_estate_deal.main_photo.url }}">
+                <div class="deal-content">
+                    <p>Название: {{ deal.title }}</p>
+                    <p>Была создана: {{ deal.date_create }}</p>
+                    <p>Текущая цена: {{ deal.current_price }}</p>
+                    <p>Тип недвижимости: {% if deal.real_estate_deal.type == deal.real_estate_deal.RealEstateType.APARTMENT %} квартира {% elif deal.real_estate_deal.type == deal.real_estate_deal.RealEstateType.HOUSE  %} дом {% elif deal.real_estate_deal.type == deal.real_estate_deal.RealEstateType.PLOT %} участок {% endif %}</p>
+                    <p>Тип сделки: {% if deal.type == deal.DealType.SALE %} продажа {% elif deal.type == deal.DealType.RENT  %} аренда {% elif deal.type == deal.DealType.CONSTRUCTION %} строительство {% endif %}</p>
+                    <p>Площадь: {{ deal.real_estate_deal.square }} м²</p>
+                    <a href="% url 'real_estate' real_estate.pk %}" class="btn">Просмотреть</a>
                 </div>
             </div>
             <hr>
@@ -51,62 +40,101 @@
     </div>
     <div class="filters">
         <form method="GET" class="filter-form">
-            <div class="filter-group">
-                <label>Номер</label>
-                <input id="id_real_estate" type="number" min="1" name="id_real_estate" value="{{ request.GET.id_real_estate }}">
+            {% if user.is_staff %}
+                <div class="filter-group">
+                    <label>Номер недвижимости</label>
+                    <input id="id_real_estate_deal" type="number" min="1" name="id_real_estate_deal" value="{{ request.GET.id_real_estate_deal }}">
+                </div>
+            {% endif %}
+            <div class="filter-group icontains-string">
+                <label>Название сделки</label>
+                <input id="title_deal" type="text" name="title_deal_value" value="{{ request.GET.title_deal_value }}">
             </div>
+            <div class="filter-group icontains-string">
+                <label>Диапазон цены</label>
+                <input id="price_deal_min" type="number" min="0" step="0.01" name="price_deal_min_value" value="{{ request.GET.price_deal_min_value }}">
+                <input id="price_deal_max" type="number" min="0" step="0.01" name="price_deal_max_value" value="{{ request.GET.price_deal_max_value }}">
+            </div>
+            <fieldset>
+                <legend>Тип сделки</legend>
+                <div class="radio-option">
+                    <input id="type_deal_any" type="radio" name="type_deal" value="type_deal_any"
+                           onchange="selectedDeal()"
+                           {% if not request.GET.type_deal or request.GET.type_deal == 'type_deal_any'  %}checked{% endif %}>
+                    <label for="type_deal_any">Любой тип сделки</label>
+                </div>
+                <div class="radio-option">
+                    <input id="type_deal_sale" type="radio" name="type_deal" value="deal_sale_only"
+                           onchange="selectedDeal()"
+                           {% if request.GET.type_deal == 'deal_sale_only' %}checked{% endif %}>
+                    <label for="type_deal_sale">Продажа</label>
+                </div>
+                <div class="radio-option">
+                    <input id="type_deal_rent" type="radio" name="type_deal" value="deal_rent_only"
+                           onchange="selectedDeal()"
+                           {% if request.GET.type_deal == 'deal_rent_only' %}checked{% endif %}>
+                    <label for="type_deal_rent">Аренда</label>
+                </div>
+                <div class="radio-option">
+                    <input id="type_deal_construction" type="radio" name="type_deal" value="deal_construction_only"
+                           onchange="selectedDeal()"
+                           {% if request.GET.type_deal == 'deal_construction_only' %}checked{% endif %}>
+                    <label for="type_deal_construction">Строительство</label>
+                </div>
+            </fieldset>
+            <div id="rent" class="view-group">
+                <div class="filter-group">
+                    <label>Диапазон цены ЖКХ</label>
+                    <input id="price_housing_and_municipalities_min" type="number" min="0" step="0.01" name="price_housing_and_municipalities_min_value" value="{{ request.GET.price_housing_and_municipalities_min_value }}">
+                    <input id="price_housing_and_municipalities_max" type="number" min="0" step="0.01" name="price_housing_and_municipalities_max_value" value="{{ request.GET.price_housing_and_municipalities_max_value }}">
+                </div>
+                <div class="filter-group">
+                    <label>Диапазон предоплаты</label>
+                    <input id="prepayment_min" type="number" min="0" step="0.01" name="prepayment_min_value" value="{{ request.GET.prepayment_min_value }}">
+                    <input id="prepayment_max" type="number" min="0" step="0.01" name="prepayment_max_value" value="{{ request.GET.prepayment_max_value }}">
+                </div>
+                <div class="filter-group">
+                    <label>Диапазон срока аренды (в днях)</label>
+                    <input id="rental_period_days_min" type="number" min="0" name="rental_period_days_min_value" value="{{ request.GET.rental_period_days_min_value }}">
+                    <input id="rental_period_days_max" type="number" min="0" name="rental_period_days_max_value" value="{{ request.GET.rental_period_days_max_value }}">
+                </div>
+            </div>
+            <div id="construction" class="view-group">
+                <div class="filter-group icontains-string">
+                    <label>Строительная компания</label>
+                    <input id="construction_company" type="text" name="construction_company_value" value="{{ request.GET.construction_company_value}}">
+                </div>
+                <div class="filter-group">
+                    <label>Примерные сроки выполнения работы</label>
+                    <input id="approximate_dates_min" type="number" min="0" name="approximate_dates_min_value" value="{{ request.GET.approximate_dates_min_value }}">
+                    <input id="approximate_dates_max" type="number" min="0" name="approximate_dates_max_value" value="{{ request.GET.approximate_dates_max_value }}">
+                </div>
+            </div>
+
             <div class="filter-group">
                 <label>Диапазон площади (м²)</label>
                 <input id="square_min" type="number" min="1" name="square_min_value" value="{{ request.GET.square_min_value }}">
                 <input id="square_max" type="number" min="1" name="square_max_value" value="{{ request.GET.square_max_value }}">
             </div>
-            <div class="filter-group">
-                <label>Диапазон даты добавления</label>
-                <input id="when_added_min" type="datetime-local" name="when_added_min_value" value="{{ request.GET.when_added_min_value }}">
-                <input id="when_added_max" type="datetime-local" name="when_added_max_value" value="{{ request.GET.when_added_max_value }}">
+            <div class="filter-group icontains-string">
+                <label>Город</label>
+                <input id="address_city" type="text" name="address_city_value" value="{{ request.GET.address_city_value}}">
             </div>
-            <fieldset>
-                <legend>Адрес</legend>
-                <div class="radio-option">
-                    <input id="address_real_estate_any" type="radio" name="address_real_estate" value="address_real_estate_any"
-                           onchange="selectedAddressRealEstate()"
-                           {% if not request.GET.address_real_estate or request.GET.address_real_estate == 'address_real_estate_any'  %}checked{% endif %}>
-                    <label for="address_real_estate_any">Любой адрес или шаблон</label>
-                </div>
-                <div class="radio-option">
-                    <input id="address_real_estate_exist" type="radio" name="address_real_estate" value="address_real_estate_exist"
-                           onchange="selectedAddressRealEstate()"
-                           {% if request.GET.address_real_estate == 'address_real_estate_exist' %}checked{% endif %}>
-                    <label for="address_real_estate_exist">Недвижимость с адресом (существующая)</label>
-                </div>
-                <div class="radio-option">
-                    <input id="address_real_estate_none" type="radio" name="address_real_estate" value="address_real_estate_none"
-                           onchange="selectedAddressRealEstate()"
-                           {% if request.GET.address_real_estate == 'address_real_estate_none' %}checked{% endif %}>
-                    <label for="address_real_estate_none">Шаблон (без адреса)</label>
-                </div>
-            </fieldset>
-            <div id="address" class="view-group">
-                <div class="filter-group icontains-string">
-                    <label>Город</label>
-                    <input id="address_city" type="text" name="address_city_value" value="{{ request.GET.address_city_value}}">
-                </div>
-                <div class="filter-group icontains-string">
-                    <label>Район</label>
-                    <input id="address_district" type="text" name="address_district_value" value="{{ request.GET.address_district_value}}">
-                </div>
-                <div class="filter-group icontains-string">
-                    <label>Улица</label>
-                    <input id="address_street" type="text" name="address_street_value" value="{{ request.GET.address_street_value}}">
-                </div>
-                <div class="filter-group icontains-string">
-                    <label>Дом</label>
-                    <input id="address_house" type="number" min="1" name="address_house_value" value="{{ request.GET.address_house_value}}">
-                </div>
-                <div class="filter-group icontains-string">
-                    <label>Квартира</label>
-                    <input id="address_apartment" type="number" min="1" name="address_apartment_value" value="{{ request.GET.address_apartment_value}}">
-                </div>
+            <div class="filter-group icontains-string">
+                <label>Район</label>
+                <input id="address_district" type="text" name="address_district_value" value="{{ request.GET.address_district_value}}">
+            </div>
+            <div class="filter-group icontains-string">
+                <label>Улица</label>
+                <input id="address_street" type="text" name="address_street_value" value="{{ request.GET.address_street_value}}">
+            </div>
+            <div class="filter-group icontains-string">
+                <label>Дом</label>
+                <input id="address_house" type="number" min="1" name="address_house_value" value="{{ request.GET.address_house_value}}">
+            </div>
+            <div class="filter-group icontains-string">
+                <label>Квартира</label>
+                <input id="address_apartment" type="number" min="1" name="address_apartment_value" value="{{ request.GET.address_apartment_value}}">
             </div>
 
             <fieldset>
@@ -350,7 +378,7 @@
 </div>
 
 <script defer>
-    selectedAddressRealEstate();
+    selectedDeal();
     selectedRealEstateAgency();
 </script>
 {% endblock %}

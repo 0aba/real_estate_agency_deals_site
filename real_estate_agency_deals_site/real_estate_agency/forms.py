@@ -1,6 +1,7 @@
 from django.core.validators import FileExtensionValidator, MinValueValidator, MaxValueValidator
 from django.core.exceptions import ValidationError
 from real_estate_agency import models
+from django.utils import timezone
 from django import forms
 
 
@@ -135,3 +136,45 @@ class RealEstateForm(forms.Form):
         return cleaned_data
 
 
+class DealForm(forms.Form):
+    title = forms.CharField(max_length=256, label='Заголовок')
+    type = forms.ChoiceField(choices=models.Deal.DealType.choices,
+                             initial=models.Deal.DealType.SALE,
+                             label='Тип недвижимости')
+    price = forms.DecimalField(max_digits=10, decimal_places=2, label='Цена')
+    real_estate_deal_id = forms.IntegerField(label='Номер недвижимости')
+    agent_username = forms.CharField(max_length=150, label='Логин агента недвижимости')
+
+    # DataConstruction
+    construction_company = forms.CharField(required=False, max_length=256, label='Название строительной компании')
+    approximate_dates = forms.DurationField(required=False, validators=[MinValueValidator(timezone.timedelta(0))],
+                                            label='Примерный срок строительства')
+    project_document = forms.FileField(required=False, validators=[
+        FileExtensionValidator(allowed_extensions=['pdf', 'docx', 'doc', 'odt']),
+    ], label='Документ проекта')
+    # end DataConstruction
+    # DataRental
+    price_housing_and_municipalities = forms.DecimalField(required=False, max_digits=10, decimal_places=2, label='Цена ЖКХ')
+    prepayment = forms.DecimalField(required=False, max_digits=10, decimal_places=2, label='Предоплата')
+    rental_period_days = forms.IntegerField(validators=[
+        MinValueValidator(1),
+        MaxValueValidator(2**15)
+    ], label='Срок аренды в днях')
+    # end DataRental
+
+    def clean(self):
+        cleaned_data = super().clean()
+        type_deal = int(cleaned_data.get('type'))
+
+        if type_deal == models.Deal.DealType.RENT:
+            plot_fields = ('price_housing_and_municipalities', 'prepayment', 'rental_period_days',)
+            for field in plot_fields:
+                if cleaned_data.get(field) is None:
+                    raise ValidationError(f'Поле "{self.fields[field].label}" обязательно для аренды')
+        elif type_deal == models.Deal.DealType.CONSTRUCTION:
+            apartment_fields = ('construction_company', 'approximate_dates','project_document',)
+            for field in apartment_fields:
+                if cleaned_data.get(field) is None:
+                    raise ValidationError(f'Поле "{self.fields[field].label}" обязательно для строительства')
+
+        return cleaned_data

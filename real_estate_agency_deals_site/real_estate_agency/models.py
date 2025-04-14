@@ -115,20 +115,6 @@ class RealEstate(models.Model):
         super().save(*args, **kwargs)
 
 
-class PhotoRealEstate(models.Model):
-    class Meta:
-        verbose_name = 'Фото недвижимости'
-        verbose_name_plural = 'Фотографии недвижимости'
-
-    additional_photo_real_estate = models.ForeignKey(RealEstate, on_delete=models.PROTECT,
-                                                     related_name='additional_photo_RE_fk')
-    photo = models.ImageField(upload_to='photos/real_estate/%Y/%m/%d/', validators=[
-        FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png']),
-    ], verbose_name='Дополнительная фотография')
-
-    objects = models.Manager()
-
-
 class DataPlot(models.Model):
     class Meta:
         verbose_name = 'Данные участка'
@@ -198,15 +184,12 @@ class Deal(models.Model):
 
     title_slug = models.CharField(max_length=256, unique=True, null=False)
     title = models.CharField(max_length=256, unique=True, verbose_name='Заголовок сделки')
-    type = models.SmallIntegerField(choices=DealType.choices, verbose_name='Тип сделки')
-    phone = models.CharField(validators=[
-        RegexValidator(r'^\+[1-9]\d{1,14}$', 'Номер телефона должен быть в международном формате E.164'
-                                                  ' "+{от 2 до 15 цифр}"')
-    ], max_length=16, verbose_name='Номер телефона')
-    email = models.EmailField(verbose_name='Почта')
+    type = models.SmallIntegerField(choices=DealType.choices, default=DealType.SALE, verbose_name='Тип сделки')
+    current_price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Текущая цена')
     date_create = models.DateTimeField(auto_now_add=True)
     real_estate_deal = models.ForeignKey(RealEstate, on_delete=models.PROTECT, related_name='real_estate_deal_fk')
     agent = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='agent_fk')
+    completed = models.BooleanField(default=False)
     deleted = models.BooleanField(default=False)
 
     class NonDeletedManager(models.Manager):
@@ -252,7 +235,7 @@ class DataRental(models.Model):
                                      validators=[
                                          MinValueValidator(0.0),
                                      ], verbose_name='Предоплата')
-    rental_period_days = models.SmallIntegerField(validators=[MinValueValidator(1)], verbose_name='Срок аренды')
+    rental_period_days = models.SmallIntegerField(validators=[MinValueValidator(1)], verbose_name='Срок аренды в днях')
     rented = models.BooleanField(default=False, verbose_name='Арендуется')
 
     objects = models.Manager()
