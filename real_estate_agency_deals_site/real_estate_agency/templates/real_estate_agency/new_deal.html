@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block title %}{{title}}{% endblock %}
+
+{% block styles %}
+<link type="text/css" rel="stylesheet" href="{% static 'common/css/form.css' %}"/>
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'real_estate_agency/js/selectedDealAgencyForm.js' %}" defer></script>
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2 class="form-title">{{ title }}</h2>
+    <form method="post" class="form" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <div class="form-group">
+            <label>{{ form.title.label }}</label>
+            {{ form.title }}
+            {{ form.title.errors }}
+        </div>
+        <div class="form-group">
+            <label>{{ form.type.label }}</label>
+            {{ form.type }}
+            {{ form.type.errors }}
+        </div>
+        <div class="form-group">
+            <label>{{ form.price.label }}</label>
+            {{ form.price }}
+            {{ form.price.errors }}
+        </div>
+        <div class="form-group">
+            <label>{{ form.real_estate_deal_id.label }}</label>
+            {{ form.real_estate_deal_id }}
+            {{ form.real_estate_deal_id.errors }}
+        </div>
+        <div class="form-group">
+            <label>{{ form.agent_username.label }}</label>
+            {{ form.agent_username }}
+            {{ form.agent_username.errors }}
+        </div>
+
+        <div id="rent" class="view-group">
+            <div class="form-group">
+                <label>{{ form.price_housing_and_municipalities.label }}</label>
+                {{ form.price_housing_and_municipalities }}
+                {{ form.price_housing_and_municipalities.errors }}
+            </div>
+            <div class="form-group">
+                <label>{{ form.prepayment.label }}</label>
+                {{ form.prepayment }}
+                {{ form.prepayment.errors }}
+            </div>
+            <div class="form-group">
+                <label>{{ form.rental_period_days.label }}</label>
+                {{ form.rental_period_days }}
+                {{ form.rental_period_days.errors }}
+            </div>
+        </div>
+        <div id="construction" class="view-group">
+            <div class="form-group">
+                <label>{{ form.construction_company.label }}</label>
+                {{ form.construction_company }}
+                {{ form.construction_company.errors }}
+            </div>
+            <div class="form-group">
+                <label>{{ form.approximate_dates.label }}</label>
+                {{ form.approximate_dates }}
+                {{ form.approximate_dates.errors }}
+            </div>
+            <div class="form-group">
+                <label>{{ form.project_document.label }}</label>
+                {{ form.project_document }}
+                {{ form.project_document.errors }}
+            </div>
+        </div>
+        <button type="submit" class="form-button">Добавить сделку</button>
+    </form>
+</div>
+{% endblock %}

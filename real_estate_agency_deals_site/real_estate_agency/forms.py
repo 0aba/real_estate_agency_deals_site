@@ -156,7 +156,7 @@ class DealForm(forms.Form):
     # DataRental
     price_housing_and_municipalities = forms.DecimalField(required=False, max_digits=10, decimal_places=2, label='Цена ЖКХ')
     prepayment = forms.DecimalField(required=False, max_digits=10, decimal_places=2, label='Предоплата')
-    rental_period_days = forms.IntegerField(validators=[
+    rental_period_days = forms.IntegerField(required=False, validators=[
         MinValueValidator(1),
         MaxValueValidator(2**15)
     ], label='Срок аренды в днях')

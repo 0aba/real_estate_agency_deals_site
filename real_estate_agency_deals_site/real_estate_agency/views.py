@@ -3,6 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.functions import Concat
 from django.http import HttpResponseRedirect
 from real_estate_agency import models, forms
+from user import models as user_models
 from django.db.models import F, Value
 from django.shortcuts import redirect
 from django.contrib import messages
@@ -180,7 +181,6 @@ class ChangeRealtorView(UpdateView):
         }
 
         return {**base_context, **context}
-
 
     def dispatch(self, request, *args, **kwargs):
         if self.request.user.is_anonymous:
@@ -415,7 +415,7 @@ class NewRealEstateView(FormView):
             return redirect('real_estate_list', permanent=False)
 
         if not self.request.user.is_staff:
-            messages.error(request, 'Что бы добавить недвижимость, нужно быть администратором')
+            messages.error(request, 'Что бы добавить недвижимость, нужно быть агентом недвижимости')
             return redirect('real_estate_list', permanent=False)
 
         return super().dispatch(request, *args, **kwargs)
@@ -529,8 +529,44 @@ class ChangeRealEstateView(FormView):
     def get_context_data(self, **kwargs):
         base_context = super().get_context_data(**kwargs)
 
+        initial_dict = {
+            'type': self.old_real_estate.type,
+            'square': self.old_real_estate.square,
+            'main_photo': self.old_real_estate.main_photo,
+            'about': self.old_real_estate.about,
+        }
+        if self.old_real_estate.address_real_estate:
+            initial_dict['have_address'] = True
+            initial_dict['city'] = self.old_real_estate.address_real_estate.city
+            initial_dict['district'] = self.old_real_estate.address_real_estate.district
+            initial_dict['street'] = self.old_real_estate.address_real_estate.street
+            initial_dict['house'] = self.old_real_estate.address_real_estate.house
+            initial_dict['apartment'] = self.old_real_estate.address_real_estate.apartment
+
+        if self.old_real_estate.type == models.RealEstate.RealEstateType.APARTMENT:
+            data_apartment = models.DataApartment.objects.get(real_estate_DA=self.old_real_estate)
+            initial_dict['data_apartment_number_storeys'] = data_apartment.number_storeys
+            initial_dict['data_apartment_floor'] = data_apartment.floor
+            initial_dict['data_apartment_balcony'] = data_apartment.balcony
+            initial_dict['data_apartment_furniture'] = data_apartment.furniture
+            initial_dict['data_apartment_year_construction'] = data_apartment.year_construction
+            initial_dict['data_apartment_accident_rate'] = data_apartment.accident_rate
+            initial_dict['data_apartment_room_type'] = data_apartment.room_type
+        elif self.old_real_estate.type == models.RealEstate.RealEstateType.HOUSE:
+            data_house = models.DataHouse.objects.get(real_estate_DH=self.old_real_estate)
+            initial_dict['data_house_number_storeys'] = data_house.number_storeys
+            initial_dict['data_house_house_area'] = data_house.house_area
+            initial_dict['data_house_year_construction'] = data_house.year_construction
+            initial_dict['data_house_garage'] = data_house.garage
+            initial_dict['data_house_communications'] = data_house.communications
+        elif self.old_real_estate.type == models.RealEstate.RealEstateType.PLOT:
+            data_plot = models.DataPlot.objects.get(real_estate_DP=self.old_real_estate)
+            initial_dict['data_plot_buildings'] = data_plot.buildings
+            initial_dict['data_plot_communications'] = data_plot.communications
+
         context = {
             'title': f'Недвижимость {self.old_real_estate.pk}',
+            'form': self.form_class(initial=initial_dict)
         }
 
         return {**base_context, **context}
@@ -550,7 +586,6 @@ class ChangeRealEstateView(FormView):
             return self.old_real_estate
 
         return super().dispatch(request, *args, **kwargs)
-
 
     def get_object(self, queryset=None):
         try:
@@ -902,13 +937,81 @@ class DealListView(ListView):
         return queryset
 
 
-class NewDealView(CreateView):
-    ...
+class NewDealView(FormView):
+    form_class = forms.DealForm
+    template_name = 'real_estate_agency/new_deal.html'
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        base_context = super().get_context_data(**kwargs)
+        context: dict = {
+            'title': 'Добавить сделку',
+        }
+
+        return {**base_context, **context}
+
+
+    def dispatch(self, request, *args, **kwargs):
+        if self.request.user.is_anonymous:
+            messages.warning(request, 'Что бы добавить сделку, нужно авторизоваться')
+            return redirect('deal_list', permanent=False)
+
+        if not self.request.user.is_staff:
+            messages.error(request, 'Что бы добавить сделку, нужно быть агентом недвижимости')
+            return redirect('deal_list', permanent=False)
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        try:
+            real_estate_deal = models.RealEstate.non_deleted.get(pk=int(form.cleaned_data.get('real_estate_deal_id')))
+        except ObjectDoesNotExist:
+            messages.error(self.request, 'Недвижимость по данному номеру не существует')
+            return redirect('deal_list', permanent=False)
+
+
+        if models.Deal.non_deleted.filter(real_estate_deal=real_estate_deal).exists():
+            messages.error(self.request, 'На одну недвижимость может существовать только одна сделка')
+            return redirect('deal_list', permanent=False)
+
+        try:
+            agent = user_models.User.objects.get(
+                username=form.cleaned_data.get('agent_username').strip(),
+                is_staff=True
+            )
+        except ObjectDoesNotExist:
+            messages.error(self.request, 'Агент недвижимости с данным логином не существует')
+            return redirect('deal_list', permanent=False)
+
+        type_deal = int(form.cleaned_data.get('type'))
+        new_deal = models.Deal.objects.create(
+            title=form.cleaned_data.get('title'),
+            type=type_deal,
+            current_price=form.cleaned_data.get('price'),
+            real_estate_deal=real_estate_deal,
+            agent=agent,
+        )
+
+        if type_deal == models.Deal.DealType.RENT:
+            models.DataRental.objects.create(
+                deal_rental=new_deal,
+                price_housing_and_municipalities=form.cleaned_data.get('price_housing_and_municipalities'),
+                prepayment=form.cleaned_data.get('prepayment'),
+                rental_period_days=form.cleaned_data.get('rental_period_days'),
+            )
+        elif type_deal == models.Deal.DealType.CONSTRUCTION:
+            models.DataConstruction.objects.create(
+                deal_construction=new_deal,
+                construction_company=form.cleaned_data.get('construction_company'),
+                approximate_dates=form.cleaned_data.get('approximate_dates'),
+                project_document=form.cleaned_data.get('project_document'),
+            )
+
+        return redirect('deal_list', permanent=False)
 
 
 class DealDetailView(DetailView):
     ...
 
 
-class ChangeDealView(UpdateView):
+class ChangeDealView(FormView):
     ...

@@ -178,9 +178,9 @@ class Deal(models.Model):
         verbose_name_plural = 'Сделки'
 
     class DealType(models.IntegerChoices):
-        SALE = 0
-        RENT = 1
-        CONSTRUCTION = 2
+        SALE = 0, 'Продажа'
+        RENT = 1, 'Аренда'
+        CONSTRUCTION = 2, 'Строительство'
 
     title_slug = models.CharField(max_length=256, unique=True, null=False)
     title = models.CharField(max_length=256, unique=True, verbose_name='Заголовок сделки')

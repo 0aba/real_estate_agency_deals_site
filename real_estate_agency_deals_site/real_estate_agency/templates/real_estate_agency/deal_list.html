@@ -9,14 +9,14 @@
 <link type="text/css" rel="stylesheet" href="{% static 'real_estate_agency/css/deal_list.css' %}"/>
 {% endblock %}
 {% block scripts %}
-<script src="{% static 'real_estate_agency/js/selectedRealEstateAgency.js' %}"></script>
+<script src="{% static 'real_estate_agency/js/selectedDealAgency.js' %}"></script>
 {% endblock %}
 
 {% block content %}
 <div class="list-container">
     <div class="list-elements">
         {% if user.is_staff %}
-            <a href="% url 'real_estate_new' %}" class="btn">Добавить сделку</a>
+            <a href="{% url 'deal_new' %}" class="btn">Добавить сделку</a>
         {% endif %}
         <hr>
         {% for deal in deal_list %}
@@ -29,7 +29,7 @@
                     <p>Тип недвижимости: {% if deal.real_estate_deal.type == deal.real_estate_deal.RealEstateType.APARTMENT %} квартира {% elif deal.real_estate_deal.type == deal.real_estate_deal.RealEstateType.HOUSE  %} дом {% elif deal.real_estate_deal.type == deal.real_estate_deal.RealEstateType.PLOT %} участок {% endif %}</p>
                     <p>Тип сделки: {% if deal.type == deal.DealType.SALE %} продажа {% elif deal.type == deal.DealType.RENT  %} аренда {% elif deal.type == deal.DealType.CONSTRUCTION %} строительство {% endif %}</p>
                     <p>Площадь: {{ deal.real_estate_deal.square }} м²</p>
-                    <a href="% url 'real_estate' real_estate.pk %}" class="btn">Просмотреть</a>
+                    <a href="{% url 'deal' deal.title_slug %}" class="btn">Просмотреть</a>
                 </div>
             </div>
             <hr>

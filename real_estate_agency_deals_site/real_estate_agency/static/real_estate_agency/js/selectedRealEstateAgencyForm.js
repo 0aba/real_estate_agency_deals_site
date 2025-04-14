@@ -1,6 +1,5 @@
 function selectedRealEstateAgencyForm() {
     const select = document.getElementById('id_type');
-    console.log(select)
     const arraySelect = [
         document.getElementById('apartment'),
         document.getElementById('house'),
