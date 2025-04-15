@@ -36,6 +36,7 @@
             {% endif %}
             <p>Тип: {% if real_estate_view.type == real_estate_view.RealEstateType.APARTMENT %} квартира {% elif real_estate_view.type == real_estate_view.RealEstateType.HOUSE  %} дом {% elif real_estate_view.type == real_estate_view.RealEstateType.PLOT %} участок {% endif %}</p>
             <p>Площадь: {{ real_estate_view.square }} м²</p>
+            <p>О недвижимости: {{ real_estate_view.about }}</p>
         </div>
         <div class="actions">
             <a href="{% url 'real_estate_change' real_estate_view.pk %}" class="btn">Изменить данные недвижимость</a>
@@ -64,7 +65,6 @@
             <p>Постройки на участке: {% if data_plot.buildings %} есть {% else %} нету {% endif %}</p>
             <p>Коммуникации: {% if data_plot.communications %} есть {% else %} нету {% endif %}</p>
         {% endif %}
-            <p>О недвижимости: {{ real_estate_view.about }}</p>
     </div>
 </div>
 {% endblock %}

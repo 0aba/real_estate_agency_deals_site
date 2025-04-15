@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block title %}{{title}}{% endblock %}
+
+{% block styles %}
+<link type="text/css" rel="stylesheet" href="{% static 'common/css/profile.css' %}"/>
+<link type="text/css" rel="stylesheet" href="{% static 'real_estate_agency/css/deal_view.css' %}"/>
+{% endblock %}
+{% block scripts %}
+
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="header-profile">
+        <div class="deal">
+            <img src="{{ deal_view.real_estate_deal.main_photo.url }}">
+            <p>Название: {{ deal_view.title }}</p>
+            <p>Была создана: {{ deal_view.date_create }}</p>
+            <p>Текущая цена: {{ deal_view.current_price }}</p>
+            <p>Тип недвижимости: {% if deal_view.real_estate_deal.type == deal_view.real_estate_deal.RealEstateType.APARTMENT %} квартира {% elif deal_view.real_estate_deal.type == deal_view.real_estate_deal.RealEstateType.HOUSE  %} дом {% elif deal_view.real_estate_deal.type == deal_view.real_estate_deal.RealEstateType.PLOT %} участок {% endif %}</p>
+            <p>Тип сделки: {% if deal_view.type == deal_view.DealType.SALE %} продажа {% elif deal_view.type == deal_view.DealType.RENT  %} аренда {% elif deal_view.type == deal_view.DealType.CONSTRUCTION %} строительство {% endif %}</p>
+            <p>Площадь: {{ deal_view.real_estate_deal.square }} м²</p>
+
+            {% if deal_view.type != deal_view.DealType.CONSTRUCTION %}
+            <p>
+                Город: {{ deal_view.real_estate_deal.address_real_estate.city }}
+                {% if deal_view.real_estate_deal.address_real_estate.district %}
+                    Район: {{ deal_view.real_estate_deal.address_real_estate.district }}
+                {% endif %}
+                Улица: {{ deal_view.real_estate_deal.address_real_estate.street }}
+                Дом: {{ deal_view.real_estate_deal.address_real_estate.house }}
+                {% if deal_view.real_estate_deal.address_real_estate.apartment %}
+                    Квартира: {{ deal_view.real_estate_deal.address_real_estate.apartment }}
+                {% endif %}
+            </p>
+            {% endif %}
+
+            <p>О недвижимости: {{ deal_view.real_estate_deal.about }}</p>
+        </div>
+        <div class="actions">
+            {% if user.is_staff %}
+                {% if not deal_view.completed %}
+                    <a href="{% url 'deal_change' deal_view.title_slug %}" class="btn">Изменить данные сделки</a>
+                    <a href="{% url 'completed_deal' deal_view.title_slug %}" class="btn">Закрыть сделку</a>
+                    {% if deal_view.type == deal_view.DealType.RENT %}
+                        {% if data_rental.rented %}
+                            <a href="{% url 'make_unrented_deal' deal_view.title_slug %}" class="btn">Установить статус не арендуется</a>
+                        {% else %}
+                            <a href="{% url 'make_rented_deal' deal_view.title_slug %}" class="btn">Установить статус арендуется</a>
+                        {% endif %}
+                    {% endif %}
+                {% endif %}
+            <a href="{% url 'del_deal' deal_view.title_slug %}" class="btn">Удалить сделку</a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="contacts-deal">
+        {% if not deal_view.completed %}
+            <h3>Контакты для обсуждения сделки</h3>
+            <p>Почта: {{ deal_view.agent.email }}</p>
+            <p>Телефон: {{ deal_view.agent.phone|default:"Не указан" }}</p>
+            <a href="% url 'del_real_estate' real_estate_view.pk %}" class="btn contact-pm">Написать агенту ответственному за недвижимость</a>
+        {% endif %}
+    </div>
+    <div class="extend-data">
+        <div class="extend-data-real-estate">
+            {% if deal_view.real_estate_deal.type == deal_view.real_estate_deal.RealEstateType.APARTMENT %}
+                <h3>Данные квартиры</h3>
+                <p>Этажность дома: {{ data_apartment.number_storeys }}</p>
+                <p>Этаж: {{ data_apartment.floor }}</p>
+                <p>Балкон: {% if data_apartment.balcony %} есть {% else %} нету {% endif %}</p>
+                <p>Мебель: {% if data_apartment.furniture %} есть {% else %} нету {% endif %}</p>
+                <p>Год постройки дома: {{ data_apartment.year_construction }}</p>
+                <p>Аварийность: {% if data_apartment.accident_rate %} есть {% else %} нету {% endif %}</p>
+                <p>Тип комнат: {% if data_apartment.room_type == data_apartment.RoomType.OTHER %} другое {% elif data_apartment.room_type == data_apartment.RoomType.COMMUNAL %} коммуналка {% elif data_apartment.room_type == data_apartment.RoomType.ONE_ROOM %} однокомнатная {% elif data_apartment.room_type == data_apartment.RoomType.TWO_ROOMS %} двухкомнатная {% elif data_apartment.room_type == data_apartment.RoomType.THREE_ROOMS %} трехкомнатная {% elif data_apartment.room_type == data_apartment.RoomType.FOUR_ROOMS %} четырехкомнатная {% elif data_apartment.room_type == data_apartment.RoomType.FOUR_PLUS_ROOMS %} четыре+ комнат {% elif data_apartment.room_type == data_apartment.RoomType.STUDIO %} студия {% elif data_apartment.room_type == data_apartment.RoomType.MAISONETTE %} мезонет {% elif data_apartment.room_type == data_apartment.RoomType.LOFT %} лофт {% elif data_apartment.room_type == data_apartment.RoomType.PENTHOUSE %} пентхаус {% endif %}
+            {% elif deal_view.real_estate_deal.type == deal_view.real_estate_deal.RealEstateType.HOUSE  %}
+                <h3>Данные дома</h3>
+                <p>Этажность дома: {{ data_house.number_storeys }}</p>
+                <p>Площадь дома: {{ data_house.house_area }} м²</p>
+                <p>Год постройки дома: {{ data_house.year_construction }}</p>
+                <p>Гараж: {% if data_house.garage %} есть {% else %} нету {% endif %}</p>
+                <p>Коммуникации: {% if data_house.communications %} есть {% else %} нету {% endif %}</p>
+            {% elif deal_view.real_estate_deal.type == deal_view.real_estate_deal.RealEstateType.PLOT %}
+                <h3>Данные участка</h3>
+                <p>Постройки на участке: {% if data_plot.buildings %} есть {% else %} нету {% endif %}</p>
+                <p>Коммуникации: {% if data_plot.communications %} есть {% else %} нету {% endif %}</p>
+            {% endif %}
+        </div>
+        {% if deal_view.type != deal_view.DealType.SALE %}
+            <div class="extend-data-deal">
+                {% if deal_view.type == deal_view.DealType.RENT %}
+                    <h3>Данные аренды</h3>
+                    <p>Цена ЖКХ: {{ data_rental.price_housing_and_municipalities }}</p>
+                    <p>Предоплата: {{ data_rental.prepayment }}</p>
+                    <p>Срок аренды в днях: {{ data_rental.rental_period_days }}</p>
+                {% elif deal_view.type == deal_view.DealType.CONSTRUCTION  %}
+                    <h3>Данные строительства</h3>
+                    <p>Строительная компания: {{ data_construction.construction_company }}</p>
+                    <p>Примерный срок строительства: {{ data_construction.approximate_dates }}</p>
+                    <p>Документ проекта: {{ data_construction.project_document }}</p>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+    <div class="price-history">
+        <h3>История изменения цены</h3>
+        {{ price_history }}
+    </div>
+</div>
+{% endblock %}

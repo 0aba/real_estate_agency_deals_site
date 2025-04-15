@@ -42,10 +42,10 @@
                     {% if user.is_staff %}
                         <a href="{% url 'real_estate_list' %}">Недвижимость</a>
                     {% endif %}
-                    <a href="#">Аренда</a>
-                    <a href="#">Покупка</a>
-                    <a href="#">Строительство</a>
-                    <a href="{% url 'realtor_list'%}">Риэлтер</a>
+                    <a href="{% url 'deal_list' %}?type_deal=deal_rent_only">Аренда</a>
+                    <a href="{% url 'deal_list' %}?type_deal=deal_sale_only">Покупка</a>
+                    <a href="{% url 'deal_list' %}?type_deal=deal_construction_only">Строительство</a>
+                    <a href="{% url 'realtor_list' %}">Риэлтер</a>
                 </div>
             </div>
             {% if user.is_superuser %}

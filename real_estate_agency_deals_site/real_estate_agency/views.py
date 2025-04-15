@@ -1009,9 +1009,183 @@ class NewDealView(FormView):
         return redirect('deal_list', permanent=False)
 
 
-class DealDetailView(DetailView):
-    ...
+class DealView(DetailView):
+    model = models.Deal
+    template_name = 'real_estate_agency/deal_view.html'
+    context_object_name = 'deal_view'
+    slug_url_kwarg = 'title_slug'
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        base_context = super().get_context_data(**kwargs)
+
+        context = {
+            'title': f'Сделка {self.object.title}',
+            'price_history': models.ChangePrices.objects.filter(deal_price=self.object),
+        }
+
+        if self.object.type == models.Deal.DealType.RENT:
+            context['data_rental'] = models.DataRental.objects.get(deal_rental=self.object)
+        elif self.object.type == models.Deal.DealType.CONSTRUCTION:
+            context['data_construction'] = models.DataConstruction.objects.get(deal_construction=self.object)
+
+        if self.object.real_estate_deal.type == models.RealEstate.RealEstateType.APARTMENT:
+            context['data_apartment'] = models.DataApartment.objects.get(real_estate_DA=self.object.real_estate_deal)
+        elif self.object.real_estate_deal.type == models.RealEstate.RealEstateType.HOUSE:
+            context['data_house'] = models.DataHouse.objects.get(real_estate_DH=self.object.real_estate_deal)
+        elif self.object.real_estate_deal.type == models.RealEstate.RealEstateType.PLOT:
+            context['data_plot'] = models.DataPlot.objects.get(real_estate_DP=self.object.real_estate_deal)
+
+        return {**base_context, **context}
+
+    def dispatch(self, request, *args, **kwargs):
+        real_estate = self.get_object()
+
+        if isinstance(real_estate, HttpResponseRedirect):
+            return real_estate
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_object(self, queryset=None):
+        try:
+            object_deal = self.model.objects.get(title_slug=self.kwargs.get(self.slug_url_kwarg))
+        except ObjectDoesNotExist:
+            messages.error(self.request, 'Сделка не найден')
+            return redirect('deal_list', permanent=False)
+
+        return object_deal
 
 
 class ChangeDealView(FormView):
-    ...
+    model = models.Deal
+    form_class = forms.DealForm
+    template_name = 'real_estate_agency/deal_change.html'
+    slug_url_kwarg = 'title_slug'
+    old_deal = None
+
+    def get_context_data(self, **kwargs):
+        base_context = super().get_context_data(**kwargs)
+
+        initial_dict = {
+            'title': self.old_deal.title,
+            'type': self.old_deal.type,
+            'price': self.old_deal.current_price,
+            'real_estate_deal_id': self.old_deal.real_estate_deal.pk,
+            'agent_username': self.old_deal.agent.username,
+        }
+
+        if self.old_deal.type == models.Deal.DealType.RENT:
+            data_rental = models.DataRental.objects.get(deal_rental=self.old_deal)
+            initial_dict['price_housing_and_municipalities'] = data_rental.price_housing_and_municipalities
+            initial_dict['prepayment'] = data_rental.prepayment
+            initial_dict['rental_period_days'] = data_rental.rental_period_days
+        elif self.old_deal.type == models.Deal.DealType.CONSTRUCTION:
+            data_construction = models.DataConstruction.objects.get(deal_construction=self.old_deal)
+            initial_dict['construction_company'] = data_construction.construction_company
+            initial_dict['approximate_dates'] = data_construction.approximate_dates
+            initial_dict['project_document'] = data_construction.project_document
+
+        context = {
+            'title': f'Изменить сделку {self.old_deal.title}',
+            'form': self.form_class(initial=initial_dict)
+        }
+
+        return {**base_context, **context}
+
+    def dispatch(self, request, *args, **kwargs):
+        if self.request.user.is_anonymous:
+            messages.warning(request, 'Что бы изменить данные о сделке, нужно авторизоваться')
+            return redirect('login', permanent=False)
+
+        if not self.request.user.is_staff:
+            messages.error(request, 'Что бы изменить данные о сделке, нужно быть агентом недвижимости')
+            return redirect('deal', title_slug=self.kwargs.get(self.slug_url_kwarg), permanent=False)
+
+        self.old_deal = self.get_object()
+
+        if isinstance(self.old_deal, HttpResponseRedirect):
+            return self.old_deal
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_object(self, queryset=None):
+        try:
+            object_deal = self.model.objects.get(title_slug=self.kwargs.get(self.slug_url_kwarg))
+        except ObjectDoesNotExist:
+            messages.error(self.request, 'Сделка не найден')
+            return redirect('deal_list', permanent=False)
+
+        return object_deal
+
+    def form_valid(self, form):
+        try:
+            real_estate_deal = models.RealEstate.non_deleted.get(pk=int(form.cleaned_data.get('real_estate_deal_id')))
+        except ObjectDoesNotExist:
+            messages.error(self.request, 'Недвижимость по данному номеру не существует')
+            return redirect('deal_list', permanent=False)
+
+        if real_estate_deal != self.old_deal.real_estate_deal and models.Deal.non_deleted.filter(
+            real_estate_deal=real_estate_deal,
+
+        ).exists():
+            messages.error(self.request, 'На одну недвижимость может существовать только одна сделка')
+            return redirect('deal_list', permanent=False)
+
+        try:
+            agent = user_models.User.objects.get(
+                username=form.cleaned_data.get('agent_username').strip(),
+                is_staff=True
+            )
+        except ObjectDoesNotExist:
+            messages.error(self.request, 'Агент недвижимости с данным логином не существует')
+            return redirect('deal_list', permanent=False)
+
+        type_deal = int(form.cleaned_data.get('type'))
+        old_type = self.old_deal.type
+        self.old_deal.title = form.cleaned_data.get('title')
+        self.old_deal.type = type_deal
+        self.old_deal.current_price = form.cleaned_data.get('price')
+        self.old_deal.real_estate_deal = real_estate_deal
+        self.old_deal.agent = agent
+        self.old_deal.save()
+
+        if type_deal == models.Deal.DealType.SALE:
+            if type_deal != old_type:
+                self.__del_extend_data(old_type)
+        elif type_deal == models.Deal.DealType.RENT:
+            if type_deal == old_type:
+                old_data_rental = models.DataRental.objects.get(deal_rental=self.old_deal)
+                old_data_rental.price_housing_and_municipalities = form.cleaned_data.get('price_housing_and_municipalities')
+                old_data_rental.prepayment = form.cleaned_data.get('prepayment')
+                old_data_rental.rental_period_days = form.cleaned_data.get('rental_period_days')
+                old_data_rental.save()
+            else:
+                self.__del_extend_data(old_type)
+                models.DataHouse.objects.create(
+                    deal_rental=self.old_deal,
+                    price_housing_and_municipalities=form.cleaned_data.get('price_housing_and_municipalities'),
+                    prepayment=form.cleaned_data.get('prepayment'),
+                    rental_period_days=form.cleaned_data.get('rental_period_days'),
+                )
+        elif type_deal == models.Deal.DealType.CONSTRUCTION:
+            if type_deal == old_type:
+                old_data_construction = models.DataConstruction.objects.get(deal_construction=self.old_deal)
+                old_data_construction.construction_company = form.cleaned_data.get('construction_company')
+                old_data_construction.approximate_dates = form.cleaned_data.get('approximate_dates')
+                old_data_construction.project_document = form.cleaned_data.get('project_document')
+                old_data_construction.save()
+            else:
+                self.__del_extend_data(old_type)
+                models.DataPlot.objects.create(
+                    deal_construction=self.old_deal,
+                    construction_company=form.cleaned_data.get('construction_company'),
+                    approximate_dates=form.cleaned_data.get('approximate_dates'),
+                    project_document=form.cleaned_data.get('project_document'),
+                )
+
+        return redirect('deal', title_slug=self.kwargs.get(self.slug_url_kwarg), permanent=False)
+
+    def __del_extend_data(self, type_data):
+        if type_data == models.Deal.DealType.RENT:
+            models.DataRental.objects.get(deal_rental=self.old_deal).delete()
+        elif type_data == models.Deal.DealType.CONSTRUCTION :
+            models.DataConstruction.objects.get(deal_construction=self.old_deal).delete()

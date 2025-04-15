@@ -9,11 +9,10 @@ urlpatterns_actions = [
 
     path('del-real-estate/<int:pk>/', utils.del_real_estate, name='del_real_estate'),
 
-    # path('del-deal/<int:pk>/', utils.del_deal, name='del_deal'),
-    # path('del-deal/<int:pk>/', utils.del_deal, name='del_deal'),
-    # path('del-deal/<int:pk>/', utils.del_deal, name='del_deal'),
-    # path('del-deal/<int:pk>/', utils.del_deal, name='del_deal'),
-    # path('del-deal/<int:pk>/', utils.del_deal, name='del_deal'),
+    path('del-deal/<slug:title_slug>/', utils.del_deal, name='del_deal'),
+    path('completed-deal/<slug:title_slug>/', utils.completed_deal, name='completed_deal'),
+    path('make-rented-deal/<slug:title_slug>/', utils.make_rented_deal, name='make_rented_deal'),
+    path('make-unrented-deal/<slug:title_slug>/', utils.make_unrented_deal, name='make_unrented_deal'),
 ]
 
 urlpatterns = ([
@@ -31,8 +30,8 @@ urlpatterns = ([
 
     path('deal-list/', views.DealListView.as_view(), name='deal_list'),
     path('deal-new/', views.NewDealView.as_view(), name='deal_new'),
-    path('deal/<slug:title_slug>/', views.DetailView.as_view(), name='deal'),
-    # path('deal/<slug:title_slug>/change/', views.ChangeRealEstateView.as_view(), name='deal_change'),
+    path('deal/<slug:title_slug>/', views.DealView.as_view(), name='deal'),
+    path('deal/<slug:title_slug>/change/', views.ChangeDealView.as_view(), name='deal_change'),
 ]
 + urlpatterns_actions
 )
