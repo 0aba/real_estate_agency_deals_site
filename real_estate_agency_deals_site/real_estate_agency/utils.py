@@ -112,7 +112,6 @@ def completed_deal(request, title_slug):
 
     return redirect('deal', title_slug=title_slug, permanent=False)
 
-
 def make_rented_deal(request, title_slug):
     if request.user.is_anonymous:
         messages.warning(request, 'Авторизуйтесь, чтобы пометить сделку как арендуемую')
@@ -180,3 +179,49 @@ def make_unrented_deal(request, title_slug):
 
     return redirect('deal', title_slug=title_slug, permanent=False)
 
+def track_deal(request, title_slug):
+    if request.user.is_anonymous:
+        messages.warning(request, 'Авторизуйтесь, чтобы следить за сделкой')
+        return redirect('login', permanent=False)
+
+    try:
+        deal = models.Deal.non_deleted.get(title_slug=title_slug)
+    except ObjectDoesNotExist:
+        messages.error(request, 'Сделка не найдена')
+        return redirect('deal_list', permanent=False)
+
+    if models.TrackDeal.objects.filter(
+            deal_rental=deal,
+            who_track=request.user,
+    ).exists():
+        messages.error(request, 'Вы уже следите за сделкой')
+        return redirect('deal', title_slug=title_slug, permanent=False)
+
+    models.TrackDeal.objects.create(
+        deal_rental=deal,
+        who_track=request.user,
+    )
+
+    return redirect('deal', title_slug=title_slug, permanent=False)
+
+def stop_track_deal(request, title_slug):
+    if request.user.is_anonymous:
+        messages.warning(request, 'Авторизуйтесь, чтобы следить за сделкой')
+        return redirect('login', permanent=False)
+
+    try:
+        deal = models.Deal.non_deleted.get(title_slug=title_slug)
+    except ObjectDoesNotExist:
+        messages.error(request, 'Сделка не найдена')
+        return redirect('deal_list', permanent=False)
+
+    try:
+        models.TrackDeal.objects.get(
+            deal_rental=deal,
+            who_track=request.user,
+        ).delete()
+    except ObjectDoesNotExist:
+        messages.error(request, 'Вы не следите за сделкой')
+        return redirect('deal', title_slug=title_slug, permanent=False)
+
+    return redirect('deal', title_slug=title_slug, permanent=False)

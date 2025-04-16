@@ -13,6 +13,8 @@ urlpatterns_actions = [
     path('completed-deal/<slug:title_slug>/', utils.completed_deal, name='completed_deal'),
     path('make-rented-deal/<slug:title_slug>/', utils.make_rented_deal, name='make_rented_deal'),
     path('make-unrented-deal/<slug:title_slug>/', utils.make_unrented_deal, name='make_unrented_deal'),
+    path('track-deal/<slug:title_slug>/', utils.track_deal, name='track_deal'),
+    path('stop-track-deal/<slug:title_slug>/', utils.stop_track_deal, name='stop_track_deal'),
 ]
 
 urlpatterns = ([

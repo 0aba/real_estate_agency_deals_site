@@ -1023,6 +1023,12 @@ class DealView(DetailView):
             'price_history': models.ChangePrices.objects.filter(deal_price=self.object),
         }
 
+        if self.request.user.is_authenticated:
+            context['track_this_deal'] = models.TrackDeal.objects.filter(
+                track_deal=self.object,
+                who_track=self.request.user,
+            ).exists(),
+
         if self.object.type == models.Deal.DealType.RENT:
             context['data_rental'] = models.DataRental.objects.get(deal_rental=self.object)
         elif self.object.type == models.Deal.DealType.CONSTRUCTION:
@@ -1143,7 +1149,12 @@ class ChangeDealView(FormView):
         old_type = self.old_deal.type
         self.old_deal.title = form.cleaned_data.get('title')
         self.old_deal.type = type_deal
-        self.old_deal.current_price = form.cleaned_data.get('price')
+        if self.old_deal.current_price != form.cleaned_data.get('price'):
+            models.ChangePrices.objects.create(
+                deal_price=self.old_deal,
+                price=self.old_deal.current_price,
+            )
+            self.old_deal.current_price = form.cleaned_data.get('price')
         self.old_deal.real_estate_deal = real_estate_deal
         self.old_deal.agent = agent
         self.old_deal.save()

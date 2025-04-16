@@ -55,6 +55,13 @@
                 {% endif %}
             <a href="{% url 'del_deal' deal_view.title_slug %}" class="btn">Удалить сделку</a>
             {% endif %}
+            {% if not deal_view.completed %}
+                {% if data_rental.rented %}
+                    <a href="{% url 'stop_track_deal' deal_view.title_slug %}" class="btn">Перестать отслеживать сделку</a>
+                {% else %}
+                    <a href="{% url 'track_deal' deal_view.title_slug %}" class="btn">Отслеживать сделку</a>
+                {% endif %}
+            {% endif %}
         </div>
     </div>
     <div class="contacts-deal">
@@ -106,8 +113,38 @@
         {% endif %}
     </div>
     <div class="price-history">
-        <h3>История изменения цены</h3>
-        {{ price_history }}
+        {% load price_tags %}
+        <h3>История изменения цены за год</h3>
+        {% if price_history %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Дата изменения</th>
+                    <th>Цена</th>
+                    <th>Изменение</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in price_history %}
+                <tr>
+                    <td>{{ record.date_change|date:"d.m.Y H:i" }}</td>
+                    <td>{{ record.price }} ₽</td>
+                    <td>
+                        {% if not forloop.last %}
+                            {% with next_record=price_history|next_value:forloop.counter0 %}
+                                {{ record.price|subtract:next_record.price }} ₽
+                            {% endwith %}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>История изменений цены отсутствует</p>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
