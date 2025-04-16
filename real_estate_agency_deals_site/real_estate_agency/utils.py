@@ -191,14 +191,14 @@ def track_deal(request, title_slug):
         return redirect('deal_list', permanent=False)
 
     if models.TrackDeal.objects.filter(
-            deal_rental=deal,
+            track_deal=deal,
             who_track=request.user,
     ).exists():
         messages.error(request, 'Вы уже следите за сделкой')
         return redirect('deal', title_slug=title_slug, permanent=False)
 
     models.TrackDeal.objects.create(
-        deal_rental=deal,
+        track_deal=deal,
         who_track=request.user,
     )
 
@@ -217,7 +217,7 @@ def stop_track_deal(request, title_slug):
 
     try:
         models.TrackDeal.objects.get(
-            deal_rental=deal,
+            track_deal=deal,
             who_track=request.user,
         ).delete()
     except ObjectDoesNotExist:

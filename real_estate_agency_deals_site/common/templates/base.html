@@ -71,6 +71,11 @@
         </div>
         <div class="right-block">
             {% if user.is_authenticated %}
+            <div class="element-header">
+                <a href="{% url 'my_track_deal_list' %}" class="btn-header">
+                    <img src="{% static 'common/svg/record-track.svg' %}">
+                </a>
+            </div>
             <div class="dropdown">
                 {% get_notifications user as notifications %}
                 {% if notifications|has_viewed %}
@@ -120,7 +125,6 @@
                     {% else %}
                         <img src="{% static 'common/svg/messages.svg' %}">
                     {% endif %}
-
                 </a>
             </div>
             <div class="element-header">

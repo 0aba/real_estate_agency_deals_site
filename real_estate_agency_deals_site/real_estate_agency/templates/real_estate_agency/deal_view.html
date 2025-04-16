@@ -55,8 +55,8 @@
                 {% endif %}
             <a href="{% url 'del_deal' deal_view.title_slug %}" class="btn">Удалить сделку</a>
             {% endif %}
-            {% if not deal_view.completed %}
-                {% if data_rental.rented %}
+            {% if user.is_authenticated %}
+                {% if track_this_deal %}
                     <a href="{% url 'stop_track_deal' deal_view.title_slug %}" class="btn">Перестать отслеживать сделку</a>
                 {% else %}
                     <a href="{% url 'track_deal' deal_view.title_slug %}" class="btn">Отслеживать сделку</a>
@@ -69,7 +69,7 @@
             <h3>Контакты для обсуждения сделки</h3>
             <p>Почта: {{ deal_view.agent.email }}</p>
             <p>Телефон: {{ deal_view.agent.phone|default:"Не указан" }}</p>
-            <a href="% url 'del_real_estate' real_estate_view.pk %}" class="btn contact-pm">Написать агенту ответственному за недвижимость</a>
+            <a href="{% url 'private_message_user' deal_view.agent.username %}" class="btn contact-pm">Написать агенту ответственному за недвижимость</a>
         {% endif %}
     </div>
     <div class="extend-data">

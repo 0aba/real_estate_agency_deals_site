@@ -16,7 +16,7 @@
     <div class="bl-list">
         {% for el in black_list %}
             <div class="blocked-user">
-                <img src="/media/{{ el.who_on_BL.photo }}">
+                <img src="{{ el.who_on_BL.photo.url }}">
                 <p><a href="{% url 'user_profile' el.who_on_BL.username %}">{{ el.who_on_BL.username }}</a></p>
                 <p>Был добавлен: {{ el.date_add }}</p>
                 <a href="{% url 'del_bl_my_black_list' el.who_on_BL.username %}" class="btn">Удалить</a>

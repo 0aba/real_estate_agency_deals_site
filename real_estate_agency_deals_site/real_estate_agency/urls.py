@@ -34,6 +34,8 @@ urlpatterns = ([
     path('deal-new/', views.NewDealView.as_view(), name='deal_new'),
     path('deal/<slug:title_slug>/', views.DealView.as_view(), name='deal'),
     path('deal/<slug:title_slug>/change/', views.ChangeDealView.as_view(), name='deal_change'),
+
+    path('my-track-deal-list/', views.TrackDealView.as_view(), name='my_track_deal_list'),
 ]
 + urlpatterns_actions
 )

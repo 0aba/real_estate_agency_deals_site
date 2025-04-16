@@ -72,6 +72,7 @@
 }
 
 .price-history th, .price-history td {
+    color: #41b039;
     padding: 8px 12px;
     border: 1px solid #ddd;
     text-align: left;

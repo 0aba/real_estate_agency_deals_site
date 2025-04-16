@@ -7,6 +7,7 @@ from user import models as user_models
 from django.db.models import F, Value
 from django.shortcuts import redirect
 from django.contrib import messages
+import csv
 
 
 class ChangeReviewAgencyView(UpdateView):
@@ -796,9 +797,6 @@ class DealListView(ListView):
 
         square_min_value = self.request.GET.get('square_min_value')
         square_max_value = self.request.GET.get('square_max_value')
-        when_added_min_value = self.request.GET.get('when_added_min_value')
-        when_added_max_value = self.request.GET.get('when_added_max_value')
-        address_real_estate = self.request.GET.get('address_real_estate')
         type_real_estate = self.request.GET.get('type_real_estate')
 
         if square_min_value:
@@ -1027,7 +1025,7 @@ class DealView(DetailView):
             context['track_this_deal'] = models.TrackDeal.objects.filter(
                 track_deal=self.object,
                 who_track=self.request.user,
-            ).exists(),
+            ).exists()
 
         if self.object.type == models.Deal.DealType.RENT:
             context['data_rental'] = models.DataRental.objects.get(deal_rental=self.object)
@@ -1200,3 +1198,33 @@ class ChangeDealView(FormView):
             models.DataRental.objects.get(deal_rental=self.old_deal).delete()
         elif type_data == models.Deal.DealType.CONSTRUCTION :
             models.DataConstruction.objects.get(deal_construction=self.old_deal).delete()
+
+
+class TrackDealView(ListView):
+    paginate_by = 10
+    model = models.TrackDeal
+    template_name = 'real_estate_agency/my_track_deal_list.html'
+    context_object_name = 'track_deal_list'
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        base_context = super().get_context_data(**kwargs)
+
+        context = {
+            'title': 'Список отслеживаемых сделок',
+        }
+
+        return {**base_context, **context}
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_anonymous:
+            messages.warning(request, 'Вам необходимо авторизоваться, чтобы просмотреть список отслеживаемых сделок')
+            return redirect('login', permanent=False)
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        queryset = models.TrackDeal.objects.filter(who_track=self.request.user)
+        return queryset
+
+
+
