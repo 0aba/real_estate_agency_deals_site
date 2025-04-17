@@ -7,7 +7,6 @@ from user import models as user_models
 from django.db.models import F, Value
 from django.shortcuts import redirect
 from django.contrib import messages
-import csv
 
 
 class ChangeReviewAgencyView(UpdateView):
@@ -1225,6 +1224,3 @@ class TrackDealView(ListView):
     def get_queryset(self):
         queryset = models.TrackDeal.objects.filter(who_track=self.request.user)
         return queryset
-
-
-

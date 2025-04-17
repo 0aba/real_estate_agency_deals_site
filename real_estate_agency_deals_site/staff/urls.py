@@ -12,4 +12,6 @@ urlpatterns = [
     path('appeal/<int:pk>/consider/', views.ConsiderAppeal.as_view(), name='appeal_consider'),
 
     path('logs-private-message/', views.LogsPrivateMessage.as_view(), name='logs_private_message'),
+
+    path('deal-statistics/', views.DealStatistics.as_view(), name='deal_statistics'),
 ]

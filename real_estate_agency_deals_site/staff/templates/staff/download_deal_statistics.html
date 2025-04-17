@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block title %}{{title}}{% endblock %}
+
+{% block styles %}
+<link type="text/css" rel="stylesheet" href="{% static 'common/css/form.css' %}"/>
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'staff/js/selectedDealAgencyForm.js' %}" defer></script>
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2 class="form-title">{{ title }}</h2>
+    <form method="post" class="form" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <div class="form-group">
+            <label>{{ form.type_deal.label }}</label>
+            {{ form.type_deal }}
+            {{ form.type_deal.errors }}
+        </div>
+        <div id="rent" class="view-group">
+            <div class="form-group">
+                <label>{{ form.rented.label }}</label>
+                {{ form.rented }}
+                {{ form.rented.errors }}
+            </div>
+        </div>
+        <div id="construction" class="view-group">
+            <div class="form-group">
+                <label>{{ form.construction_company.label }}</label>
+                {{ form.construction_company }}
+                {{ form.construction_company.errors }}
+            </div>
+        </div>
+
+
+
+        <div class="form-group">
+            <label>{{ form.date_create_start.label }}</label>
+            {{ form.date_create_start }}
+            {{ form.date_create_start.errors }}
+        </div>
+        <div class="form-group">
+            <label>{{ form.date_create_end.label }}</label>
+            {{ form.date_create_end }}
+            {{ form.date_create_end.errors }}
+        </div>
+        <div class="form-group">
+            <label>{{ form.price_min.label }}</label>
+            {{ form.price_min }}
+            {{ form.price_min.errors }}
+        </div>
+        <div class="form-group">
+            <label>{{ form.price_max.label }}</label>
+            {{ form.price_max }}
+            {{ form.price_max.errors }}
+        </div>
+        <div class="form-group">
+            <label>{{ form.completed_deal_status.label }}</label>
+            {{ form.completed_deal_status }}
+            {{ form.completed_deal_status.errors }}
+        </div>
+        <div class="form-group">
+            <label>{{ form.deleted_deal.label }}</label>
+            {{ form.deleted_deal }}
+            {{ form.deleted_deal.errors }}
+        </div>
+        <div class="form-group">
+            <label>{{ form.agent_username.label }}</label>
+            {{ form.agent_username }}
+            {{ form.agent_username.errors }}
+        </div>
+        <div class="form-group">
+            <label>{{ form.real_estate_deal_id.label }}</label>
+            {{ form.real_estate_deal_id }}
+            {{ form.real_estate_deal_id.errors }}
+        </div>
+        <div class="form-group">
+            <label>{{ form.type_real_estate.label }}</label>
+            {{ form.type_real_estate }}
+            {{ form.type_real_estate.errors }}
+        </div>
+        <div class="form-group">
+            <label>{{ form.square_min.label }}</label>
+            {{ form.square_min }}
+            {{ form.square_min.errors }}
+        </div>
+        <div class="form-group">
+            <label>{{ form.square_max.label }}</label>
+            {{ form.square_max }}
+            {{ form.square_max.errors }}
+        </div>
+        <button type="submit" class="form-button">Загрузить статистику</button>
+    </form>
+</div>
+{% endblock %}
