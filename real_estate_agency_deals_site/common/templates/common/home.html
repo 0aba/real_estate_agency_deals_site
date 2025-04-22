@@ -20,8 +20,8 @@
         } else {
             dealTypeSelect.disabled = false;
 
-            if (realEstateTypeSelect.value === "plot") {
-                dealTypeSelect.querySelector('option[value="construction"]').disabled = true;
+            if (realEstateTypeSelect.value === "plot_only") {
+                dealTypeSelect.querySelector('option[value="deal_construction_only"]').disabled = true;
             } else {
                 Array.from(dealTypeSelect.options).forEach(option => {
                     option.disabled = false;
@@ -36,22 +36,24 @@
 
 <div class="city">
     <div class="found-deal">
-        <form>
-            <select id="realEstateType" onchange="updateDealType()">
-                <option value="">Тип недвижимости</option>
-                <option value="house">Дом</option>
-                <option value="apartment">Квартира</option>
-                <option value="plot">Участок</option>
+        <form method="post">
+            {% csrf_token %}
+            <input name="formId" value="search_deal_home" type="hidden"/>
+            <select id="realEstateType" name="real_estate_type" onchange="updateDealType()">
+                <option value="real_estate_any">Тип недвижимости</option>
+                <option value="house_only">Дом</option>
+                <option value="apartment_only">Квартира</option>
+                <option value="plot_only">Участок</option>
             </select>
-            <select id="dealType" disabled>
-                <option value="">Тип сделки</option>
-                <option value="sale">Продажа</option>
-                <option value="rent">Аренда</option>
-                <option value="construction">Строительство</option>
+            <select id="dealType" name="deal_type" disabled>
+                <option value="type_deal_any">Тип сделки</option>
+                <option value="deal_sale_only">Продажа</option>
+                <option value="deal_rent_only">Аренда</option>
+                <option value="deal_construction_only">Строительство</option>
             </select>
-            <input type="number" placeholder="Цена от">
-            <input type="number" placeholder="Цена до">
-            <button type="button">Найти</button>
+            <input name="deal_price_min" type="number" min="0" step="0.01" placeholder="Цена от">
+            <input name="deal_price_max" type="number" min="0" step="0.01" placeholder="Цена до">
+            <button type="submit">Найти</button>
         </form>
     </div>
 </div>

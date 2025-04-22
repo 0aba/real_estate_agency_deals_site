@@ -6,8 +6,8 @@ from django.shortcuts import redirect
 from real_estate_agency import forms
 from django.contrib import messages
 from django.shortcuts import render
+from django.urls import reverse
 from django.views import View
-
 
 class Home(FormMixin,View):
     template_name = 'common/home.html'
@@ -45,6 +45,16 @@ class Home(FormMixin,View):
         return render(request, self.template_name, context=Home.get_context_data(self))
 
     def post(self, request, *args, **kwargs):
+        if request.POST.get('formId') == 'search_deal_home':
+            deal_type = request.POST.get('deal_type')
+            real_estate_type = request.POST.get('real_estate_type')
+            deal_price_min = request.POST.get('deal_price_min')
+            deal_price_max = request.POST.get('deal_price_max')
+
+            base_url = reverse('deal_list')
+            query_string = f'type_deal={deal_type}&type_real_estate={real_estate_type}&price_deal_min_value={deal_price_min}&price_deal_max_value={deal_price_max}'
+            return redirect(f'{base_url}?{query_string}', permanent=False)
+
         if self.request.user.is_anonymous:
             messages.error(request, 'Отзыв может оставить только авторизованный пользователь')
             return redirect('home', permanent=False)
