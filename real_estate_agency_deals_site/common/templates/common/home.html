@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
 
-
 {% block title %}{{title}}{% endblock %}
 
 {% block styles %}
@@ -60,7 +59,7 @@
 <div class="review-container">
     <h3>Отзывы</h3>
     <div class="reviews">
-    {% for review in reviews_agency %}
+    {% for review in page_obj %}
         <div class="review">
             <div class="review-header">
                 <img src="{{ review.wrote_review.photo.url }}">
@@ -68,7 +67,7 @@
                     <span class="review-author">{{ review.wrote_review.username }}</span>
                     <span class="review-date">
                         {{ review.date_write }}
-                        <span class="grade"> {{ review.grade|floatformat:2 }}</span>
+                        {% include "includes/star_rating_display.html" with rating=review.grade %}
                         {% if review.change %}
                             <span class="edited-badge">(изменено)</span>
                         {% endif %}
@@ -99,10 +98,7 @@
         <form method="post" class="form">
             {% csrf_token %}
             {{ form.non_field_errors }}
-            <div class="form-group">
-                {{ form.grade }}
-                {{ form.grade.errors }}
-            </div>
+            {% include "includes/half_stars_rating.html" with name="grade" %}
             <div class="form-group">
                 {{ form.message }}
                 {{ form.message.errors }}
