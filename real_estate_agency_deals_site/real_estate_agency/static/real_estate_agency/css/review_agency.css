@@ -101,14 +101,28 @@ h3 {
     background-color: #ffcdd2;
 }
 
+.write-review textarea,
 .message-content textarea {
     width: 100%;
-    min-height: 100px;
+    height: 150px;
+    font-size: 14px;
     border: 1px solid #1e1e1e;;
     border-radius: 4px;
     resize: none;
     background-color: #c5c5c5;
     color: black;
+}
+
+.write-review button {
+    width: 100%;
+    display: inline-block;
+    margin-bottom: 15px;
+    padding: 8px 4px;
+    background-color: #0d62c9;
+    border-radius: 4px;
+    color: white;
+    text-decoration: none;
+    transition: background-color 0.3s;
 }
 
 .write-review {

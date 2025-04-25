@@ -10,7 +10,6 @@ function selectedDealAgencyForm() {
     }
 
     let selectedValue = select?.value - 1;
-    console.log(select?.value)
 
     if (arraySelect[selectedValue]) {
         arraySelect[selectedValue].style.display = 'block';

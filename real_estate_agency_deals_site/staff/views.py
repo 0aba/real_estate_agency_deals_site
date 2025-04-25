@@ -402,7 +402,7 @@ class DealStatistics(FormView):
     def get_context_data(self, **kwargs):
         base_context = super().get_context_data(**kwargs)
         context = {
-            'title': f'Скачать статистику',
+            'title': f'Скачать статистику сделок',
         }
 
         return {**base_context, **context}
@@ -512,5 +512,257 @@ class DealStatistics(FormView):
             writer.writerow((id_table, deal.title, deal_type(deal.type).label, real_estate_type(deal.real_estate_deal.type).label, deal.real_estate_deal.square,
                              deal.current_price, deal.real_estate_deal.pk, deal.agent.username,
                              'Завершена' if deal.completed else 'Не завершена', deal.date_create,))
+
+        return response
+
+
+class ImportRealEstateData(FormView):
+    model = real_estate_agency_models.RealEstate
+    form_class = forms.ImportRealEstateDataFilterForm
+    template_name = 'staff/import_real_estate_data.html'
+
+    def get_context_data(self, **kwargs):
+        base_context = super().get_context_data(**kwargs)
+        context = {
+            'title': 'Импорт данных недвижимости',
+        }
+
+        return {**base_context, **context}
+
+    def dispatch(self, request, *args, **kwargs):
+        if self.request.user.is_anonymous:
+            messages.warning(request, 'Что бы импортировать данные недвижимость, нужно авторизоваться')
+            return redirect('login', permanent=False)
+
+        if not self.request.user.is_superuser:
+            messages.error(request, 'Что бы импортировать данные недвижимость, нужно быть администратором')
+            return redirect('home', permanent=False)
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        queryset = real_estate_agency_models.RealEstate.non_deleted.filter()
+
+        type_real_estate = form.cleaned_data.get('type_real_estate')
+        if type_real_estate:
+            type_real_estate = int(type_real_estate)
+            if type_real_estate == real_estate_agency_models.RealEstate.RealEstateType.APARTMENT:
+                queryset = queryset.filter(type=real_estate_agency_models.RealEstate.RealEstateType.APARTMENT)
+
+                apartment_number_storeys_min = form.cleaned_data.get('apartment_number_storeys_min')
+                apartment_number_storeys_max = form.cleaned_data.get('apartment_number_storeys_max')
+                apartment_floor_min = form.cleaned_data.get('apartment_floor_min')
+                apartment_floor_max = form.cleaned_data.get('apartment_floor_max')
+                apartment_balcony = form.cleaned_data.get('apartment_balcony')
+                apartment_furniture = form.cleaned_data.get('apartment_furniture')
+
+                apartment_year_construction_min = form.cleaned_data.get('apartment_year_construction_min')
+                apartment_year_construction_max = form.cleaned_data.get('apartment_year_construction_max')
+                apartment_accident_rate = form.cleaned_data.get('apartment_accident_rate')
+                apartment_room_type = form.cleaned_data.get('apartment_room_type')
+
+                if apartment_number_storeys_min:
+                    queryset = queryset.filter(real_estate_DA_fk__number_storeys__gte=apartment_number_storeys_min)
+
+                if apartment_number_storeys_max:
+                    queryset = queryset.filter(real_estate_DA_fk__number_storeys__lte=apartment_number_storeys_max)
+
+                if apartment_floor_min:
+                    queryset = queryset.filter(real_estate_DA_fk__floor__gte=apartment_floor_min)
+
+                if apartment_floor_max:
+                    queryset = queryset.filter(real_estate_DA_fk__floor__lte=apartment_floor_max)
+
+
+                if apartment_year_construction_min:
+                    queryset = queryset.filter(real_estate_DA_fk__year_construction__gte=apartment_year_construction_min)
+
+                if apartment_year_construction_max:
+                    queryset = queryset.filter(real_estate_DA_fk__year_construction__lte=apartment_year_construction_max)
+
+                if apartment_balcony:
+                    apartment_balcony = int(apartment_balcony)
+                    if apartment_balcony == forms.ImportRealEstateDataFilterForm.BoolFieldChoice.YES:
+                        queryset = queryset.filter(real_estate_DA_fk__balcony=True)
+                    elif apartment_balcony == forms.ImportRealEstateDataFilterForm.BoolFieldChoice.NO:
+                        queryset = queryset.filter(real_estate_DA_fk__balcony=False)
+
+                if apartment_furniture:
+                    apartment_furniture = int(apartment_furniture)
+                    if apartment_furniture == forms.ImportRealEstateDataFilterForm.BoolFieldChoice.YES:
+                        queryset = queryset.filter(real_estate_DA_fk__furniture=True)
+                    elif apartment_furniture == forms.ImportRealEstateDataFilterForm.BoolFieldChoice.NO:
+                        queryset = queryset.filter(real_estate_DA_fk__furniture=False)
+
+                if apartment_accident_rate:
+                    apartment_accident_rate = int(apartment_accident_rate)
+                    if apartment_accident_rate == forms.ImportRealEstateDataFilterForm.BoolFieldChoice.YES:
+                        queryset = queryset.filter(real_estate_DA_fk__accident_rate=True)
+                    elif apartment_accident_rate == forms.ImportRealEstateDataFilterForm.BoolFieldChoice.NO:
+                        queryset = queryset.filter(real_estate_DA_fk__accident_rate=False)
+
+                if apartment_room_type:
+                    apartment_room_type = int(apartment_room_type)
+                    if 0 <= apartment_furniture <= len(real_estate_agency_models.DataApartment.RoomType.choices):
+                        queryset = queryset.filter(real_estate_DA_fk__room_type=apartment_room_type)
+            elif type_real_estate == real_estate_agency_models.RealEstate.RealEstateType.HOUSE:
+                queryset = queryset.filter(type=real_estate_agency_models.RealEstate.RealEstateType.HOUSE)
+
+                house_number_storeys_min = form.cleaned_data.get('house_number_storeys_min')
+                house_number_storeys_max = form.cleaned_data.get('house_number_storeys_max')
+                house_area_min = form.cleaned_data.get('house_area_min')
+                house_area_max = form.cleaned_data.get('house_area_max')
+                house_year_construction_min = form.cleaned_data.get('house_year_construction_min')
+                house_year_construction_max = form.cleaned_data.get('house_year_construction_max')
+                house_garage = form.cleaned_data.get('house_garage')
+                house_communications = form.cleaned_data.get('house_communications')
+
+                if house_number_storeys_min:
+                    queryset = queryset.filter(real_estate_DH_fk__number_storeys__gte=house_number_storeys_min)
+
+                if house_number_storeys_max:
+                    queryset = queryset.filter(real_estate_DH_fk__number_storeys__lte=house_number_storeys_max)
+
+                if house_area_min:
+                    queryset = queryset.filter(real_estate_DH_fk__house_area__gte=house_area_min)
+
+                if house_area_max:
+                    queryset = queryset.filter(real_estate_DH_fk__house_area__lte=house_area_max)
+
+                if house_year_construction_min:
+                    queryset = queryset.filter(real_estate_DH_fk__year_construction__gte=house_year_construction_min)
+
+                if house_year_construction_max:
+                    queryset = queryset.filter(real_estate_DH_fk__year_construction__lte=house_year_construction_max)
+
+                if house_garage:
+                    house_garage = int(house_garage)
+                    if house_garage == forms.ImportRealEstateDataFilterForm.BoolFieldChoice.YES:
+                        queryset = queryset.filter(real_estate_DH_fk__garage=True)
+                    elif house_garage == forms.ImportRealEstateDataFilterForm.BoolFieldChoice.NO:
+                        queryset = queryset.filter(real_estate_DH_fk__garage=False)
+
+                if house_communications:
+                    house_communications = int(house_communications)
+                    if house_communications == forms.ImportRealEstateDataFilterForm.BoolFieldChoice.YES:
+                        queryset = queryset.filter(real_estate_DH_fk__communications=True)
+                    elif house_communications == forms.ImportRealEstateDataFilterForm.BoolFieldChoice.NO:
+                        queryset = queryset.filter(real_estate_DH_fk__communications=False)
+            elif type_real_estate == real_estate_agency_models.RealEstate.RealEstateType.PLOT:
+                queryset = queryset.filter(type=real_estate_agency_models.RealEstate.RealEstateType.PLOT)
+
+                plot_buildings = form.cleaned_data.get('plot_buildings')
+                plot_communications = form.cleaned_data.get('plot_communications')
+
+                if plot_buildings:
+                    plot_buildings = int(plot_buildings)
+                    if plot_buildings == forms.ImportRealEstateDataFilterForm.BoolFieldChoice.YES:
+                        queryset = queryset.filter(real_estate_DH_fk__buildings=True)
+                    elif plot_buildings == forms.ImportRealEstateDataFilterForm.BoolFieldChoice.NO:
+                        queryset = queryset.filter(real_estate_DH_fk__buildings=False)
+
+                if plot_communications:
+                    plot_communications = int(plot_communications)
+                    if plot_communications == forms.ImportRealEstateDataFilterForm.BoolFieldChoice.YES:
+                        queryset = queryset.filter(real_estate_DP_fk__communications=True)
+                    elif plot_communications == forms.ImportRealEstateDataFilterForm.BoolFieldChoice.NO:
+                        queryset = queryset.filter(real_estate_DP_fk__communications=False)
+
+        square_min = form.cleaned_data.get('square_min')
+        square_max = form.cleaned_data.get('square_max')
+        when_added_min = form.cleaned_data.get('when_added_min')
+        when_added_max = form.cleaned_data.get('when_added_max')
+
+        if square_min:
+            queryset = queryset.filter(square__gte=square_min)
+
+        if square_max:
+            queryset = queryset.filter(square__lte=square_max)
+
+        if when_added_min:
+            queryset = queryset.filter(when_added__gte=when_added_min)
+
+        if when_added_max:
+            queryset = queryset.filter(when_added__lte=when_added_max)
+
+        # csv
+        response = HttpResponse(content_type='text/csv')
+        current_time = timezone.now()
+
+        response['Content-Disposition'] = f'attachment; filename="real-estate-data-{current_time.strftime("%Y-%m-%d_%H-%M-%S")}.csv"'
+
+        writer = csv.writer(response)
+        writer.writerow(('Номер', 'Тип недвижимости', 'Площадь', 'Адрес', 'Дата добавления',))
+
+        real_estate_type = real_estate_agency_models.RealEstate.RealEstateType
+
+        for id_table, real_estate in enumerate(queryset):
+            writer.writerow((id_table, real_estate_type(real_estate.type).label, real_estate.square,
+                             str(real_estate.address_real_estate) if real_estate.address_real_estate else 'Нет (шаблон)',
+                             real_estate.when_added,))
+
+        return response
+
+
+class ImportRealtorData(FormView):
+    model = real_estate_agency_models.Realtor
+    form_class = forms.ImportRealtorDataFilterForm
+    template_name = 'staff/import_realtor_data.html'
+
+    def get_context_data(self, **kwargs):
+        base_context = super().get_context_data(**kwargs)
+        context = {
+            'title': f'Импорт данных риэлтеров',
+        }
+
+        return {**base_context, **context}
+
+    def dispatch(self, request, *args, **kwargs):
+        if self.request.user.is_anonymous:
+            messages.warning(request, 'Что бы импортировать данные реэлтеров, нужно авторизоваться')
+            return redirect('login', permanent=False)
+
+        if not self.request.user.is_superuser:
+            messages.error(request, 'Что бы импортировать данные реэлтеров, нужно быть администратором')
+            return redirect('home', permanent=False)
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        queryset = real_estate_agency_models.Realtor.objects.filter()
+
+        experience_min = form.cleaned_data.get('experience_min')
+        experience_max = form.cleaned_data.get('experience_max')
+        price_min = form.cleaned_data.get('price_min')
+        price_max = form.cleaned_data.get('price_max')
+
+        if experience_min:
+            queryset = queryset.filter(experience=experience_min)
+
+        if experience_max:
+            queryset = queryset.filter(experience=experience_max)
+
+        if price_min:
+            queryset = queryset.filter(price__gte=price_min)
+
+        if price_max:
+            queryset = queryset.filter(price__lte=price_max)
+
+        # csv
+        response = HttpResponse(content_type='text/csv')
+        current_time = timezone.now()
+
+        response['Content-Disposition'] = f'attachment; filename="realtor-data-{current_time.strftime("%Y-%m-%d_%H-%M-%S")}.csv"'
+
+        writer = csv.writer(response)
+        writer.writerow(('Номер', 'ФИО', 'Опыт (месяцы)', 'Телефон', 'Почта', 'Цена',))
+
+        for id_table, realtor in enumerate(queryset):
+            writer.writerow((id_table,
+                             ' '.join((realtor.first_name, realtor.last_name, realtor.patronymic,)),
+                             realtor.experience,
+                             realtor.phone,
+                             realtor.email,
+                             realtor.price,))
 
         return response

@@ -118,6 +118,17 @@ input {
     width: 100%;
 }
 
+.links-form a {
+    display: block;
+    color: #1976d2;
+    text-decoration: none;
+}
+
+.links-form a:hover {
+    text-decoration: underline;
+}
+
+
 hr {
     margin-bottom: 20px;
 }

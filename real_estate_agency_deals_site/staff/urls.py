@@ -14,4 +14,6 @@ urlpatterns = [
     path('logs-private-message/', views.LogsPrivateMessage.as_view(), name='logs_private_message'),
 
     path('deal-statistics/', views.DealStatistics.as_view(), name='deal_statistics'),
+    path('real-estate-data-import/', views.ImportRealEstateData.as_view(), name='real_estate_data_import'),
+    path('realtor-data-import/', views.ImportRealtorData.as_view(), name='realtor_data_import'),
 ]

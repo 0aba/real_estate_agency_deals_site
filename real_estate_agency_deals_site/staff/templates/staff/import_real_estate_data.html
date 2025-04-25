@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block title %}{{title}}{% endblock %}
+
+{% block styles %}
+<link type="text/css" rel="stylesheet" href="{% static 'common/css/form.css' %}"/>
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'staff/js/selectedRealEstateAgencyForm.js' %}" defer></script>
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2 class="form-title">{{ title }}</h2>
+    <form method="post" class="form" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <div class="form-group">
+            <label>{{ form.type_real_estate.label }}</label>
+            {{ form.type_real_estate }}
+            {{ form.type_real_estate.errors }}
+        </div>
+
+        <div id="apartment" class="view-group">
+            <div class="form-group">
+                <label>{{ form.apartment_number_storeys_min.label }}</label>
+                {{ form.apartment_number_storeys_min }}
+                {{ form.apartment_number_storeys_min.errors }}
+            </div>
+            <div class="form-group">
+                <label>{{ form.apartment_number_storeys_max.label }}</label>
+                {{ form.apartment_number_storeys_max }}
+                {{ form.apartment_number_storeys_max.errors }}
+            </div>
+            <div class="form-group">
+                <label>{{ form.apartment_floor_min.label }}</label>
+                {{ form.apartment_floor_min }}
+                {{ form.apartment_floor_min.errors }}
+            </div>
+            <div class="form-group">
+                <label>{{ form.apartment_floor_max.label }}</label>
+                {{ form.apartment_floor_max }}
+                {{ form.apartment_floor_max.errors }}
+            </div>
+            <div class="form-group">
+                <label>{{ form.apartment_balcony.label }}</label>
+                {{ form.apartment_balcony }}
+                {{ form.apartment_balcony.errors }}
+            </div>
+            <div class="form-group">
+                <label>{{ form.apartment_furniture.label }}</label>
+                {{ form.apartment_furniture }}
+                {{ form.apartment_furniture.errors }}
+            </div>
+            <div class="form-group">
+                <label>{{ form.apartment_year_construction_min.label }}</label>
+                {{ form.apartment_year_construction_min }}
+                {{ form.apartment_year_construction_min.errors }}
+            </div>
+            <div class="form-group">
+                <label>{{ form.apartment_year_construction_max.label }}</label>
+                {{ form.apartment_year_construction_max }}
+                {{ form.apartment_year_construction_max.errors }}
+            </div>
+            <div class="form-group">
+                <label>{{ form.apartment_accident_rate.label }}</label>
+                {{ form.apartment_accident_rate }}
+                {{ form.apartment_accident_rate.errors }}
+            </div>
+            <div class="form-group">
+                <label>{{ form.apartment_room_type.label }}</label>
+                {{ form.apartment_room_type }}
+                {{ form.apartment_room_type.errors }}
+            </div>
+        </div>
+        <div id="house" class="view-group">
+            <div class="form-group">
+                <label>{{ form.house_number_storeys_min.label }}</label>
+                {{ form.house_number_storeys_min }}
+                {{ form.house_number_storeys_min.errors }}
+            </div>
+            <div class="form-group">
+                <label>{{ form.house_number_storeys_max.label }}</label>
+                {{ form.house_number_storeys_max }}
+                {{ form.house_number_storeys_max.errors }}
+            </div>
+            <div class="form-group">
+                <label>{{ form.house_area_min.label }}</label>
+                {{ form.house_area_min }}
+                {{ form.house_area_min.errors }}
+            </div>
+            <div class="form-group">
+                <label>{{ form.house_area_max.label }}</label>
+                {{ form.house_area_max }}
+                {{ form.house_area_max.errors }}
+            </div>
+            <div class="form-group">
+                <label>{{ form.house_year_construction_min.label }}</label>
+                {{ form.house_year_construction_min }}
+                {{ form.house_year_construction_min.errors }}
+            </div>
+            <div class="form-group">
+                <label>{{ form.house_year_construction_max.label }}</label>
+                {{ form.house_year_construction_max }}
+                {{ form.house_year_construction_max.errors }}
+            </div>
+            <div class="form-group">
+                <label>{{ form.house_garage.label }}</label>
+                {{ form.house_garage }}
+                {{ form.house_garage.errors }}
+            </div>
+            <div class="form-group">
+                <label>{{ form.house_communications.label }}</label>
+                {{ form.house_communications }}
+                {{ form.house_communications.errors }}
+            </div>
+        </div>
+        <div id="plot" class="view-group">
+            <div class="form-group">
+                <label>{{ form.plot_buildings.label }}</label>
+                {{ form.plot_buildings }}
+                {{ form.plot_buildings.errors }}
+            </div>
+            <div class="form-group">
+                <label>{{ form.plot_communications.label }}</label>
+                {{ form.plot_communications }}
+                {{ form.plot_communications.errors }}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>{{ form.square_min.label }}</label>
+            {{ form.square_min }}
+            {{ form.square_min.errors }}
+        </div>
+        <div class="form-group">
+            <label>{{ form.square_max.label }}</label>
+            {{ form.square_max }}
+            {{ form.square_max.errors }}
+        </div>
+        <div class="form-group">
+            <label>{{ form.when_added_min.label }}</label>
+            {{ form.when_added_min }}
+            {{ form.when_added_min.errors }}
+        </div>
+        <div class="form-group">
+            <label>{{ form.when_added_max.label }}</label>
+            {{ form.when_added_max }}
+            {{ form.when_added_max.errors }}
+        </div>
+
+        <button type="submit" class="form-button">Загрузить данные</button>
+    </form>
+</div>
+{% endblock %}

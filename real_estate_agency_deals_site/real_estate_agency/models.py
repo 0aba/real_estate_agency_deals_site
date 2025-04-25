@@ -78,6 +78,16 @@ class Address(models.Model):
 
     objects = models.Manager()
 
+    def __str__(self):
+        address_parts = (
+            f'город {self.city}',
+            f'район {self.district}' if self.district else None,
+            f'улица {self.street}',
+            f'дом {self.house}',
+            f'кв. {self.apartment}' if self.apartment else None,
+        )
+        return ' '.join(filter(None, address_parts))
+
 
 class RealEstate(models.Model):
     class Meta:

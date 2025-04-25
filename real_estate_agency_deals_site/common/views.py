@@ -9,7 +9,8 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.views import View
 
-class Home(FormMixin,View):
+
+class Home(FormMixin, View):
     template_name = 'common/home.html'
     form_class = forms.ReviewAgencyCreationForm
     paginate_by = 5
@@ -25,8 +26,12 @@ class Home(FormMixin,View):
             'title': 'Домашняя страница',
             'page_obj': paginator,
             'have_review': self.have_review,
-            'form': forms.ReviewAgencyCreationForm(),
         }
+
+        if kwargs.get('form'):
+            context['form'] = kwargs['form']
+        else:
+            context['form'] = self.form_class()
 
         return context
 
@@ -71,7 +76,7 @@ class Home(FormMixin,View):
         if form.is_valid():
             return self.form_valid(form)
         else:
-            return self.form_invalid(form)
+            return render(request, self.template_name, context=self.get_context_data(form=form))
 
     def form_valid(self, form):
         review_agency = form.save(commit=False)

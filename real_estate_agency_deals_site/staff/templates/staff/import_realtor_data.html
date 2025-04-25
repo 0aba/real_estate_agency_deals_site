@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block title %}{{title}}{% endblock %}
+
+{% block styles %}
+<link type="text/css" rel="stylesheet" href="{% static 'common/css/form.css' %}"/>
+{% endblock %}
+{% block scripts %}
+
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2 class="form-title">{{ title }}</h2>
+    <form method="post" class="form" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+
+        <div class="form-group">
+            <label>{{ form.experience_min.label }}</label>
+            {{ form.experience_min }}
+            {{ form.experience_min.errors }}
+        </div>
+        <div class="form-group">
+            <label>{{ form.experience_max.label }}</label>
+            {{ form.experience_max }}
+            {{ form.experience_max.errors }}
+        </div>
+        <div class="form-group">
+            <label>{{ form.price_min.label }}</label>
+            {{ form.price_min }}
+            {{ form.price_min.errors }}
+        </div>
+        <div class="form-group">
+            <label>{{ form.price_max.label }}</label>
+            {{ form.price_max }}
+            {{ form.price_max.errors }}
+        </div>
+
+        <button type="submit" class="form-button">Загрузить данные</button>
+    </form>
+</div>
+{% endblock %}

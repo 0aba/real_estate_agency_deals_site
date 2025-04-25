@@ -11,8 +11,12 @@ class ReviewAgencyCreationForm(forms.ModelForm):
         fields = ('message', 'grade',)
         exclude = ('wrote_review',)
 
+    message = forms.CharField(
+        widget=forms.Textarea,
+        max_length=256,
+        label='Сообщение'
+    )
     grade = forms.DecimalField(widget=forms.NumberInput(attrs={'min': '0', 'max': '5', 'step': '0.1'}), label='Оценка')
-
 
 class ReviewAgencyUpdateForm(forms.ModelForm):
     class Meta:

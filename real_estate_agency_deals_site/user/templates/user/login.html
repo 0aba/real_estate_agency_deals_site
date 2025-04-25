@@ -29,6 +29,9 @@
         </div>
         <button type="submit" class="form-button">Войти</button>
     </form>
-    <a href="{% url 'create_restore_password' %}">Забыл пароль?</a>
+    <div class="links-form">
+        <a href="{% url 'create_restore_password' %}">Забыл пароль?</a>
+        <a href="{% url 'signup' %}">Нет учетной записи?</a>
+    </div>
 </div>
 {% endblock %}
