@@ -1086,6 +1086,9 @@ class ChangeDealView(FormView):
 
     def get_context_data(self, **kwargs):
         base_context = super().get_context_data(**kwargs)
+        context = {
+            'title': f'Изменить сделку {self.old_deal.title}',
+        }
 
         initial_dict = {
             'title': self.old_deal.title,
@@ -1106,10 +1109,7 @@ class ChangeDealView(FormView):
             initial_dict['approximate_dates'] = data_construction.approximate_dates
             initial_dict['project_document'] = data_construction.project_document
 
-        context = {
-            'title': f'Изменить сделку {self.old_deal.title}',
-            'form': self.form_class(initial=initial_dict)
-        }
+        context['form'] = self.form_class(initial=initial_dict)
 
         return {**base_context, **context}
 
@@ -1124,8 +1124,8 @@ class ChangeDealView(FormView):
 
         self.old_deal = self.get_object()
 
-        if (self.old_deal.completed_type != models.Deal.DealCompletedType.SUCCESS and
-            self.old_deal.completed_type != models.Deal.DealCompletedType.REJECTED):
+        if (self.old_deal.completed_type == models.Deal.DealCompletedType.SUCCESS or
+            self.old_deal.completed_type == models.Deal.DealCompletedType.REJECTED):
             messages.error(request, 'Нельзя изменять уже завершенные сделки')
             return redirect('deal', title_slug=self.kwargs.get(self.slug_url_kwarg), permanent=False)
 
@@ -1720,3 +1720,45 @@ class ImportRealtorData(FormView):
 
         return response
 
+
+class ReCreationDealView(NewDealView):
+    slug_url_kwarg = 'title_slug'
+    prototype_deal = None
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        base_context = super().get_context_data(**kwargs)
+        context: dict = {
+            'title': 'Пересоздать сделку по прототипу',
+        }
+
+        initial_dict = {
+            'title': self.prototype_deal.title,
+            'type': self.prototype_deal.type,
+            'price': self.prototype_deal.current_price,
+            'real_estate_deal_id': self.prototype_deal.real_estate_deal.pk,
+            'agent_username': self.prototype_deal.agent.username,
+        }
+
+        if self.prototype_deal.type == models.Deal.DealType.RENT:
+            data_rental = models.DataRental.objects.get(deal_rental=self.prototype_deal)
+            initial_dict['price_housing_and_municipalities'] = data_rental.price_housing_and_municipalities
+            initial_dict['prepayment'] = data_rental.prepayment
+            initial_dict['rental_period_days'] = data_rental.rental_period_days
+        elif self.prototype_deal.type == models.Deal.DealType.CONSTRUCTION:
+            data_construction = models.DataConstruction.objects.get(deal_construction=self.prototype_deal)
+            initial_dict['construction_company'] = data_construction.construction_company
+            initial_dict['approximate_dates'] = data_construction.approximate_dates
+            initial_dict['project_document'] = data_construction.project_document
+
+        context['form'] = self.form_class(initial=initial_dict)
+
+        return {**base_context, **context}
+
+    def dispatch(self, request, *args, **kwargs):
+        try:
+            self.prototype_deal = models.Deal.non_deleted.get(title_slug=self.kwargs.get(self.slug_url_kwarg))
+        except ObjectDoesNotExist:
+            messages.error(self.request, 'Сделка не найдена')
+            return redirect('deal_list', permanent=False)
+
+        return super().dispatch(request, *args, **kwargs)

@@ -21,11 +21,11 @@
             {% if deal_view.completed_type == deal_view.DealCompletedType.CLIENT_SEARCH %}
                 <p class="deal-status deal-status-client-search">Открыта для совершения сделки</p>
             {% elif deal_view.completed_type == deal_view.DealCompletedType.IN_PROGRESS %}
-                <p class="deal-status deal-status-in-progress">В процессе совершения сделки</p>
+                <p class="deal-status deal-status-in-progress">В процессе совершения сделки c {{ deal_view.deal_with.username }}</p>
             {% elif deal_view.completed_type == deal_view.DealCompletedType.SUCCESS %}
-                <p class="deal-status deal-status-success">Успешно завершенная сделка</p>
+                <p class="deal-status deal-status-success">Успешно завершенная сделка c {{ deal_view.deal_with.username }}</p>
             {% elif deal_view.completed_type == deal_view.DealCompletedType.REJECTED %}
-                <p class="deal-status deal-status-rejected">Сделка была отклонена</p>
+                <p class="deal-status deal-status-rejected">Сделка c {{ deal_view.deal_with.username }} была отклонена</p>
             {% endif %}
 
             <p>Название: {{ deal_view.title }}</p>
@@ -62,6 +62,9 @@
             {% if user.is_staff %}
                 {% if deal_view.completed_type != deal_view.DealCompletedType.SUCCESS and deal_view.completed_type != deal_view.DealCompletedType.REJECTED %}
                     <a href="{% url 'deal_change' deal_view.title_slug %}" class="btn">Изменить данные сделки</a>
+                {% endif %}
+                {% if deal_view.completed_type == deal_view.DealCompletedType.SUCCESS or deal_view.completed_type == deal_view.DealCompletedType.REJECTED %}
+                    <a href="{% url 're_creation_deal' deal_view.title_slug %}" class="btn">Создать подобную сделку (пересоздать)</a>
                 {% endif %}
                 <a id="delete-deal-btn" class="btn danger-btn">Удалить сделку</a>
                 {% url 'del_deal' deal_view.title_slug as tmp_href %}

@@ -32,6 +32,7 @@ urlpatterns = ([
 
     path('deal-list/', views.DealListView.as_view(), name='deal_list'),
     path('deal-new/', views.NewDealView.as_view(), name='deal_new'),
+    path('re-creation-deal/', views.ReCreationDealView.as_view(), name='re_creation_deal'),
     path('deal/<slug:title_slug>/', views.DealView.as_view(), name='deal'),
     path('deal/<slug:title_slug>/change/', views.ChangeDealView.as_view(), name='deal_change'),
 
