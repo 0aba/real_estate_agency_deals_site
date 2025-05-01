@@ -75,16 +75,12 @@
                 {{ user_profile.first_name|default:"(Имя не указано)" }}
                 {{ user_profile.patronymic|default:"(Отчество не указано)" }}
         </p>
-        <p>Почта:
-        {% if user_profile.view_email %}
-            {{ user_profile.email }}
+        {% if user_profile.display_contacts %}
+            <p>Почта: {{ user_profile.email }}</p>
+            <p>Телефон: {{ user_profile.phone|default:"(Телефон не указан)" }}</p>
         {% else %}
-            почта скрыта
+            <p>Контакты скрыты</p>
         {% endif %}
-        </p>
-        <p>
-            Телефон: {{ user_profile.phone|default:"(Телефон не указан)" }}
-        </p>
         <p>О себе: {{ user_profile.about|default:"(Информация о себе не указана)" }}</p>
     </div>
 </div>

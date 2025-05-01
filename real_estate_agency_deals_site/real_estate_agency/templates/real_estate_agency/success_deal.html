@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block title %}{{title}}{% endblock %}
+
+{% block styles %}
+<link type="text/css" rel="stylesheet" href="{% static 'common/css/form.css' %}"/>
+{% endblock %}
+{% block scripts %}
+
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2 class="form-title">{{ title }}</h2>
+    <form method="post" class="form" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <div class="form-group">
+            <label>{{ form.deal_document.label }}</label>
+            {{ form.deal_document }}
+            {{ form.deal_document.errors }}
+        </div>
+        <div class="danger-info">
+            <p>Перепроверьте всю информацию, перед завершением</p>
+            <p>После завершения сделки ее изменить больше будет нельзя, только удалить!</p>
+        </div>
+        <button type="submit" class="form-button">Завершить сделку</button>
+    </form>
+</div>
+{% endblock %}

@@ -10,9 +10,9 @@ urlpatterns_actions = [
     path('del-real-estate/<int:pk>/', utils.del_real_estate, name='del_real_estate'),
 
     path('del-deal/<slug:title_slug>/', utils.del_deal, name='del_deal'),
-    path('completed-deal/<slug:title_slug>/', utils.completed_deal, name='completed_deal'),
-    path('make-rented-deal/<slug:title_slug>/', utils.make_rented_deal, name='make_rented_deal'),
-    path('make-unrented-deal/<slug:title_slug>/', utils.make_unrented_deal, name='make_unrented_deal'),
+
+    path('del-deal/<slug:title_slug>/', utils.reject_deal, name='reject_deal'),
+
     path('track-deal/<slug:title_slug>/', utils.track_deal, name='track_deal'),
     path('stop-track-deal/<slug:title_slug>/', utils.stop_track_deal, name='stop_track_deal'),
 ]
@@ -35,7 +35,14 @@ urlpatterns = ([
     path('deal/<slug:title_slug>/', views.DealView.as_view(), name='deal'),
     path('deal/<slug:title_slug>/change/', views.ChangeDealView.as_view(), name='deal_change'),
 
+    path('start-deal/<slug:title_slug>/', views.StartDeal.as_view(), name='start_deal'),
+    path('start-deal/<slug:title_slug>/', views.SuccessDeal.as_view(), name='success_deal'),
+
     path('my-track-deal-list/', views.TrackDealView.as_view(), name='my_track_deal_list'),
+
+    path('deal-statistics/', views.DealStatistics.as_view(), name='deal_statistics'),
+    path('real-estate-data-import/', views.ImportRealEstateData.as_view(), name='real_estate_data_import'),
+    path('realtor-data-import/', views.ImportRealtorData.as_view(), name='realtor_data_import'),
 ]
 + urlpatterns_actions
 )

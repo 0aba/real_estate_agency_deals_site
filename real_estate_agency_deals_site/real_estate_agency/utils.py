@@ -88,95 +88,29 @@ def del_deal(request, title_slug):
 
     return redirect('deal_list', permanent=False)
 
-def completed_deal(request, title_slug):
+def reject_deal(request, title_slug):
     if request.user.is_anonymous:
-        messages.warning(request, 'Авторизуйтесь, чтобы завершить сделку')
+        messages.warning(request, 'Что бы отклонить сделку, нужно авторизоваться')
         return redirect('login', permanent=False)
 
-    try:
-        deal = models.Deal.non_deleted.get(title_slug=title_slug)
-    except ObjectDoesNotExist:
-        messages.error(request, 'Сделка не найдена')
-        return redirect('deal_list', permanent=False)
-
     if not request.user.is_staff:
-        messages.error(request, 'У вас нет прав на завершение сделки, вы должны быть агент недвижимости')
-        return redirect('deal', title_slug=title_slug, permanent=False)
-
-    if deal.completed:
-        messages.error(request, 'Сделка уже завершена')
-        return redirect('deal', title_slug=title_slug, permanent=False)
-
-    deal.completed = True
-    deal.save()
-
-    return redirect('deal', title_slug=title_slug, permanent=False)
-
-def make_rented_deal(request, title_slug):
-    if request.user.is_anonymous:
-        messages.warning(request, 'Авторизуйтесь, чтобы пометить сделку как арендуемую')
-        return redirect('login', permanent=False)
+        messages.error(request, 'Что бы отклонить сделку, нужно быть агентом недвижимости')
+        return redirect('home', permanent=False)
 
     try:
-        deal = models.Deal.non_deleted.get(
-            title_slug=title_slug,
-            type=models.Deal.DealType.RENT,
-        )
+        current_deal = models.Deal.objects.get(title_slug=title_slug)
     except ObjectDoesNotExist:
-        messages.error(request, 'Сделка аренды не найдена')
+        messages.error(request, 'Сделки не существует')
         return redirect('deal_list', permanent=False)
 
-    if not request.user.is_staff:
-        messages.error(request, 'У вас нет прав на то, чтобы пометить сделку арендуемой, вы должны быть агент недвижимости')
+    if current_deal.completed_type != models.Deal.DealCompletedType.IN_PROGRESS:
+        messages.error(request, 'Сделка должна быть в статусе "В процессе совершения", чтобы совершить это действие')
         return redirect('deal', title_slug=title_slug, permanent=False)
 
-    if deal.completed:
-        messages.error(request, 'Сделка завершена')
-        return redirect('deal', title_slug=title_slug, permanent=False)
+    current_deal.completed_type = models.Deal.DealCompletedType.REJECTED
+    current_deal.save()
 
-    data_rental = models.DataRental.objects.get(deal_rental=deal)
-
-    if data_rental.rented:
-        messages.error(request, 'Сделка уже является арендуемой')
-        return redirect('deal', title_slug=title_slug, permanent=False)
-
-    data_rental.rented = True
-    data_rental.save()
-
-    return redirect('deal', title_slug=title_slug, permanent=False)
-
-def make_unrented_deal(request, title_slug):
-    if request.user.is_anonymous:
-        messages.warning(request, 'Авторизуйтесь, чтобы пометить сделку как не арендуемую')
-        return redirect('login', permanent=False)
-
-    try:
-        deal = models.Deal.non_deleted.get(
-            title_slug=title_slug,
-            type=models.Deal.DealType.RENT,
-        )
-    except ObjectDoesNotExist:
-        messages.error(request, 'Сделка аренды не найдена')
-        return redirect('deal_list', permanent=False)
-
-    if not request.user.is_staff:
-        messages.error(request,
-                       'У вас нет прав на то, чтобы пометить сделку не арендуемой, вы должны быть агент недвижимости')
-        return redirect('deal', title_slug=title_slug, permanent=False)
-
-    if deal.completed:
-        messages.error(request, 'Сделка завершена')
-        return redirect('deal', title_slug=title_slug, permanent=False)
-
-    data_rental = models.DataRental.objects.get(deal_rental=deal)
-
-    if not data_rental.rented:
-        messages.error(request, 'Сделка уже является арендуемой')
-        return redirect('deal', title_slug=title_slug, permanent=False)
-
-    data_rental.rented = False
-    data_rental.save()
-
+    messages.success(request, 'Сделка была отменена успешно')
     return redirect('deal', title_slug=title_slug, permanent=False)
 
 def track_deal(request, title_slug):

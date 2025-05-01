@@ -46,6 +46,11 @@
                     <a href="{% url 'deal_list' %}?type_deal=deal_sale_only">Покупка</a>
                     <a href="{% url 'deal_list' %}?type_deal=deal_construction_only">Строительство</a>
                     <a href="{% url 'realtor_list' %}">Риэлтер</a>
+                    {% if user.is_staff or user.is_superuser %}
+                        <a href="{% url 'deal_statistics' %}">Статистика сделок</a>
+                        <a href="{% url 'real_estate_data_import' %}">Импорт данных недвижимости</a>
+                        <a href="{% url 'realtor_data_import' %}">Импорт данных риэлтер</a>
+                    {% endif %}
                 </div>
             </div>
             {% if user.is_superuser %}
@@ -55,9 +60,6 @@
                     <a href="{% url 'complaint_list' %}">Жалобы</a>
                     <a href="{% url 'appeal_list' %}">Апелляции</a>
                     <a href="{% url 'logs_private_message' %}">Логи личных сообщений</a>
-                    <a href="{% url 'deal_statistics' %}">Статистика сделок</a>
-                    <a href="{% url 'real_estate_data_import' %}">Импорт данных недвижимости</a>
-                    <a href="{% url 'realtor_data_import' %}">Импорт данных риэлтер</a>
                 </div>
             </div>
             {% endif %}

@@ -80,11 +80,11 @@ class Address(models.Model):
 
     def __str__(self):
         address_parts = (
-            f'город {self.city}',
-            f'район {self.district}' if self.district else None,
-            f'улица {self.street}',
-            f'дом {self.house}',
-            f'кв. {self.apartment}' if self.apartment else None,
+            f'Город {self.city}',
+            f'Район {self.district}' if self.district else None,
+            f'Улица {self.street}',
+            f'Дом {self.house}',
+            f'Кв. {self.apartment}' if self.apartment else None,
         )
         return ' '.join(filter(None, address_parts))
 
@@ -100,7 +100,7 @@ class RealEstate(models.Model):
         PLOT = 2, 'Участок'
 
     type = models.SmallIntegerField(choices=RealEstateType.choices, verbose_name='Тип недвижимости')
-    main_photo = models.ImageField(upload_to='photos/real_estate/%Y/%m/%d/', validators=[
+    main_photo = models.ImageField(blank=True, upload_to='photos/real_estate/%Y/%m/%d/', validators=[
         FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png']),
     ], default='default/real_estate.png',
        verbose_name='Главное фото')
@@ -162,7 +162,7 @@ class DataApartment(models.Model):
     furniture = models.BooleanField(verbose_name='Есть мебель')
     year_construction = models.SmallIntegerField(validators=[MinValueValidator(1900)], verbose_name='Год постройки')
     accident_rate = models.BooleanField(verbose_name='Здание аварийное')
-    room_type = models.IntegerField(choices=RoomType.choices, default=RoomType.OTHER, verbose_name='Тип комнаты')
+    room_type = models.SmallIntegerField(choices=RoomType.choices, default=RoomType.OTHER, verbose_name='Тип комнаты')
 
     objects = models.Manager()
 
@@ -192,14 +192,24 @@ class Deal(models.Model):
         RENT = 1, 'Аренда'
         CONSTRUCTION = 2, 'Строительство'
 
-    title_slug = models.CharField(max_length=256, unique=True, null=False)
+    class DealCompletedType(models.IntegerChoices):
+        CLIENT_SEARCH = 0, 'Поиск клиента'
+        IN_PROGRESS = 1, 'В процессе совершения'
+        SUCCESS = 2, 'Успешно совершена'
+        REJECTED = 3, 'Отклонена сделка'
+
+    title_slug = models.CharField(max_length=256, unique=True)
     title = models.CharField(max_length=256, unique=True, verbose_name='Заголовок сделки')
     type = models.SmallIntegerField(choices=DealType.choices, default=DealType.SALE, verbose_name='Тип сделки')
-    current_price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Текущая цена')
+    current_price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)], verbose_name='Текущая цена')
     date_create = models.DateTimeField(auto_now_add=True)
     real_estate_deal = models.ForeignKey(RealEstate, on_delete=models.PROTECT, related_name='real_estate_deal_fk')
     agent = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='agent_fk')
-    completed = models.BooleanField(default=False)
+    deal_with = models.ForeignKey(AUTH_USER_MODEL, null=True, on_delete=models.PROTECT, related_name='deal_with_fk')
+    completed_type = models.SmallIntegerField(choices=DealCompletedType.choices, default=DealCompletedType.CLIENT_SEARCH, verbose_name='Тип сделки')
+    completion_document = models.FileField(null=True, upload_to='documents/deal/completion/%Y/%m/%d/', validators=[
+        FileExtensionValidator(allowed_extensions=['pdf', 'docx', 'doc', 'odt']),
+    ], verbose_name='Документ сделки')
     deleted = models.BooleanField(default=False)
 
     class NonDeletedManager(models.Manager):
@@ -224,7 +234,7 @@ class DataConstruction(models.Model):
     approximate_dates = models.DurationField(null=True, blank=True,
                                              validators=[MinValueValidator(timezone.timedelta(0))],
                                              verbose_name='Примерный срок строительства')
-    project_document = models.FileField(upload_to='documents/%Y/%m/%d/', validators=[
+    project_document = models.FileField(upload_to='documents/deal/project/%Y/%m/%d/', validators=[
         FileExtensionValidator(allowed_extensions=['pdf', 'docx', 'doc', 'odt']),
     ], verbose_name='Документ проекта')
 
@@ -246,7 +256,6 @@ class DataRental(models.Model):
                                          MinValueValidator(0.0),
                                      ], verbose_name='Предоплата')
     rental_period_days = models.SmallIntegerField(validators=[MinValueValidator(1)], verbose_name='Срок аренды в днях')
-    rented = models.BooleanField(default=False, verbose_name='Арендуется')
 
     objects = models.Manager()
 
@@ -258,7 +267,7 @@ class ChangePrices(models.Model):
 
     deal_price = models.ForeignKey(Deal, on_delete=models.PROTECT,
                                    related_name='deal_price_fk')
-    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Цена')
+    price = models.DecimalField(validators=[MinValueValidator(0)], max_digits=10, decimal_places=2, verbose_name='Цена')
     date_change = models.DateTimeField(auto_now_add=True)
 
     objects = models.Manager()

@@ -17,6 +17,17 @@
     <div class="header-profile">
         <div class="deal">
             <img src="{{ deal_view.real_estate_deal.main_photo.url }}">
+
+            {% if deal_view.completed_type == deal_view.DealCompletedType.CLIENT_SEARCH %}
+                <p class="deal-status deal-status-client-search">Открыта для совершения сделки</p>
+            {% elif deal_view.completed_type == deal_view.DealCompletedType.IN_PROGRESS %}
+                <p class="deal-status deal-status-in-progress">В процессе совершения сделки</p>
+            {% elif deal_view.completed_type == deal_view.DealCompletedType.SUCCESS %}
+                <p class="deal-status deal-status-success">Успешно завершенная сделка</p>
+            {% elif deal_view.completed_type == deal_view.DealCompletedType.REJECTED %}
+                <p class="deal-status deal-status-rejected">Сделка была отклонена</p>
+            {% endif %}
+
             <p>Название: {{ deal_view.title }}</p>
             <p>Была создана: {{ deal_view.date_create }}</p>
             <p>Текущая цена: {{ deal_view.current_price }}</p>
@@ -37,23 +48,24 @@
                 {% endif %}
             </p>
             {% endif %}
-
             <p>О недвижимости: {{ deal_view.real_estate_deal.about }}</p>
         </div>
         <div class="actions">
-            {% if user.is_staff %}
-                {% if not deal_view.completed %}
-                    <a href="{% url 'deal_change' deal_view.title_slug %}" class="btn">Изменить данные сделки</a>
-                    <a href="{% url 'completed_deal' deal_view.title_slug %}" class="btn">Закрыть сделку</a>
-                    {% if deal_view.type == deal_view.DealType.RENT %}
-                        {% if data_rental.rented %}
-                            <a href="{% url 'make_unrented_deal' deal_view.title_slug %}" class="btn">Установить статус не арендуется</a>
-                        {% else %}
-                            <a href="{% url 'make_rented_deal' deal_view.title_slug %}" class="btn">Установить статус арендуется</a>
-                        {% endif %}
-                    {% endif %}
+            {% if user == deal_view.agent %}
+                {% if deal_view.completed_type == deal_view.DealCompletedType.CLIENT_SEARCH %}
+                    <a href="{% url 'start_deal' deal_view.title_slug %}" class="btn">Начать совершение сделки</a>
+                {% elif deal_view.completed_type == deal_view.DealCompletedType.IN_PROGRESS %}
+                    <a href="{% url 'success_deal' deal_view.title_slug %}" class="btn">Подтвердить совершение</a>
+                    <a href="{% url 'reject_deal' deal_view.title_slug %}" class="btn">Отклонить сделку</a>
                 {% endif %}
-            <a href="{% url 'del_deal' deal_view.title_slug %}" class="btn">Удалить сделку</a>
+            {% endif %}
+            {% if user.is_staff %}
+                {% if deal_view.completed_type != deal_view.DealCompletedType.SUCCESS and deal_view.completed_type != deal_view.DealCompletedType.REJECTED %}
+                    <a href="{% url 'deal_change' deal_view.title_slug %}" class="btn">Изменить данные сделки</a>
+                {% endif %}
+                <a id="delete-deal-btn" class="btn danger-btn">Удалить сделку</a>
+                {% url 'del_deal' deal_view.title_slug as tmp_href %}
+                {% include 'includes/popup_confirmation.html' with modal_id="delete-deal-modal" trigger_element_id="#delete-deal-btn" title="Подтвердите удаление сделки" text="Вы уверены, что хотите выполнить это необратимое действие?" button_html_code='<a href="'|add:tmp_href|add:'" class="btn">Подтвердить удаление</a>' cancel_text="Отменить" %}
             {% endif %}
             {% if user.is_authenticated %}
                 {% if track_this_deal %}
@@ -65,11 +77,14 @@
         </div>
     </div>
     <div class="contacts-deal">
-        {% if not deal_view.completed %}
+        {% if user.is_authenticated %}
             <h3>Контакты для обсуждения сделки</h3>
             <p>Почта: {{ deal_view.agent.email }}</p>
             <p>Телефон: {{ deal_view.agent.phone|default:"Не указан" }}</p>
             <a href="{% url 'private_message_user' deal_view.agent.username %}" class="btn contact-pm">Написать агенту ответственному за недвижимость</a>
+        {% else %}
+            <h3>Авторизуйтесь, чтобы обсудить сделку</h3>
+            <a href="{% url 'login' %}" class="btn">Авторизация</a>
         {% endif %}
     </div>
     <div class="extend-data">

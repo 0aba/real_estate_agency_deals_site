@@ -5,6 +5,8 @@ from django.utils import timezone
 from django import forms
 
 
+NONE = -1
+
 class ReviewAgencyCreationForm(forms.ModelForm):
     class Meta:
         model = models.ReviewAgency
@@ -182,3 +184,126 @@ class DealForm(forms.Form):
                     raise ValidationError(f'Поле "{self.fields[field].label}" обязательно для строительства')
 
         return cleaned_data
+
+
+class StartDealForm(forms.Form):
+    deal_with = forms.CharField(max_length=150, label='С кем заключается (логин)')
+
+
+class SuccessDealForm(forms.Form):
+    deal_document = forms.FileField(validators=[
+        FileExtensionValidator(allowed_extensions=['pdf', 'docx', 'doc', 'odt']),
+    ], label='Документ сделки')
+
+
+class DealStatisticsFilterForm(forms.Form):
+    type_deal = forms.ChoiceField(required=False,
+                                  choices=(models.Deal.DealType.choices + [(NONE, 'Любой тип',)]),
+                                  initial=NONE,
+                                  label='Тип сделки')
+    # DataConstruction
+    construction_company = forms.CharField(required=False, max_length=256, label='Строительная компания')
+    # end DataConstruction
+    # DataRental
+    # end DataRental
+
+    date_create_start = forms.DateTimeField(required=False, label='Минимальная дата создание')
+    date_create_end = forms.DateTimeField(required=False, label='Максимальная дата создания')
+    price_min = forms.DecimalField(required=False, max_digits=10, decimal_places=2, label='Минимальная цена')
+    price_max = forms.DecimalField(required=False, max_digits=10, decimal_places=2, label='Максимальная цена')
+    completed_type_status = forms.ChoiceField(required=False,
+                                              choices=(models.Deal.DealCompletedType.choices + [(NONE, 'Любой тип',)]),
+                                              initial=None,
+                                              label='Тип сделки')
+    deleted_deal = forms.BooleanField(required=False, label='Учитывать удаленные')
+    agent_username = forms.CharField(required=False, max_length=150, label='Кто ответственный (логин)')
+    deal_with = forms.CharField(required=False, max_length=150, label='С кем сделка (логин)')
+    real_estate_deal_id = forms.IntegerField(required=False, label='С какой недвижимостью связано')
+
+    type_real_estate = forms.ChoiceField(required=False,
+                                         choices=(models.RealEstate.RealEstateType.choices + [(NONE, 'Любой тип',)]),
+                                         initial=NONE,
+                                         label='Тип недвижимости')
+    square_min = forms.IntegerField(required=False, validators=[MinValueValidator(1)], label='Минимальная площадь')
+    square_max = forms.IntegerField(required=False, validators=[MinValueValidator(1)], label='Максимальная площадь')
+
+
+class ImportRealEstateDataFilterForm(forms.Form):
+    class BoolFieldChoice(models.models.IntegerChoices):
+        NONE = -1, 'Без разницы'
+        YES = 0, 'С'
+        NO = 1, 'Без'
+
+    type_real_estate = forms.ChoiceField(required=False,
+                                         choices=(models.RealEstate.RealEstateType.choices + [(NONE, 'Любой тип',)]),
+                                         initial=NONE,
+                                         label='Тип сделки')
+    # DataPlot
+    plot_buildings = forms.ChoiceField(required=False,
+                                       choices=BoolFieldChoice.choices,
+                                       initial=BoolFieldChoice.NONE,
+                                       label='Есть постройки')
+    plot_communications = forms.ChoiceField(required=False,
+                                            choices=BoolFieldChoice.choices,
+                                            initial=BoolFieldChoice.NONE,
+                                            label='Есть коммуникации')
+    # end DataPlot
+    # DataApartment
+    apartment_number_storeys_min = forms.IntegerField(required=False, validators=[MinValueValidator(1)], label='Количество этажей у дома минимум')
+    apartment_number_storeys_max = forms.IntegerField(required=False, validators=[MinValueValidator(1)], label='Количество этажей у дома максимум')
+    apartment_floor_min = forms.IntegerField(required=False, validators=[MinValueValidator(1)], label='Этаж минимум')
+    apartment_floor_max = forms.IntegerField(required=False, validators=[MinValueValidator(1)], label='Этаж максимум')
+    apartment_balcony = forms.ChoiceField(required=False,
+                                          choices=BoolFieldChoice.choices,
+                                          initial=BoolFieldChoice.NONE,
+                                          label='Есть балкон')
+    apartment_furniture = forms.ChoiceField(required=False,
+                                           choices=BoolFieldChoice.choices,
+                                           initial=BoolFieldChoice.NONE,
+                                           label='Есть мебель')
+    apartment_year_construction_min = forms.IntegerField(required=False, validators=[MinValueValidator(1900), MaxValueValidator(2**15)], label='Год постройки минимум')
+    apartment_year_construction_max = forms.IntegerField(required=False, validators=[MinValueValidator(1900), MaxValueValidator(2**15)], label='Год постройки максимум')
+    apartment_accident_rate = forms.ChoiceField(required=False,
+                                                choices=BoolFieldChoice.choices,
+                                                initial=BoolFieldChoice.NONE,
+                                                label='Есть аварийность')
+    apartment_room_type = forms.ChoiceField(required=False,
+                                            choices=(models.DataApartment.RoomType.choices + [(NONE, 'Любой тип',)]),
+                                            initial=NONE,
+                                            label='Тип комнаты')
+    # end DataApartment
+    # DataHouse
+    house_number_storeys_min = forms.IntegerField(required=False, validators=[MinValueValidator(1)], label='Количество этажей минимум')
+    house_number_storeys_max = forms.IntegerField(required=False, validators=[MinValueValidator(1)], label='Количество этажей максимум')
+    house_area_min = forms.IntegerField(required=False, validators=[MinValueValidator(1)], label='Площадь дома минимум')
+    house_area_max = forms.IntegerField(required=False, validators=[MinValueValidator(1)], label='Площадь дома максимум')
+    house_year_construction_min = forms.IntegerField(required=False,
+                                                     validators=[MinValueValidator(1900), MaxValueValidator(2 ** 15)],
+                                                     label='Год постройки дома минимум')
+    house_year_construction_max = forms.IntegerField(required=False,
+                                                    validators=[MinValueValidator(1900), MaxValueValidator(2 ** 15)],
+                                                    label='Год постройки дома максимум')
+    house_garage = forms.ChoiceField(required=False,
+                                     choices=BoolFieldChoice.choices,
+                                     initial=BoolFieldChoice.NONE,
+                                     label='Есть гараж')
+    house_communications = forms.ChoiceField(required=False,
+                                            choices=BoolFieldChoice.choices,
+                                            initial=BoolFieldChoice.NONE,
+                                            label='Есть коммуникации')
+    # end DataHouse
+    square_min = forms.DateTimeField(required=False, label='Минимальная площадь')
+    square_max = forms.DateTimeField(required=False, label='Максимальная площадь')
+    when_added_min = forms.DateTimeField(required=False, label='Была добавлена с')
+    when_added_max = forms.DateTimeField(required=False, label='Была добавлена до')
+
+
+class ImportRealtorDataFilterForm(forms.Form):
+    experience_min = forms.IntegerField(required=False,
+                                        validators=[MinValueValidator(0)],
+                                        label='Опыт минимум месяцев')
+    experience_max = forms.IntegerField(required=False,
+                                        validators=[MinValueValidator(0)],
+                                        label='Опыт максимум месяцев')
+    price_min = forms.DecimalField(required=False, max_digits=10, decimal_places=2, label='Минимальная цена')
+    price_max = forms.DecimalField(required=False, max_digits=10, decimal_places=2, label='Максимальная цена')

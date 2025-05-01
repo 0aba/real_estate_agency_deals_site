@@ -22,11 +22,11 @@ class User(AbstractUser):
 
     email = models.EmailField(unique=True, verbose_name='Почта')
     verification_email = models.BooleanField(default=False)
-    view_email = models.BooleanField(default=False, verbose_name='Отображать почту')
+    display_contacts = models.BooleanField(default=False, verbose_name='Отображать почту')
     phone = models.CharField(null=True, blank=True, validators=[
-        RegexValidator(r'^\+[1-9]\d{1,14}$', 'Номер телефона должен быть в международном формате E.164'
+        RegexValidator(r'^[1-9]\d{1,14}$', 'Номер телефона должен быть в международном формате E.164'
                                                   ' "+{от 2 до 15 цифр}"')
-    ], max_length=16, verbose_name='Номер телефона')
+    ], max_length=15, verbose_name='Номер телефона')
     date_register = models.DateTimeField(auto_now_add=True)
     banned = models.BooleanField(default=False)
     online = models.BooleanField(default=False)
@@ -38,6 +38,7 @@ class User(AbstractUser):
     def save(self, *args, **kwargs):
         if not self.photo:
             self.photo = 'default/photo.png'
+        
         super().save(*args, **kwargs)
 
 

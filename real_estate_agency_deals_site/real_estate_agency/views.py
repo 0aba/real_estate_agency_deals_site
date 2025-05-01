@@ -1,12 +1,14 @@
 from django.views.generic import CreateView, DetailView, UpdateView, ListView, FormView
+from django.http import HttpResponseRedirect, HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.functions import Concat
-from django.http import HttpResponseRedirect
 from real_estate_agency import models, forms
 from user import models as user_models
-from django.db.models import F, Value
+from django.db.models import F, Value, Q
 from django.shortcuts import redirect
 from django.contrib import messages
+from django.utils import timezone
+import csv
 
 
 class ChangeReviewAgencyView(UpdateView):
@@ -725,14 +727,25 @@ class DealListView(ListView):
         return {**base_context, **context}
 
     def get_queryset(self):
-        queryset = models.Deal.non_deleted.filter()
+        queryset = queryset = models.Deal.non_deleted.filter()
+        if self.request.user.is_authenticated:
+            if self.request.user.is_staff:
+                id_real_estate_deal = self.request.GET.get('id_real_estate_deal')
+                agent_deals = self.request.GET.get('agent_deals')
 
-        if self.request.user.is_staff:
-            id_real_estate_deal = self.request.GET.get('id_real_estate_deal')
-            if id_real_estate_deal:
-                queryset = queryset.filter(real_estate_deal__pk=id_real_estate_deal)
+                if id_real_estate_deal:
+                    queryset = queryset.filter(real_estate_deal__pk=id_real_estate_deal)
+
+                if agent_deals:
+                    queryset = queryset.filter(agent__username=agent_deals)
+            else:
+                queryset = queryset.filter(Q(deal_with=self.request.user) | Q(completed_type=models.Deal.DealCompletedType.CLIENT_SEARCH))
+
+            my_deals_only_value = self.request.GET.get('my_deals_only_value')
+            if my_deals_only_value:
+                queryset = models.Deal.non_deleted.filter(Q(deal_with=self.request.user))
         else:
-            queryset = queryset.filter(completed=False)
+            queryset = models.Deal.non_deleted.filter(completed_type=models.Deal.DealCompletedType.CLIENT_SEARCH)
 
         title_deal_value = self.request.GET.get('title_deal_value')
         price_deal_min_value = self.request.GET.get('price_deal_min_value')
@@ -1041,12 +1054,18 @@ class DealView(DetailView):
         return {**base_context, **context}
 
     def dispatch(self, request, *args, **kwargs):
-        real_estate = self.get_object()
+        deal = self.get_object()
 
-        if isinstance(real_estate, HttpResponseRedirect):
-            return real_estate
+        if isinstance(deal, HttpResponseRedirect):
+            return deal
 
-        return super().dispatch(request, *args, **kwargs)
+        if (self.request.user.is_staff
+            or deal.completed_type == models.Deal.DealCompletedType.CLIENT_SEARCH
+            or deal.deal_with == self.request.user):
+            return super().dispatch(request, *args, **kwargs)
+
+        messages.error(self.request, 'Вы не можете просматривать чужие сделки')
+        return redirect('deal_list', permanent=False)
 
     def get_object(self, queryset=None):
         try:
@@ -1104,6 +1123,11 @@ class ChangeDealView(FormView):
             return redirect('deal', title_slug=self.kwargs.get(self.slug_url_kwarg), permanent=False)
 
         self.old_deal = self.get_object()
+
+        if (self.old_deal.completed_type != models.Deal.DealCompletedType.SUCCESS and
+            self.old_deal.completed_type != models.Deal.DealCompletedType.REJECTED):
+            messages.error(request, 'Нельзя изменять уже завершенные сделки')
+            return redirect('deal', title_slug=self.kwargs.get(self.slug_url_kwarg), permanent=False)
 
         if isinstance(self.old_deal, HttpResponseRedirect):
             return self.old_deal
@@ -1199,6 +1223,102 @@ class ChangeDealView(FormView):
             models.DataConstruction.objects.get(deal_construction=self.old_deal).delete()
 
 
+class StartDeal(FormView):
+    model = models.Deal
+    form_class = forms.StartDealForm
+    template_name = 'real_estate_agency/start_deal.html'
+    slug_url_kwarg = 'title_slug'
+    current_deal = None
+
+    def get_context_data(self, **kwargs):
+        base_context = super().get_context_data(**kwargs)
+        context = {
+            'title': 'Начать сделку',
+        }
+
+        return {**base_context, **context}
+
+    def dispatch(self, request, *args, **kwargs):
+        if self.request.user.is_anonymous:
+            messages.warning(request, 'Что бы начать сделку, нужно авторизоваться')
+            return redirect('login', permanent=False)
+
+        if not self.request.user.is_staff:
+            messages.error(request, 'Что бы начать сделку, нужно быть агентом недвижимости')
+            return redirect('home', permanent=False)
+
+        try:
+            current_deal = models.Deal.objects.get(title_slug=self.kwargs.get(self.slug_url_kwarg))
+        except ObjectDoesNotExist:
+            messages.error(request, 'Сделки не существует')
+            return redirect('deal_list', permanent=False)
+
+        if current_deal.completed_type != models.Deal.DealCompletedType.CLIENT_SEARCH:
+            messages.error(request, 'Сделка должна быть в статусе "Поиск клиента", чтобы совершить это действие')
+            return redirect('deal', title_slug=self.kwargs.get(self.slug_url_kwarg), permanent=False)
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        try:
+            deal_with = user_models.User.objects.get(username=form.cleaned_data.get('deal_with').strip())
+        except ObjectDoesNotExist:
+            messages.error(self.request, 'Пользователь не найден')
+            return redirect('deal', title_slug=self.kwargs.get(self.slug_url_kwarg), permanent=False)
+
+        self.current_deal.completed_type = models.Deal.DealCompletedType.IN_PROGRESS
+        self.current_deal.deal_with = deal_with
+        self.current_deal.save()
+
+        messages.success(self.request, 'Сделка была начата успешно')
+        return redirect('deal', title_slug=self.kwargs.get(self.slug_url_kwarg), permanent=False)
+
+
+class SuccessDeal(FormView):
+    model = models.Deal
+    form_class = forms.SuccessDealForm
+    template_name = 'real_estate_agency/success_deal.html'
+    slug_url_kwarg = 'title_slug'
+    current_deal = None
+
+    def get_context_data(self, **kwargs):
+        base_context = super().get_context_data(**kwargs)
+        context = {
+            'title': 'Завершить сделку',
+        }
+
+        return {**base_context, **context}
+
+    def dispatch(self, request, *args, **kwargs):
+        if self.request.user.is_anonymous:
+            messages.warning(request, 'Что бы завершить сделку, нужно авторизоваться')
+            return redirect('login', permanent=False)
+
+        if not self.request.user.is_staff:
+            messages.error(request, 'Что бы завершить сделку, нужно быть агентом недвижимости')
+            return redirect('home', permanent=False)
+
+        try:
+            current_deal = models.Deal.objects.get(title_slug=self.kwargs.get(self.slug_url_kwarg))
+        except ObjectDoesNotExist:
+            messages.error(request, 'Сделки не существует')
+            return redirect('deal_list', permanent=False)
+
+        if current_deal.completed_type != models.Deal.DealCompletedType.IN_PROGRESS:
+            messages.error(request, 'Сделка должна быть в статусе "В процессе совершения", чтобы совершить это действие')
+            return redirect('deal', title_slug=self.kwargs.get(self.slug_url_kwarg), permanent=False)
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        self.current_deal.completed_type = models.Deal.DealCompletedType.SUCCESS
+        self.current_deal.completion_document = form.cleaned_data.get('completion_document')
+        self.current_deal.save()
+
+        messages.success(self.request, 'Сделка была завершена успешно')
+        return redirect('deal', title_slug=self.kwargs.get(self.slug_url_kwarg), permanent=False)
+
+
 class TrackDealView(ListView):
     paginate_by = 10
     model = models.TrackDeal
@@ -1224,3 +1344,379 @@ class TrackDealView(ListView):
     def get_queryset(self):
         queryset = models.TrackDeal.objects.filter(who_track=self.request.user)
         return queryset
+
+
+class DealStatistics(FormView):
+    model = models.Deal
+    form_class = forms.DealStatisticsFilterForm
+    template_name = 'real_estate_agency/download_deal_statistics.html'
+
+    def get_context_data(self, **kwargs):
+        base_context = super().get_context_data(**kwargs)
+        context = {
+            'title': f'Скачать статистику сделок',
+        }
+
+        return {**base_context, **context}
+
+    def dispatch(self, request, *args, **kwargs):
+        if self.request.user.is_anonymous:
+            messages.warning(request, 'Что бы скачивать статистику сделок, нужно авторизоваться')
+            return redirect('login', permanent=False)
+
+        if not self.request.user.is_superuser and not self.request.user.is_staff:
+            messages.error(request, 'Что бы скачивать статистику сделок, нужно быть персоналом')
+            return redirect('home', permanent=False)
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        deleted_deal = form.cleaned_data.get('deleted_deal')
+        if deleted_deal:
+            queryset = models.Deal.objects.filter()
+        else:
+            queryset = models.Deal.non_deleted.filter()
+
+        type_deal = form.cleaned_data.get('type_deal')
+        if type_deal:
+            type_deal = int(type_deal)
+            if type_deal == models.Deal.DealType.SALE:
+                queryset = queryset.filter(type=models.Deal.DealType.SALE)
+            elif type_deal == models.Deal.DealType.RENT:
+                queryset = queryset.filter(type=models.Deal.DealType.RENT)
+            elif type_deal == models.Deal.DealType.CONSTRUCTION:
+                queryset = queryset.filter(type=models.Deal.DealType.CONSTRUCTION)
+                construction_company = form.cleaned_data.get('construction_company')
+                if construction_company:
+                    queryset = queryset.filter(deal_construction_fk__construction_company__icontains=construction_company)
+
+        date_create_start = form.cleaned_data.get('date_create_start')
+        date_create_end = form.cleaned_data.get('date_create_end')
+        price_min = form.cleaned_data.get('price_min')
+        price_max = form.cleaned_data.get('price_max')
+        completed_type_status = form.cleaned_data.get('completed_type_status')
+        agent_username = form.cleaned_data.get('agent_username')
+        deal_with = form.cleaned_data.get('deal_with')
+        real_estate_deal_id = form.cleaned_data.get('real_estate_deal_id')
+        type_real_estate = form.cleaned_data.get('type_real_estate')
+        square_min = form.cleaned_data.get('square_min')
+        square_max = form.cleaned_data.get('square_max')
+
+        if date_create_start:
+            queryset = queryset.filter(date_create__gte=date_create_start)
+
+        if date_create_end:
+            queryset = queryset.filter(date_create__lte=date_create_end)
+
+        if price_min:
+            queryset = queryset.filter(current_price__gte=price_min)
+
+        if price_max:
+            queryset = queryset.filter(current_price__lte=price_max)
+
+        if completed_type_status:
+            completed_type_status = int(completed_type_status)
+            if completed_type_status == models.Deal.DealCompletedType.CLIENT_SEARCH:
+                queryset = queryset.filter(completed_type=models.Deal.DealCompletedType.CLIENT_SEARCH)
+            elif completed_type_status == models.Deal.DealCompletedType.IN_PROGRESS:
+                queryset = queryset.filter(completed_type=models.Deal.DealCompletedType.IN_PROGRESS)
+            elif completed_type_status == models.Deal.DealCompletedType.SUCCESS:
+                queryset = queryset.filter(completed_type=models.Deal.DealCompletedType.SUCCESS)
+            elif completed_type_status == models.Deal.DealCompletedType.REJECTED:
+                queryset = queryset.filter(completed_type=models.Deal.DealCompletedType.REJECTED)
+
+        if agent_username:
+            queryset = queryset.filter(agent__username=agent_username)
+
+        if deal_with:
+            queryset = queryset.filter(deal_with__username=deal_with)
+
+        if real_estate_deal_id:
+            queryset = queryset.filter(real_estate_deal__pk=int(real_estate_deal_id))
+
+        if type_real_estate:
+            type_real_estate = int(type_real_estate)
+            if type_real_estate == models.RealEstate.RealEstateType.APARTMENT:
+                queryset = queryset.filter(real_estate_deal__type=models.RealEstate.RealEstateType.APARTMENT)
+            elif type_real_estate == models.RealEstate.RealEstateType.HOUSE:
+                queryset = queryset.filter(real_estate_deal__type=models.RealEstate.RealEstateType.HOUSE)
+            elif type_real_estate == models.RealEstate.RealEstateType.PLOT:
+                queryset = queryset.filter(real_estate_deal__type=models.RealEstate.RealEstateType.PLOT)
+
+        if square_min:
+            queryset = queryset.filter(square__gte=square_min)
+
+        if square_max:
+            queryset = queryset.filter(square__lte=square_max)
+
+        # csv
+        response = HttpResponse(content_type='text/csv')
+        current_time = timezone.now()
+
+        response['Content-Disposition'] = f'attachment; filename="deals_export-{current_time.strftime("%Y-%m-%d_%H-%M-%S")}.csv"'
+
+        writer = csv.writer(response)
+        writer.writerow(('Номер', 'Заголовок', 'Тип сделки', 'Тип недвижимости', 'Общая площадь недвижимости', 'Текущая цена', 'Номер недвижимости', 'Отвественненый агент', 'Статус завершения', 'Дата создания',))
+
+        deal_type = models.Deal.DealType
+        real_estate_type = models.RealEstate.RealEstateType
+
+        for id_table, deal in enumerate(queryset):
+            writer.writerow((id_table, deal.title, deal_type(deal.type).label, real_estate_type(deal.real_estate_deal.type).label, deal.real_estate_deal.square,
+                             deal.current_price, deal.real_estate_deal.pk, deal.agent.username,
+                             'Завершена' if deal.completed else 'Не завершена', deal.date_create,))
+
+        return response
+
+
+class ImportRealEstateData(FormView):
+    model = models.RealEstate
+    form_class = forms.ImportRealEstateDataFilterForm
+    template_name = 'real_estate_agency/import_real_estate_data.html'
+
+    def get_context_data(self, **kwargs):
+        base_context = super().get_context_data(**kwargs)
+        context = {
+            'title': 'Импорт данных недвижимости',
+        }
+
+        return {**base_context, **context}
+
+    def dispatch(self, request, *args, **kwargs):
+        if self.request.user.is_anonymous:
+            messages.warning(request, 'Что бы импортировать данные недвижимость, нужно авторизоваться')
+            return redirect('login', permanent=False)
+
+        if not self.request.user.is_superuser and not self.request.user.is_staff:
+            messages.error(request, 'Что бы импортировать данные недвижимость, нужно быть персоналом')
+            return redirect('home', permanent=False)
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        queryset = models.RealEstate.non_deleted.filter()
+
+        type_real_estate = form.cleaned_data.get('type_real_estate')
+        if type_real_estate:
+            type_real_estate = int(type_real_estate)
+            if type_real_estate == models.RealEstate.RealEstateType.APARTMENT:
+                queryset = queryset.filter(type=models.RealEstate.RealEstateType.APARTMENT)
+
+                apartment_number_storeys_min = form.cleaned_data.get('apartment_number_storeys_min')
+                apartment_number_storeys_max = form.cleaned_data.get('apartment_number_storeys_max')
+                apartment_floor_min = form.cleaned_data.get('apartment_floor_min')
+                apartment_floor_max = form.cleaned_data.get('apartment_floor_max')
+                apartment_balcony = form.cleaned_data.get('apartment_balcony')
+                apartment_furniture = form.cleaned_data.get('apartment_furniture')
+
+                apartment_year_construction_min = form.cleaned_data.get('apartment_year_construction_min')
+                apartment_year_construction_max = form.cleaned_data.get('apartment_year_construction_max')
+                apartment_accident_rate = form.cleaned_data.get('apartment_accident_rate')
+                apartment_room_type = form.cleaned_data.get('apartment_room_type')
+
+                if apartment_number_storeys_min:
+                    queryset = queryset.filter(real_estate_DA_fk__number_storeys__gte=apartment_number_storeys_min)
+
+                if apartment_number_storeys_max:
+                    queryset = queryset.filter(real_estate_DA_fk__number_storeys__lte=apartment_number_storeys_max)
+
+                if apartment_floor_min:
+                    queryset = queryset.filter(real_estate_DA_fk__floor__gte=apartment_floor_min)
+
+                if apartment_floor_max:
+                    queryset = queryset.filter(real_estate_DA_fk__floor__lte=apartment_floor_max)
+
+
+                if apartment_year_construction_min:
+                    queryset = queryset.filter(real_estate_DA_fk__year_construction__gte=apartment_year_construction_min)
+
+                if apartment_year_construction_max:
+                    queryset = queryset.filter(real_estate_DA_fk__year_construction__lte=apartment_year_construction_max)
+
+                if apartment_balcony:
+                    apartment_balcony = int(apartment_balcony)
+                    if apartment_balcony == forms.ImportRealEstateDataFilterForm.BoolFieldChoice.YES:
+                        queryset = queryset.filter(real_estate_DA_fk__balcony=True)
+                    elif apartment_balcony == forms.ImportRealEstateDataFilterForm.BoolFieldChoice.NO:
+                        queryset = queryset.filter(real_estate_DA_fk__balcony=False)
+
+                if apartment_furniture:
+                    apartment_furniture = int(apartment_furniture)
+                    if apartment_furniture == forms.ImportRealEstateDataFilterForm.BoolFieldChoice.YES:
+                        queryset = queryset.filter(real_estate_DA_fk__furniture=True)
+                    elif apartment_furniture == forms.ImportRealEstateDataFilterForm.BoolFieldChoice.NO:
+                        queryset = queryset.filter(real_estate_DA_fk__furniture=False)
+
+                if apartment_accident_rate:
+                    apartment_accident_rate = int(apartment_accident_rate)
+                    if apartment_accident_rate == forms.ImportRealEstateDataFilterForm.BoolFieldChoice.YES:
+                        queryset = queryset.filter(real_estate_DA_fk__accident_rate=True)
+                    elif apartment_accident_rate == forms.ImportRealEstateDataFilterForm.BoolFieldChoice.NO:
+                        queryset = queryset.filter(real_estate_DA_fk__accident_rate=False)
+
+                if apartment_room_type:
+                    apartment_room_type = int(apartment_room_type)
+                    if 0 <= apartment_furniture <= len(models.DataApartment.RoomType.choices):
+                        queryset = queryset.filter(real_estate_DA_fk__room_type=apartment_room_type)
+            elif type_real_estate == models.RealEstate.RealEstateType.HOUSE:
+                queryset = queryset.filter(type=models.RealEstate.RealEstateType.HOUSE)
+
+                house_number_storeys_min = form.cleaned_data.get('house_number_storeys_min')
+                house_number_storeys_max = form.cleaned_data.get('house_number_storeys_max')
+                house_area_min = form.cleaned_data.get('house_area_min')
+                house_area_max = form.cleaned_data.get('house_area_max')
+                house_year_construction_min = form.cleaned_data.get('house_year_construction_min')
+                house_year_construction_max = form.cleaned_data.get('house_year_construction_max')
+                house_garage = form.cleaned_data.get('house_garage')
+                house_communications = form.cleaned_data.get('house_communications')
+
+                if house_number_storeys_min:
+                    queryset = queryset.filter(real_estate_DH_fk__number_storeys__gte=house_number_storeys_min)
+
+                if house_number_storeys_max:
+                    queryset = queryset.filter(real_estate_DH_fk__number_storeys__lte=house_number_storeys_max)
+
+                if house_area_min:
+                    queryset = queryset.filter(real_estate_DH_fk__house_area__gte=house_area_min)
+
+                if house_area_max:
+                    queryset = queryset.filter(real_estate_DH_fk__house_area__lte=house_area_max)
+
+                if house_year_construction_min:
+                    queryset = queryset.filter(real_estate_DH_fk__year_construction__gte=house_year_construction_min)
+
+                if house_year_construction_max:
+                    queryset = queryset.filter(real_estate_DH_fk__year_construction__lte=house_year_construction_max)
+
+                if house_garage:
+                    house_garage = int(house_garage)
+                    if house_garage == forms.ImportRealEstateDataFilterForm.BoolFieldChoice.YES:
+                        queryset = queryset.filter(real_estate_DH_fk__garage=True)
+                    elif house_garage == forms.ImportRealEstateDataFilterForm.BoolFieldChoice.NO:
+                        queryset = queryset.filter(real_estate_DH_fk__garage=False)
+
+                if house_communications:
+                    house_communications = int(house_communications)
+                    if house_communications == forms.ImportRealEstateDataFilterForm.BoolFieldChoice.YES:
+                        queryset = queryset.filter(real_estate_DH_fk__communications=True)
+                    elif house_communications == forms.ImportRealEstateDataFilterForm.BoolFieldChoice.NO:
+                        queryset = queryset.filter(real_estate_DH_fk__communications=False)
+            elif type_real_estate == models.RealEstate.RealEstateType.PLOT:
+                queryset = queryset.filter(type=models.RealEstate.RealEstateType.PLOT)
+
+                plot_buildings = form.cleaned_data.get('plot_buildings')
+                plot_communications = form.cleaned_data.get('plot_communications')
+
+                if plot_buildings:
+                    plot_buildings = int(plot_buildings)
+                    if plot_buildings == forms.ImportRealEstateDataFilterForm.BoolFieldChoice.YES:
+                        queryset = queryset.filter(real_estate_DH_fk__buildings=True)
+                    elif plot_buildings == forms.ImportRealEstateDataFilterForm.BoolFieldChoice.NO:
+                        queryset = queryset.filter(real_estate_DH_fk__buildings=False)
+
+                if plot_communications:
+                    plot_communications = int(plot_communications)
+                    if plot_communications == forms.ImportRealEstateDataFilterForm.BoolFieldChoice.YES:
+                        queryset = queryset.filter(real_estate_DP_fk__communications=True)
+                    elif plot_communications == forms.ImportRealEstateDataFilterForm.BoolFieldChoice.NO:
+                        queryset = queryset.filter(real_estate_DP_fk__communications=False)
+
+        square_min = form.cleaned_data.get('square_min')
+        square_max = form.cleaned_data.get('square_max')
+        when_added_min = form.cleaned_data.get('when_added_min')
+        when_added_max = form.cleaned_data.get('when_added_max')
+
+        if square_min:
+            queryset = queryset.filter(square__gte=square_min)
+
+        if square_max:
+            queryset = queryset.filter(square__lte=square_max)
+
+        if when_added_min:
+            queryset = queryset.filter(when_added__gte=when_added_min)
+
+        if when_added_max:
+            queryset = queryset.filter(when_added__lte=when_added_max)
+
+        # csv
+        response = HttpResponse(content_type='text/csv')
+        current_time = timezone.now()
+
+        response['Content-Disposition'] = f'attachment; filename="real-estate-data-{current_time.strftime("%Y-%m-%d_%H-%M-%S")}.csv"'
+
+        writer = csv.writer(response)
+        writer.writerow(('Номер', 'Тип недвижимости', 'Площадь', 'Адрес', 'Дата добавления',))
+
+        real_estate_type = models.RealEstate.RealEstateType
+
+        for id_table, real_estate in enumerate(queryset):
+            writer.writerow((id_table, real_estate_type(real_estate.type).label, real_estate.square,
+                             str(real_estate.address_real_estate) if real_estate.address_real_estate else 'Нет (шаблон)',
+                             real_estate.when_added,))
+
+        return response
+
+
+class ImportRealtorData(FormView):
+    model = models.Realtor
+    form_class = forms.ImportRealtorDataFilterForm
+    template_name = 'real_estate_agency/import_realtor_data.html'
+
+    def get_context_data(self, **kwargs):
+        base_context = super().get_context_data(**kwargs)
+        context = {
+            'title': f'Импорт данных риэлтеров',
+        }
+
+        return {**base_context, **context}
+
+    def dispatch(self, request, *args, **kwargs):
+        if self.request.user.is_anonymous:
+            messages.warning(request, 'Что бы импортировать данные реэлтеров, нужно авторизоваться')
+            return redirect('login', permanent=False)
+
+        if not self.request.user.is_superuser and not self.request.user.is_staff:
+            messages.error(request, 'Что бы импортировать данные реэлтеров, нужно быть персоналом')
+            return redirect('home', permanent=False)
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        queryset = models.Realtor.objects.filter()
+
+        experience_min = form.cleaned_data.get('experience_min')
+        experience_max = form.cleaned_data.get('experience_max')
+        price_min = form.cleaned_data.get('price_min')
+        price_max = form.cleaned_data.get('price_max')
+
+        if experience_min:
+            queryset = queryset.filter(experience=experience_min)
+
+        if experience_max:
+            queryset = queryset.filter(experience=experience_max)
+
+        if price_min:
+            queryset = queryset.filter(price__gte=price_min)
+
+        if price_max:
+            queryset = queryset.filter(price__lte=price_max)
+
+        # csv
+        response = HttpResponse(content_type='text/csv')
+        current_time = timezone.now()
+
+        response['Content-Disposition'] = f'attachment; filename="realtor-data-{current_time.strftime("%Y-%m-%d_%H-%M-%S")}.csv"'
+
+        writer = csv.writer(response)
+        writer.writerow(('Номер', 'ФИО', 'Опыт (месяцы)', 'Телефон', 'Почта', 'Цена',))
+
+        for id_table, realtor in enumerate(queryset):
+            writer.writerow((id_table,
+                             ' '.join((realtor.first_name, realtor.last_name, realtor.patronymic,)),
+                             realtor.experience,
+                             realtor.phone,
+                             realtor.email,
+                             realtor.price,))
+
+        return response
+

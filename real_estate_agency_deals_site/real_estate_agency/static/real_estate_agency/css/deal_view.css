@@ -48,7 +48,7 @@
     padding: 8px 0;
 }
 
-.delete-btn {
+.danger-btn {
     text-decoration: none;
     background-color: red;
     color: white;
@@ -58,7 +58,7 @@
     border-radius: 5px;
 }
 
-.delete-btn:hover {
+.danger-btn:hover {
     background-color: darkred;
 }
 
@@ -84,4 +84,30 @@
 
 .price-history tr:nth-child(even) {
     background-color: #f9f9f9;
+}
+
+.deal-status {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+  margin: 4px 0;
+}
+
+.deal-status-client-search {
+  background-color: #4CAF50;
+}
+
+.deal-status-in-progress {
+  background-color: #2196F3;
+}
+
+.deal-status-success {
+  background-color: #673AB7;
+}
+
+.deal-status-rejected {
+  background-color: #F44336;
 }

@@ -40,10 +40,21 @@
     </div>
     <div class="filters">
         <form method="GET" class="filter-form">
+            {% if user.is_authenticated %}
+                <div class="filter-group">
+                    <label>Только мои сделки</label>
+                    <input id="my_deals_only_state" type="checkbox" name="my_deals_only_value" value="my_deals_only_value"
+                           {% if request.GET.my_deals_only_value %}checked{% endif %}>
+                </div>
+            {% endif %}
             {% if user.is_staff %}
                 <div class="filter-group">
                     <label>Номер недвижимости</label>
                     <input id="id_real_estate_deal" type="number" min="1" name="id_real_estate_deal" value="{{ request.GET.id_real_estate_deal }}">
+                </div>
+                <div class="filter-group">
+                    <label>Cделки с агентом (логин)</label>
+                    <input id="agent_deals" type="text" name="agent_deals" value="{{ request.GET.agent_deals }}">
                 </div>
             {% endif %}
             <div class="filter-group icontains-string">

@@ -74,7 +74,7 @@ class ResetPasswordForm(forms.Form):
 class ChangeUserProfileForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ('last_name', 'first_name', 'patronymic', 'photo', 'view_email', 'phone', 'about',)
+        fields = ('last_name', 'first_name', 'patronymic', 'photo', 'display_contacts', 'phone', 'about',)
 
 
 class PrivateMessageForm(forms.ModelForm):
