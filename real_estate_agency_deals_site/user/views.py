@@ -25,7 +25,7 @@ class SignupView(CreateView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         base_context = super().get_context_data(**kwargs)
-        context: dict = {
+        context = {
             'title': 'Регистрация',
         }
 
@@ -63,7 +63,7 @@ class EmailConfirmationView(View):
     template_name = 'user/email_confirmation.html'
 
     def get_context_data(self, *, object_list=None, **kwargs):
-        context: dict = {
+        context = {
             'title': 'Подтверждение почты',
         }
 
@@ -95,7 +95,7 @@ class MyLoginView(LoginView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         base_context = super().get_context_data(**kwargs)
-        context: dict = {
+        context = {
             'title': 'Вход',
         }
 
@@ -180,7 +180,7 @@ class RestoreInfoView(View):
     template_name = 'user/restore_info.html'
 
     def get_context_data(self, *, object_list=None, **kwargs):
-        context: dict = {
+        context = {
             'title': 'Информация восстановления пароля',
         }
 

@@ -11,7 +11,7 @@ urlpatterns_actions = [
 
     path('del-deal/<slug:title_slug>/', utils.del_deal, name='del_deal'),
 
-    path('del-deal/<slug:title_slug>/', utils.reject_deal, name='reject_deal'),
+    path('reject-deal/<slug:title_slug>/', utils.reject_deal, name='reject_deal'),
 
     path('track-deal/<slug:title_slug>/', utils.track_deal, name='track_deal'),
     path('stop-track-deal/<slug:title_slug>/', utils.stop_track_deal, name='stop_track_deal'),
@@ -32,12 +32,12 @@ urlpatterns = ([
 
     path('deal-list/', views.DealListView.as_view(), name='deal_list'),
     path('deal-new/', views.NewDealView.as_view(), name='deal_new'),
-    path('re-creation-deal/', views.ReCreationDealView.as_view(), name='re_creation_deal'),
+    path('re-creation-deal/<slug:title_slug>/', views.ReCreationDealView.as_view(), name='re_creation_deal'),
     path('deal/<slug:title_slug>/', views.DealView.as_view(), name='deal'),
     path('deal/<slug:title_slug>/change/', views.ChangeDealView.as_view(), name='deal_change'),
 
     path('start-deal/<slug:title_slug>/', views.StartDeal.as_view(), name='start_deal'),
-    path('start-deal/<slug:title_slug>/', views.SuccessDeal.as_view(), name='success_deal'),
+    path('success-deal/<slug:title_slug>/', views.SuccessDeal.as_view(), name='success_deal'),
 
     path('my-track-deal-list/', views.TrackDealView.as_view(), name='my_track_deal_list'),
 

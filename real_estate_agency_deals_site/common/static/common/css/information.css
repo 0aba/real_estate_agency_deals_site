@@ -1,11 +1,16 @@
 @import url(variables.css);
 
+#content {
+    padding: 50px 0;
+}
 
 .info-container {
+    width: 65%;
     background-color: var(--background-color);
     border-radius: 15px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     padding: 20px;
+    margin: auto;
     text-align: center;
 }
 

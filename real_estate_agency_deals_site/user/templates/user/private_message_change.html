@@ -13,7 +13,7 @@
 
 {% block content %}
 <div class="form-container">
-    <a href="{% url 'private_message_user' chat_with_user %}">Обратно в чат</a>
+    <a class="back-button" href="{% url 'private_message_user' chat_with_user %}">Обратно в чат</a>
     <h2 class="form-title">{{ title }}</h2>
     <form method="post" class="form">
         {% csrf_token %}

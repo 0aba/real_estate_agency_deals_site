@@ -10,6 +10,7 @@ class ReviewAgency(models.Model):
     class Meta:
         verbose_name = 'Отзыв агентства'
         verbose_name_plural = 'Отзывы агенств'
+        ordering = ('-date_write',)
 
     wrote_review = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.PROTECT,
                                      related_name='wrote_review_fk')
@@ -44,9 +45,9 @@ class Realtor(models.Model):
        verbose_name='Фото')
     experience = models.SmallIntegerField(default=0, validators=[MinValueValidator(0)])
     phone = models.CharField(validators=[
-        RegexValidator(r'^\+[1-9]\d{1,14}$', 'Номер телефона должен быть в международном формате E.164'
+        RegexValidator(r'^[1-9]\d{1,14}$', 'Номер телефона должен быть в международном формате E.164'
                                                   ' "+{от 2 до 15 цифр}"')
-    ], max_length=16, verbose_name='Номер телефона')
+    ], max_length=15, verbose_name='Номер телефона')
     email = models.EmailField(verbose_name='Почта')
     price = models.DecimalField(
         max_digits=10,

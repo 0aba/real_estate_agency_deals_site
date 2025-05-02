@@ -9,7 +9,7 @@
                 <div class="message-header">
                     <img src="{{ message.wrote_PM.photo.url }}" class="message-avatar">
                     <div class="message-info">
-                        <span class="message-author">{{ message.wrote_PM.username }}</span>
+                        <span class="message-author"><a href="{% url 'user_profile' message.wrote_PM.username %}">{{ message.wrote_PM.username }}</a></span>
                         <span class="message-date">
                             {{ message.date_write }}
                             {% if message.change %}

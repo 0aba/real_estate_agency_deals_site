@@ -17,8 +17,8 @@
     <div class="list-elements">
         {% if user.is_staff %}
             <a href="{% url 'deal_new' %}" class="btn">Добавить сделку</a>
+            <hr>
         {% endif %}
-        <hr>
         {% for deal in deal_list %}
             <div class="deal">
                 <img src="{{ deal.real_estate_deal.main_photo.url }}">

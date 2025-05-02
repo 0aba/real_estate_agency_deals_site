@@ -34,7 +34,7 @@ class Appeal(models.Model):
         ordering = ('-date_write',)
 
     write_appeal = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='write_appeal_fk')
-    message = models.CharField(max_length=256, verbose_name='Апелляции')
+    message = models.CharField(max_length=256, verbose_name='Апелляция')
     reviewed_appeal = models.ForeignKey(AUTH_USER_MODEL, null=True, on_delete=models.PROTECT,
                                         related_name='reviewed_appeal_fk')
     rejected = models.BooleanField(default=False)

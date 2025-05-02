@@ -1,11 +1,9 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.views.generic.edit import FormMixin
+from django.shortcuts import redirect, render
+from real_estate_agency import models, forms
 from django.core.paginator import Paginator
-from real_estate_agency import models
-from django.shortcuts import redirect
-from real_estate_agency import forms
 from django.contrib import messages
-from django.shortcuts import render
 from django.urls import reverse
 from django.views import View
 
@@ -38,9 +36,7 @@ class Home(FormMixin, View):
     def dispatch(self, request, *args, **kwargs):
         if self.request.user.is_authenticated:
             try:
-                self.have_review = models.ReviewAgency.non_deleted.get(
-                    wrote_review=self.request.user,
-                )
+                self.have_review = models.ReviewAgency.non_deleted.get(wrote_review=self.request.user)
             except ObjectDoesNotExist:
                 self.have_review = None
 
@@ -67,11 +63,12 @@ class Home(FormMixin, View):
         if self.request.user.banned:
             messages.error(request, 'Вы не можете использовать функцию отзывов, когда вы заблокированы')
             return redirect('home', permanent=False)
-        form = self.get_form()
 
         if self.have_review:
             messages.error(request, 'Вы можете оставить только один отзыв у агентстве')
             return redirect('home', permanent=False)
+
+        form = self.get_form()
 
         if form.is_valid():
             return self.form_valid(form)

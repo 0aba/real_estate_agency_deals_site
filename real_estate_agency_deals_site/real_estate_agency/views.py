@@ -2,10 +2,10 @@ from django.views.generic import CreateView, DetailView, UpdateView, ListView, F
 from django.http import HttpResponseRedirect, HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.functions import Concat
+from django.shortcuts import redirect, render
 from real_estate_agency import models, forms
 from user import models as user_models
 from django.db.models import F, Value, Q
-from django.shortcuts import redirect
 from django.contrib import messages
 from django.utils import timezone
 import csv
@@ -31,6 +31,10 @@ class ChangeReviewAgencyView(UpdateView):
         if self.request.user.is_anonymous:
             messages.warning(self.request, 'Чтобы изменить отзыв об агентстве необходимо авторизоваться')
             return redirect('login', permanent=False)
+
+        if self.request.user.banned:
+            messages.error(self.request, 'Вы не можете изменить отзыв, когда вы заблокированы, но можете его удалить')
+            return redirect('home', permanent=False)
 
         review = self.get_object()
 
@@ -959,7 +963,6 @@ class NewDealView(FormView):
 
         return {**base_context, **context}
 
-
     def dispatch(self, request, *args, **kwargs):
         if self.request.user.is_anonymous:
             messages.warning(request, 'Что бы добавить сделку, нужно авторизоваться')
@@ -971,6 +974,16 @@ class NewDealView(FormView):
 
         return super().dispatch(request, *args, **kwargs)
 
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            context = self.get_context_data()
+            context['form'] = form
+            return render(request, self.template_name, context=context)
+
     def form_valid(self, form):
         try:
             real_estate_deal = models.RealEstate.non_deleted.get(pk=int(form.cleaned_data.get('real_estate_deal_id')))
@@ -978,10 +991,13 @@ class NewDealView(FormView):
             messages.error(self.request, 'Недвижимость по данному номеру не существует')
             return redirect('deal_list', permanent=False)
 
-
-        if models.Deal.non_deleted.filter(real_estate_deal=real_estate_deal).exists():
-            messages.error(self.request, 'На одну недвижимость может существовать только одна сделка')
-            return redirect('deal_list', permanent=False)
+        if models.Deal.non_deleted.filter(
+            Q(real_estate_deal=real_estate_deal)
+            & ~Q(completed_type=models.Deal.DealCompletedType.SUCCESS)
+            & ~Q(completed_type=models.Deal.DealCompletedType.REJECTED)
+        ).exists():
+            messages.error(self.request, 'На одну недвижимость может существовать только одна активная сделка')
+            return redirect('deal_new', permanent=False)
 
         try:
             agent = user_models.User.objects.get(
@@ -990,9 +1006,15 @@ class NewDealView(FormView):
             )
         except ObjectDoesNotExist:
             messages.error(self.request, 'Агент недвижимости с данным логином не существует')
-            return redirect('deal_list', permanent=False)
+            return redirect('deal_new', permanent=False)
 
         type_deal = int(form.cleaned_data.get('type'))
+
+        if type_deal == models.Deal.DealType.CONSTRUCTION and real_estate_deal.type == models.RealEstate.RealEstateType.PLOT:
+            messages.error(self.request, 'Нельзя сделать сделку строительства для участка')
+            return redirect('deal_new', permanent=False)
+
+
         new_deal = models.Deal.objects.create(
             title=form.cleaned_data.get('title'),
             type=type_deal,
@@ -1016,7 +1038,7 @@ class NewDealView(FormView):
                 project_document=form.cleaned_data.get('project_document'),
             )
 
-        return redirect('deal_list', permanent=False)
+        return redirect('deal', title_slug=new_deal.title_slug, permanent=False)
 
 
 class DealView(DetailView):
@@ -1069,7 +1091,7 @@ class DealView(DetailView):
 
     def get_object(self, queryset=None):
         try:
-            object_deal = self.model.objects.get(title_slug=self.kwargs.get(self.slug_url_kwarg))
+            object_deal = self.model.non_deleted.get(title_slug=self.kwargs.get(self.slug_url_kwarg))
         except ObjectDoesNotExist:
             messages.error(self.request, 'Сделка не найден')
             return redirect('deal_list', permanent=False)
@@ -1143,6 +1165,21 @@ class ChangeDealView(FormView):
 
         return object_deal
 
+    def post(self, request, *args, **kwargs):
+        context = self.get_context_data()
+        form = self.get_form()
+
+        if 'project_document' not in form.files and int(form.data.get('type')) == models.Deal.DealType.CONSTRUCTION:
+            form.files = form.files.copy()
+            form.files['project_document'] = context['form'].initial['project_document']
+
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            context['form'] = form
+            return render(request, self.template_name, context=context)
+
+
     def form_valid(self, form):
         try:
             real_estate_deal = models.RealEstate.non_deleted.get(pk=int(form.cleaned_data.get('real_estate_deal_id')))
@@ -1151,10 +1188,11 @@ class ChangeDealView(FormView):
             return redirect('deal_list', permanent=False)
 
         if real_estate_deal != self.old_deal.real_estate_deal and models.Deal.non_deleted.filter(
-            real_estate_deal=real_estate_deal,
-
+            Q(real_estate_deal=real_estate_deal)
+            & ~Q(completed_type=models.Deal.DealCompletedType.SUCCESS)
+            & ~Q(completed_type=models.Deal.DealCompletedType.REJECTED)
         ).exists():
-            messages.error(self.request, 'На одну недвижимость может существовать только одна сделка')
+            messages.error(self.request, 'На одну недвижимость может существовать только одна активная сделка')
             return redirect('deal_list', permanent=False)
 
         try:
@@ -1167,6 +1205,11 @@ class ChangeDealView(FormView):
             return redirect('deal_list', permanent=False)
 
         type_deal = int(form.cleaned_data.get('type'))
+
+        if type_deal == models.Deal.DealType.CONSTRUCTION and real_estate_deal.type == models.RealEstate.RealEstateType.PLOT:
+            messages.error(self.request, 'Нельзя сделать сделку строительства для участка')
+            return redirect('deal_change', title_slug=self.kwargs.get(self.slug_url_kwarg), permanent=False)
+
         old_type = self.old_deal.type
         self.old_deal.title = form.cleaned_data.get('title')
         self.old_deal.type = type_deal
@@ -1203,7 +1246,8 @@ class ChangeDealView(FormView):
                 old_data_construction = models.DataConstruction.objects.get(deal_construction=self.old_deal)
                 old_data_construction.construction_company = form.cleaned_data.get('construction_company')
                 old_data_construction.approximate_dates = form.cleaned_data.get('approximate_dates')
-                old_data_construction.project_document = form.cleaned_data.get('project_document')
+                if old_data_construction.project_document != form.cleaned_data.get('project_document'):
+                    old_data_construction.project_document = form.cleaned_data.get('project_document')
                 old_data_construction.save()
             else:
                 self.__del_extend_data(old_type)
@@ -1248,12 +1292,12 @@ class StartDeal(FormView):
             return redirect('home', permanent=False)
 
         try:
-            current_deal = models.Deal.objects.get(title_slug=self.kwargs.get(self.slug_url_kwarg))
+            self.current_deal = models.Deal.objects.get(title_slug=self.kwargs.get(self.slug_url_kwarg))
         except ObjectDoesNotExist:
             messages.error(request, 'Сделки не существует')
             return redirect('deal_list', permanent=False)
 
-        if current_deal.completed_type != models.Deal.DealCompletedType.CLIENT_SEARCH:
+        if self.current_deal.completed_type != models.Deal.DealCompletedType.CLIENT_SEARCH:
             messages.error(request, 'Сделка должна быть в статусе "Поиск клиента", чтобы совершить это действие')
             return redirect('deal', title_slug=self.kwargs.get(self.slug_url_kwarg), permanent=False)
 
@@ -1264,7 +1308,7 @@ class StartDeal(FormView):
             deal_with = user_models.User.objects.get(username=form.cleaned_data.get('deal_with').strip())
         except ObjectDoesNotExist:
             messages.error(self.request, 'Пользователь не найден')
-            return redirect('deal', title_slug=self.kwargs.get(self.slug_url_kwarg), permanent=False)
+            return redirect('start_deal', title_slug=self.kwargs.get(self.slug_url_kwarg), permanent=False)
 
         self.current_deal.completed_type = models.Deal.DealCompletedType.IN_PROGRESS
         self.current_deal.deal_with = deal_with
@@ -1299,12 +1343,12 @@ class SuccessDeal(FormView):
             return redirect('home', permanent=False)
 
         try:
-            current_deal = models.Deal.objects.get(title_slug=self.kwargs.get(self.slug_url_kwarg))
+            self.current_deal = models.Deal.objects.get(title_slug=self.kwargs.get(self.slug_url_kwarg))
         except ObjectDoesNotExist:
             messages.error(request, 'Сделки не существует')
             return redirect('deal_list', permanent=False)
 
-        if current_deal.completed_type != models.Deal.DealCompletedType.IN_PROGRESS:
+        if self.current_deal.completed_type != models.Deal.DealCompletedType.IN_PROGRESS:
             messages.error(request, 'Сделка должна быть в статусе "В процессе совершения", чтобы совершить это действие')
             return redirect('deal', title_slug=self.kwargs.get(self.slug_url_kwarg), permanent=False)
 
@@ -1312,7 +1356,7 @@ class SuccessDeal(FormView):
 
     def form_valid(self, form):
         self.current_deal.completed_type = models.Deal.DealCompletedType.SUCCESS
-        self.current_deal.completion_document = form.cleaned_data.get('completion_document')
+        self.current_deal.completion_document = form.cleaned_data.get('deal_document')
         self.current_deal.save()
 
         messages.success(self.request, 'Сделка была завершена успешно')
@@ -1459,12 +1503,13 @@ class DealStatistics(FormView):
         writer.writerow(('Номер', 'Заголовок', 'Тип сделки', 'Тип недвижимости', 'Общая площадь недвижимости', 'Текущая цена', 'Номер недвижимости', 'Отвественненый агент', 'Статус завершения', 'Дата создания',))
 
         deal_type = models.Deal.DealType
+        completed_deal_type = models.Deal.DealCompletedType
         real_estate_type = models.RealEstate.RealEstateType
 
         for id_table, deal in enumerate(queryset):
             writer.writerow((id_table, deal.title, deal_type(deal.type).label, real_estate_type(deal.real_estate_deal.type).label, deal.real_estate_deal.square,
                              deal.current_price, deal.real_estate_deal.pk, deal.agent.username,
-                             'Завершена' if deal.completed else 'Не завершена', deal.date_create,))
+                             completed_deal_type(deal.completed_type).label, deal.date_create,))
 
         return response
 

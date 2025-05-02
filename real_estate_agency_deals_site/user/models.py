@@ -64,6 +64,7 @@ class Notification(models.Model):
     class Meta:
         verbose_name = 'Уведомление'
         verbose_name_plural = 'Уведомления'
+        ordering = ('-event_time',)
 
     to_whom = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='notification_fk')
     message = models.CharField(max_length=256)

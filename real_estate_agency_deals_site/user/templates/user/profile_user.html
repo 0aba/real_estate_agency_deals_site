@@ -77,7 +77,7 @@
         </p>
         {% if user_profile.display_contacts %}
             <p>Почта: {{ user_profile.email }}</p>
-            <p>Телефон: {{ user_profile.phone|default:"(Телефон не указан)" }}</p>
+            <p>Телефон: {% if user_profile.phone %} +{{ user_profile.phone }} {% else %} (Телефон не указан) {% endif %}</p>
         {% else %}
             <p>Контакты скрыты</p>
         {% endif %}

@@ -44,10 +44,10 @@
             {{ form.password2 }}
             {{ form.password2.errors }}
         </div>
-        <div class="user-agreement-confirmed" style="display: flex; align-items: center;">
+        <div class="form-group user-agreement-confirmed">
             <input id="userAgreementConfirmed" type="checkbox" onchange="changeUserAgreementConfirmed()" style="margin-right: 8px; width: 30px;">
             <label for="userAgreementConfirmed" style="margin: 0;">
-                Согласен с пользовательским соглашением <a href="{% url 'user_agreement' %}">Прочитать</a>
+                Согласен с пользовательским соглашением <a href="{% url 'user_agreement' %}">прочитать</a>
             </label>
         </div>
 

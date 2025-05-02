@@ -26,6 +26,11 @@ class ReviewAgencyUpdateForm(forms.ModelForm):
         fields = ('message', 'grade',)
 
     grade = forms.DecimalField(widget=forms.NumberInput(attrs={'min': '0', 'max': '5', 'step': '0.1'}), label='Оценка')
+    message = forms.CharField(
+        widget=forms.Textarea,
+        max_length=256,
+        label='Сообщение'
+    )
 
 
 class RealtorCreationForm(forms.ModelForm):
@@ -106,7 +111,7 @@ class RealEstateForm(forms.Form):
         type_real_estate = int(cleaned_data.get('type'))
 
         if not have_address and type_real_estate == models.RealEstate.RealEstateType.PLOT:
-            raise ValidationError('Шаблоном не может быть участок')
+            raise ValidationError('Шаблоном не может быть участок (адрес для участка обязателен)')
 
         if have_address:
             address_fields = ('city', 'street', 'house',)
@@ -154,7 +159,7 @@ class DealForm(forms.Form):
     # DataConstruction
     construction_company = forms.CharField(required=False, max_length=256, label='Название строительной компании')
     approximate_dates = forms.DurationField(required=False, validators=[MinValueValidator(timezone.timedelta(0))],
-                                            label='Примерный срок строительства')
+                                            label='Примерный срок строительства (Формат "DD HH:MM:SS")')
     project_document = forms.FileField(required=False, validators=[
         FileExtensionValidator(allowed_extensions=['pdf', 'docx', 'doc', 'odt']),
     ], label='Документ проекта')
@@ -213,8 +218,8 @@ class DealStatisticsFilterForm(forms.Form):
     price_max = forms.DecimalField(required=False, max_digits=10, decimal_places=2, label='Максимальная цена')
     completed_type_status = forms.ChoiceField(required=False,
                                               choices=(models.Deal.DealCompletedType.choices + [(NONE, 'Любой тип',)]),
-                                              initial=None,
-                                              label='Тип сделки')
+                                              initial=NONE,
+                                              label='Статус сделки')
     deleted_deal = forms.BooleanField(required=False, label='Учитывать удаленные')
     agent_username = forms.CharField(required=False, max_length=150, label='Кто ответственный (логин)')
     deal_with = forms.CharField(required=False, max_length=150, label='С кем сделка (логин)')
