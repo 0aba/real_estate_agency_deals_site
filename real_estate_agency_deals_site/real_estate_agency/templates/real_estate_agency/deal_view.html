@@ -48,6 +48,9 @@
                 {% endif %}
             </p>
             {% endif %}
+            {% if deal_view.completed_type == deal_view.DealCompletedType.SUCCESS%}
+                <a href="{{ deal_view.completion_document.url }}">Скачать документ сделки</a>
+            {% endif %}
             <p>О недвижимости: {{ deal_view.real_estate_deal.about }}</p>
         </div>
         <div class="actions">
@@ -125,7 +128,7 @@
                     <h3>Данные строительства</h3>
                     <p>Строительная компания: {{ data_construction.construction_company }}</p>
                     <p>Примерный срок строительства: {{ data_construction.approximate_dates }}</p>
-                    <p>Документ проекта: {{ data_construction.project_document }}</p>
+                    <p><a href="{{ data_construction.project_document.url }}">Скачать документ проекта</a></p>
                 {% endif %}
             </div>
         {% endif %}

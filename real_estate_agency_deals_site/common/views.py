@@ -86,3 +86,17 @@ class Home(FormMixin, View):
         messages.success(self.request, 'Вы успешно оставили отзыв')
 
         return redirect('home', permanent=False)
+
+
+class UserAgreement(View):
+    template_name = 'common/user_agreement.html'
+
+    def get_context_data(self, **kwargs):
+        context: dict = {
+            'title': 'Пользовательское соглашение',
+        }
+
+        return context
+
+    def get(self, request):
+        return render(request, self.template_name, context=self.get_context_data())

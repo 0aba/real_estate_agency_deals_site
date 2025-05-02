@@ -1,0 +1,113 @@
+.user-agreement-content {
+    color: white;
+    min-height: 100vh;
+}
+
+.agreement-container {
+    display: flex;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 16px 8px;
+    border-radius: 5px;
+    color: white;
+}
+
+.agreement-nav {
+    background-color: var(--background-color);
+    width: 250px;
+    padding: 16px 8px;
+    margin-right: 20px;
+    border-radius: 5px;
+    position: sticky;
+    top: 20px;
+    align-self: flex-start;
+    color: white;
+}
+
+.agreement-nav h3 {
+    margin-top: 0;
+    color: white;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding-bottom: 10px;
+}
+
+.agreement-nav ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.agreement-nav ul ul {
+    padding-left: 15px;
+}
+
+.agreement-nav li {
+    margin-bottom: 5px;
+}
+
+.agreement-nav a {
+    color: #4dabf7;
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.2s;
+}
+
+.agreement-nav a:hover {
+    color: #74c0fc;
+    text-decoration: underline;
+}
+
+.agreement-text {
+    background-color: var(--background-color);
+    flex: 1;
+    padding: 20px 16px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.agreement-text h1 {
+    margin-top: 0;
+    color: white;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.agreement-text h2 {
+    color: white;
+    margin-top: 30px;
+    padding-top: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.agreement-text h3 {
+    color: #e9ecef;
+    margin-top: 20px;
+}
+
+.agreement-text p {
+    color: #f8f9fa;
+    line-height: 1.6;
+}
+
+.agreement-footer {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    color: #adb5bd;
+    font-style: italic;
+}
+
+@media (max-width: 768px) {
+    .agreement-container {
+        flex-direction: column;
+    }
+
+    .agreement-nav {
+        width: 100%;
+        position: static;
+        margin-bottom: 30px;
+    }
+
+    .agreement-text {
+        padding: 20px;
+    }
+}

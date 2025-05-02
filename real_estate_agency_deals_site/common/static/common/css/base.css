@@ -70,6 +70,16 @@ footer > * {
     width: auto;
 }
 
+.links-footer a {
+    color: #05054a;
+    text-decoration: underline dotted;
+}
+
+.links-footer a:hover {
+    color: #526bb1;
+    text-decoration: underline solid;
+}
+
 .right-block img {
     height: 100%;
     max-height: 40px;
