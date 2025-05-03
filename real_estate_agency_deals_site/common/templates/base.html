@@ -103,7 +103,7 @@
                             <button class="btn-mark-read"
                                     data-notification-id="{{ notification.id }}"
                                     {% if notification.link %} data-notification-link="{{ notification.link }}" {% endif %}>
-                                {% if notification.link %} Просмотреть {% else %} Пометить прочитанным {% endif %}
+                                {% if notification.link %} Перейти {% if not notification.viewed %} и прочитать {% endif %} {% else %} Пометить прочитанным {% endif %}
                             </button>
                             {% endif %}
                             <button class="notification-btn-delete" data-notification-id="{{ notification.id }}">

@@ -4,6 +4,7 @@ from django.contrib.auth import logout
 from django.db import IntegrityError
 from django.shortcuts import redirect
 from django.contrib import messages
+from django.urls import reverse
 from user import models
 from enum import Enum
 
@@ -37,6 +38,7 @@ def ban_user_action(request, username):
     models.Notification.objects.create(
         to_whom=action_user,
         message='Вы были заблокированы',
+        link=reverse('appeal_new'),
     )
 
     return redirect('user_profile', username=username, permanent=False)
@@ -263,7 +265,7 @@ def get_user_chats(user):
     for other_user in other_users:
         chats.append({
             'user': {
-                'id': other_user.id, # TODO! del см. шаблон в макете???
+                'id': other_user.id, # TODO! del см. шаблон в макете или нет
                 'username': other_user.username,
                 'photo': other_user.photo.url if other_user.photo else None,
             },

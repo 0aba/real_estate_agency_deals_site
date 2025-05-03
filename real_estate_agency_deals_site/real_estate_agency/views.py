@@ -73,7 +73,6 @@ class RealtorListView(ListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         base_context = super().get_context_data(**kwargs)
-
         context = {
             'title': 'Список риэлтеров',
         }
@@ -148,7 +147,6 @@ class RealtorView(DetailView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         base_context = super().get_context_data(**kwargs)
-
         context = {
             'title': f'Риэлтер {self.object.last_name} {self.object.first_name} {self.object.patronymic}',
         }
@@ -228,7 +226,6 @@ class RealEstateListView(ListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         base_context = super().get_context_data(**kwargs)
-
         context = {
             'title': 'Список недвижимости',
         }
@@ -409,7 +406,7 @@ class NewRealEstateView(FormView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         base_context = super().get_context_data(**kwargs)
-        context: dict = {
+        context = {
             'title': 'Добавить недвижимость',
         }
 
@@ -485,7 +482,6 @@ class RealEstateView(DetailView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         base_context = super().get_context_data(**kwargs)
-
         context = {
             'title': f'Недвижимость {self.object.pk}',
         }
@@ -723,7 +719,6 @@ class DealListView(ListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         base_context = super().get_context_data(**kwargs)
-
         context = {
             'title': 'Список сделок',
         }
@@ -957,7 +952,7 @@ class NewDealView(FormView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         base_context = super().get_context_data(**kwargs)
-        context: dict = {
+        context = {
             'title': 'Добавить сделку',
         }
 
@@ -1049,7 +1044,6 @@ class DealView(DetailView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         base_context = super().get_context_data(**kwargs)
-
         context = {
             'title': f'Сделка {self.object.title}',
             'price_history': models.ChangePrices.objects.filter(deal_price=self.object),
@@ -1371,7 +1365,6 @@ class TrackDealView(ListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         base_context = super().get_context_data(**kwargs)
-
         context = {
             'title': 'Список отслеживаемых сделок',
         }
@@ -1772,7 +1765,7 @@ class ReCreationDealView(NewDealView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         base_context = super().get_context_data(**kwargs)
-        context: dict = {
+        context = {
             'title': 'Пересоздать сделку по прототипу',
         }
 

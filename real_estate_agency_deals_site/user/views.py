@@ -8,15 +8,13 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect
 from user.models import ConfirmationCode
 from django.core.mail import send_mail
+from user import models, utils, forms
 from django.contrib.auth import login
 from django.contrib import messages
 from django.utils import timezone
 from django.urls import reverse
 from django.db.models import Q
 from django.views import View
-from user import models
-from user import utils
-from user import forms
 
 
 class SignupView(CreateView):
@@ -112,7 +110,7 @@ class MyLoginView(LoginView):
         user: models.User = form.get_user()
 
         if user.banned:
-            messages.error(self.request, 'Учетная запись заблокирована часть функций не доступно.\n'
+            messages.error(self.request, 'Учетная запись заблокирована часть функций не доступно.'
                                          'Вы можете подать на апелляцию нажмите на "..." в шапке сайта '
                                          'после, чего "подать апелляцию".')
 
@@ -133,7 +131,7 @@ class CreateRestorePasswordView(FormView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         base_context = super().get_context_data(**kwargs)
-        context: dict = {
+        context = {
             'title': 'Подтверждение для восстановления пароля',
         }
 
@@ -351,7 +349,7 @@ class PrivateMessageView(View):
     template_name = 'user/private_message.html'
 
     def get_context_data(self, *, object_list=None, **kwargs):
-        context: dict = {
+        context = {
             'title': 'Личные сообщения',
             'chat_list': utils.get_user_chats(self.request.user),
         }
@@ -373,7 +371,7 @@ class PrivateMessageUserView(FormMixin, ListView):
     def get_context_data(self, *, object_list=None, **kwargs):
         base_context = super().get_context_data(**kwargs)
         base_context[self.context_object_name] = reversed(base_context[self.context_object_name])
-        context: dict = {
+        context = {
             'title': f'Личные сообщения c {self.kwargs.get('username')}',
             'chat_list': utils.get_user_chats(self.request.user),
             'im_in_black_list': self.im_in_black_list,

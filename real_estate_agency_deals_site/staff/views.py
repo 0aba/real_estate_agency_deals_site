@@ -6,9 +6,8 @@ from django.core.mail import send_mail
 from user import models as user_models
 from django.shortcuts import redirect
 from django.contrib import messages
+from staff import models, forms
 from django.db.models import Q
-from staff import models
-from staff import forms
 
 
 class NewComplaint(CreateView):
@@ -17,7 +16,7 @@ class NewComplaint(CreateView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         base_context = super().get_context_data(**kwargs)
-        context: dict = {
+        context = {
             'title': 'Написать жалобу',
         }
 
@@ -176,7 +175,7 @@ class NewAppeal(CreateView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         base_context = super().get_context_data(**kwargs)
-        context: dict = {
+        context = {
             'title': 'Написать апелляция',
         }
 

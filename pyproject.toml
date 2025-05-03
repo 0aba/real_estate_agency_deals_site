@@ -1,12 +1,12 @@
 [build-system]
-requires = ["setuptools>=75.1"]
+requires = ["setuptools==75.1"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "real_estate_agency_deals_site"
 version = "1.0.0-alpha"
 description = "A site where real estate agencies present deals on their real estate and offer real estate services."
-requires-python = ">=3.13"
+requires-python = "==3.13.1"
 
 dependencies = [
   "Django == 5.1.7",
