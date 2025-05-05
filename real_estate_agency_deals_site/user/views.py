@@ -80,7 +80,7 @@ class EmailConfirmationView(View):
                 confirmation_code.user.save()
                 confirmation_code.delete()
                 messages.success(request, 'Ваша почта подтверждена')
-                return redirect('home', permanent=False)
+                return redirect('login', permanent=False)
             except ObjectDoesNotExist:
                messages.error(request, 'Ошибка кода подтверждения')
 
@@ -169,7 +169,7 @@ class CreateRestorePasswordView(FormView):
 
                 return redirect('restore_info', permanent=False)
             except ObjectDoesNotExist:
-                messages.error(self.request, 'Ошибка переданных данных')
+                messages.error(self.request, 'Пользователь не найден')
 
         return redirect('create_restore_password', permanent=False)
 
@@ -224,7 +224,6 @@ class RestorePasswordView(FormView):
 
             messages.success(self.request, 'Пароль был изменен')
             return redirect('login', permanent=False)
-
 
         return redirect('create_restore_password', (self.kwargs.get('code'),), permanent=False)
 

@@ -276,7 +276,6 @@ def get_user_chats(user):
 
     return chats
 
-
 def del_private_message(request, pk):
     if request.user.is_anonymous:
         messages.warning(request, 'Авторизуйтесь, чтобы удалить сообщение авторизуйтесь')
@@ -295,7 +294,6 @@ def del_private_message(request, pk):
     message.deleted = True
     message.save()
     return redirect('private_message_user', username=message.received_PM.username, permanent=False)
-
 
 def disable_account_action(request):
     if request.user.is_anonymous:
