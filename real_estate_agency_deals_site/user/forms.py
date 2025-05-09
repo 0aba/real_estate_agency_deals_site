@@ -36,7 +36,7 @@ class CreateResetTokenForm(forms.Form):
         min_length=3,
         max_length=150,
         required=True,
-        label='Логин'
+        label='Логин учетной записи'
     )
     email = forms.EmailField(label='Почта учетной записи')
 
@@ -48,7 +48,7 @@ class ResetPasswordForm(forms.Form):
     )
     new_password_confirmation = forms.CharField(
         widget=forms.PasswordInput(attrs={"autocomplete": "new-password"}),
-        label='Старый пароль'
+        label='Подтверждение нового пароля'
     )
 
     def clean_new_password(self):

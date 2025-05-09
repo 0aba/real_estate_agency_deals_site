@@ -42,8 +42,8 @@ urlpatterns = ([
     path('my-track-deal-list/', views.TrackDealView.as_view(), name='my_track_deal_list'),
 
     path('deal-statistics/', views.DealStatistics.as_view(), name='deal_statistics'),
-    path('real-estate-data-import/', views.ImportRealEstateData.as_view(), name='real_estate_data_import'),
-    path('realtor-data-import/', views.ImportRealtorData.as_view(), name='realtor_data_import'),
+    path('real-estate-data-statistics/', views.RealEstateStatistics.as_view(), name='real_estate_statistics'),
+    path('realtor-data-statistics/', views.RealtorStatistics.as_view(), name='realtor_statistics'),
 ]
 + urlpatterns_actions
 )

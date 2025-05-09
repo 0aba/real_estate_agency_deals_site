@@ -30,12 +30,12 @@
         {{ form.non_field_errors }}
 
         <div class="form-group">
-        <label>Вердикт</label>
+        <label>{{ form.verdict.label }}</label>
             {{ form.verdict }}
             {{ form.verdict.errors }}
         </div>
         <div class="form-group">
-        <label>Отклонить</label>
+        <label>{{ form.rejected.label }}</label>
             {{ form.rejected }}
             {{ form.rejected.errors }}
         </div>

@@ -18,14 +18,14 @@
         {% csrf_token %}
         {{ form.non_field_errors }}
         {% if user.is_anonymous %}
-        <div class="form-group">
-            <label>Почта для обратной связи</label>
-            {{ form.feedback_email }}
-            {{ form.feedback_email.errors }}
-        </div>
+            <div class="form-group">
+                <label>{{ form.feedback_email.label }}</label>
+                {{ form.feedback_email }}
+                {{ form.feedback_email.errors }}
+            </div>
         {% endif %}
         <div class="form-group">
-            <label>Жалоба</label>
+            <label>{{ form.message.label }}</label>
             {{ form.message }}
             {{ form.message.errors }}
         </div>

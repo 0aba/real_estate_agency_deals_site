@@ -48,8 +48,8 @@
                     <a href="{% url 'realtor_list' %}">Риэлтер</a>
                     {% if user.is_staff or user.is_superuser %}
                         <a href="{% url 'deal_statistics' %}">Статистика сделок</a>
-                        <a href="{% url 'real_estate_data_import' %}">Импорт данных недвижимости</a>
-                        <a href="{% url 'realtor_data_import' %}">Импорт данных риэлтер</a>
+                        <a href="{% url 'real_estate_statistics' %}">Статистика недвижимости</a>
+                        <a href="{% url 'realtor_statistics' %}">Статистика риэлтеров</a>
                     {% endif %}
                 </div>
             </div>
@@ -103,7 +103,7 @@
                             <button class="btn-mark-read"
                                     data-notification-id="{{ notification.id }}"
                                     {% if notification.link %} data-notification-link="{{ notification.link }}" {% endif %}>
-                                {% if notification.link %} Перейти {% if not notification.viewed %} и прочитать {% endif %} {% else %} Пометить прочитанным {% endif %}
+                                {% if notification.link %} Перейти {% if not notification.viewed %} и прочитать {% endif %} {% else %} Прочитать {% endif %}
                             </button>
                             {% endif %}
                             <button class="notification-btn-delete" data-notification-id="{{ notification.id }}">

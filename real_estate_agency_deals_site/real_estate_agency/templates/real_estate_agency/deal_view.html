@@ -121,13 +121,13 @@
             <div class="extend-data-deal">
                 {% if deal_view.type == deal_view.DealType.RENT %}
                     <h3>Данные аренды</h3>
-                    <p>Цена ЖКХ: {{ data_rental.price_housing_and_municipalities }}</p>
-                    <p>Предоплата: {{ data_rental.prepayment }}</p>
+                    <p>Цена ЖКХ: {{ data_rental.price_housing_and_municipalities|default:"Не указано" }}</p>
+                    <p>Предоплата: {{ data_rental.prepayment|default:"Не указано" }}</p>
                     <p>Срок аренды в днях: {{ data_rental.rental_period_days }}</p>
                 {% elif deal_view.type == deal_view.DealType.CONSTRUCTION  %}
                     <h3>Данные строительства</h3>
                     <p>Строительная компания: {{ data_construction.construction_company }}</p>
-                    <p>Примерный срок строительства: {{ data_construction.approximate_dates }}</p>
+                    <p>Примерный срок строительства: {{ data_construction.approximate_dates|default:"Не указано" }}</p>
                     <p><a href="{{ data_construction.project_document.url }}">Скачать документ проекта</a></p>
                 {% endif %}
             </div>

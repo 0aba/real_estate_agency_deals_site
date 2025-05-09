@@ -37,7 +37,7 @@ class Appeal(models.Model):
     message = models.CharField(max_length=256, verbose_name='Апелляция')
     reviewed_appeal = models.ForeignKey(AUTH_USER_MODEL, null=True, on_delete=models.PROTECT,
                                         related_name='reviewed_appeal_fk')
-    rejected = models.BooleanField(default=False)
+    rejected = models.BooleanField(default=False, verbose_name='Отклонить апелляцию')
     date_write = models.DateTimeField(auto_now_add=True)
     verdict = models.CharField(null=True, max_length=256, verbose_name='Вердикт')
 

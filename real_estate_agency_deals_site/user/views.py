@@ -225,6 +225,7 @@ class RestorePasswordView(FormView):
             messages.success(self.request, 'Пароль был изменен')
             return redirect('login', permanent=False)
 
+        messages.success(self.request, 'Ошибка переданных данных')
         return redirect('create_restore_password', (self.kwargs.get('code'),), permanent=False)
 
 

@@ -4,8 +4,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.functions import Concat
 from django.shortcuts import redirect, render
 from real_estate_agency import models, forms
-from user import models as user_models
 from django.db.models import F, Value, Q
+from user import models as user_models
 from django.contrib import messages
 from django.utils import timezone
 import csv
@@ -62,6 +62,8 @@ class ChangeReviewAgencyView(UpdateView):
         review = form.save(commit=False)
         review.change = True
         review.save()
+        messages.success(self.request, 'Отзыв был успешно изменен')
+
         return redirect('home', permanent=False)
 
 
@@ -132,11 +134,11 @@ class NewRealtorView(CreateView):
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
-        form.save()
+        new_realtor = form.save()
 
         messages.success(self.request, 'Успешное создан новый риэлтер')
 
-        return redirect('realtor_list', permanent=False)
+        return redirect('realtor', pk=new_realtor.pk, permanent=False)
 
 
 class RealtorView(DetailView):
@@ -471,7 +473,9 @@ class NewRealEstateView(FormView):
                 communications=form.cleaned_data.get('data_plot_communications'),
             )
 
-        return redirect('real_estate_list', permanent=False)
+        messages.success(self.request, 'Недвижимость была успешно добавлена')
+
+        return redirect('real_estate', pk=new_real_estate.pk, permanent=False)
 
 
 class RealEstateView(DetailView):
@@ -606,7 +610,7 @@ class ChangeRealEstateView(FormView):
         return super().get(request, *args, **kwargs)
 
     def form_valid(self, form):
-        if (form.cleaned_data.get('have_address') == bool(self.old_real_estate.address_real_estate)
+        if (form.cleaned_data.get('have_address') != bool(self.old_real_estate.address_real_estate)
             and models.Deal.non_deleted.filter(
                 real_estate_deal=self.old_real_estate,
             ).exists()):
@@ -700,6 +704,8 @@ class ChangeRealEstateView(FormView):
                     communications=form.cleaned_data.get('data_plot_communications'),
                 )
 
+        messages.success(self.request, 'Недвижимость была успешно изменена')
+
         return redirect('real_estate', pk=self.kwargs.get(self.pk_url_kwarg), permanent=False)
 
     def __del_extend_data(self, type_data):
@@ -731,12 +737,22 @@ class DealListView(ListView):
             if self.request.user.is_staff:
                 id_real_estate_deal = self.request.GET.get('id_real_estate_deal')
                 agent_deals = self.request.GET.get('agent_deals')
+                completed_status = self.request.GET.get('completed_status')
 
                 if id_real_estate_deal:
                     queryset = queryset.filter(real_estate_deal__pk=id_real_estate_deal)
 
                 if agent_deals:
                     queryset = queryset.filter(agent__username=agent_deals)
+
+                if completed_status == 'completed_status_client_search':
+                    queryset = queryset.filter(completed_type=models.Deal.DealCompletedType.CLIENT_SEARCH)
+                elif completed_status == 'completed_status_in_progress':
+                    queryset = queryset.filter(completed_type=models.Deal.DealCompletedType.IN_PROGRESS)
+                elif completed_status == 'completed_status_success':
+                    queryset = queryset.filter(completed_type=models.Deal.DealCompletedType.SUCCESS)
+                elif completed_status == 'completed_status_rejected':
+                    queryset = queryset.filter(completed_type=models.Deal.DealCompletedType.REJECTED)
             else:
                 queryset = queryset.filter(Q(deal_with=self.request.user) | Q(completed_type=models.Deal.DealCompletedType.CLIENT_SEARCH))
 
@@ -931,7 +947,6 @@ class DealListView(ListView):
 
             if communications_house in ('yes', 'no',):
                 queryset = queryset.filter(real_estate_deal__real_estate_DH_fk__communications=True if communications_house == 'yes' else False)
-
         elif type_real_estate == 'plot_only':
             queryset = queryset.filter(real_estate_deal__type=models.RealEstate.RealEstateType.PLOT)
 
@@ -1032,6 +1047,8 @@ class NewDealView(FormView):
                 approximate_dates=form.cleaned_data.get('approximate_dates'),
                 project_document=form.cleaned_data.get('project_document'),
             )
+
+        messages.success(self.request, 'Сделка была успешно добавлена')
 
         return redirect('deal', title_slug=new_deal.title_slug, permanent=False)
 
@@ -1173,7 +1190,6 @@ class ChangeDealView(FormView):
             context['form'] = form
             return render(request, self.template_name, context=context)
 
-
     def form_valid(self, form):
         try:
             real_estate_deal = models.RealEstate.non_deleted.get(pk=int(form.cleaned_data.get('real_estate_deal_id')))
@@ -1252,7 +1268,9 @@ class ChangeDealView(FormView):
                     project_document=form.cleaned_data.get('project_document'),
                 )
 
-        return redirect('deal', title_slug=self.kwargs.get(self.slug_url_kwarg), permanent=False)
+        messages.success(self.request, 'Сделка была успешно изменена')
+
+        return redirect('deal', title_slug=self.old_deal.title_slug, permanent=False)
 
     def __del_extend_data(self, type_data):
         if type_data == models.Deal.DealType.RENT:
@@ -1309,6 +1327,7 @@ class StartDeal(FormView):
         self.current_deal.save()
 
         messages.success(self.request, 'Сделка была начата успешно')
+
         return redirect('deal', title_slug=self.kwargs.get(self.slug_url_kwarg), permanent=False)
 
 
@@ -1354,6 +1373,7 @@ class SuccessDeal(FormView):
         self.current_deal.save()
 
         messages.success(self.request, 'Сделка была завершена успешно')
+
         return redirect('deal', title_slug=self.kwargs.get(self.slug_url_kwarg), permanent=False)
 
 
@@ -1507,15 +1527,15 @@ class DealStatistics(FormView):
         return response
 
 
-class ImportRealEstateData(FormView):
+class RealEstateStatistics(FormView):
     model = models.RealEstate
-    form_class = forms.ImportRealEstateDataFilterForm
-    template_name = 'real_estate_agency/import_real_estate_data.html'
+    form_class = forms.RealEstateStatisticsFilterForm
+    template_name = 'real_estate_agency/download_real_estate_statistics.html'
 
     def get_context_data(self, **kwargs):
         base_context = super().get_context_data(**kwargs)
         context = {
-            'title': 'Импорт данных недвижимости',
+            'title': 'Скачать статистику недвижимости',
         }
 
         return {**base_context, **context}
@@ -1573,23 +1593,23 @@ class ImportRealEstateData(FormView):
 
                 if apartment_balcony:
                     apartment_balcony = int(apartment_balcony)
-                    if apartment_balcony == forms.ImportRealEstateDataFilterForm.BoolFieldChoice.YES:
+                    if apartment_balcony == self.form_class.BoolFieldChoice.YES:
                         queryset = queryset.filter(real_estate_DA_fk__balcony=True)
-                    elif apartment_balcony == forms.ImportRealEstateDataFilterForm.BoolFieldChoice.NO:
+                    elif apartment_balcony == self.form_class.BoolFieldChoice.NO:
                         queryset = queryset.filter(real_estate_DA_fk__balcony=False)
 
                 if apartment_furniture:
                     apartment_furniture = int(apartment_furniture)
-                    if apartment_furniture == forms.ImportRealEstateDataFilterForm.BoolFieldChoice.YES:
+                    if apartment_furniture == self.form_class.BoolFieldChoice.YES:
                         queryset = queryset.filter(real_estate_DA_fk__furniture=True)
-                    elif apartment_furniture == forms.ImportRealEstateDataFilterForm.BoolFieldChoice.NO:
+                    elif apartment_furniture == self.form_class.BoolFieldChoice.NO:
                         queryset = queryset.filter(real_estate_DA_fk__furniture=False)
 
                 if apartment_accident_rate:
                     apartment_accident_rate = int(apartment_accident_rate)
-                    if apartment_accident_rate == forms.ImportRealEstateDataFilterForm.BoolFieldChoice.YES:
+                    if apartment_accident_rate == self.form_class.BoolFieldChoice.YES:
                         queryset = queryset.filter(real_estate_DA_fk__accident_rate=True)
-                    elif apartment_accident_rate == forms.ImportRealEstateDataFilterForm.BoolFieldChoice.NO:
+                    elif apartment_accident_rate == self.form_class.BoolFieldChoice.NO:
                         queryset = queryset.filter(real_estate_DA_fk__accident_rate=False)
 
                 if apartment_room_type:
@@ -1628,16 +1648,16 @@ class ImportRealEstateData(FormView):
 
                 if house_garage:
                     house_garage = int(house_garage)
-                    if house_garage == forms.ImportRealEstateDataFilterForm.BoolFieldChoice.YES:
+                    if house_garage == self.form_class.BoolFieldChoice.YES:
                         queryset = queryset.filter(real_estate_DH_fk__garage=True)
-                    elif house_garage == forms.ImportRealEstateDataFilterForm.BoolFieldChoice.NO:
+                    elif house_garage == self.form_class.BoolFieldChoice.NO:
                         queryset = queryset.filter(real_estate_DH_fk__garage=False)
 
                 if house_communications:
                     house_communications = int(house_communications)
-                    if house_communications == forms.ImportRealEstateDataFilterForm.BoolFieldChoice.YES:
+                    if house_communications == self.form_class.BoolFieldChoice.YES:
                         queryset = queryset.filter(real_estate_DH_fk__communications=True)
-                    elif house_communications == forms.ImportRealEstateDataFilterForm.BoolFieldChoice.NO:
+                    elif house_communications == self.form_class.BoolFieldChoice.NO:
                         queryset = queryset.filter(real_estate_DH_fk__communications=False)
             elif type_real_estate == models.RealEstate.RealEstateType.PLOT:
                 queryset = queryset.filter(type=models.RealEstate.RealEstateType.PLOT)
@@ -1647,16 +1667,16 @@ class ImportRealEstateData(FormView):
 
                 if plot_buildings:
                     plot_buildings = int(plot_buildings)
-                    if plot_buildings == forms.ImportRealEstateDataFilterForm.BoolFieldChoice.YES:
+                    if plot_buildings == self.form_class.BoolFieldChoice.YES:
                         queryset = queryset.filter(real_estate_DH_fk__buildings=True)
-                    elif plot_buildings == forms.ImportRealEstateDataFilterForm.BoolFieldChoice.NO:
+                    elif plot_buildings == self.form_class.BoolFieldChoice.NO:
                         queryset = queryset.filter(real_estate_DH_fk__buildings=False)
 
                 if plot_communications:
                     plot_communications = int(plot_communications)
-                    if plot_communications == forms.ImportRealEstateDataFilterForm.BoolFieldChoice.YES:
+                    if plot_communications == self.form_class.BoolFieldChoice.YES:
                         queryset = queryset.filter(real_estate_DP_fk__communications=True)
-                    elif plot_communications == forms.ImportRealEstateDataFilterForm.BoolFieldChoice.NO:
+                    elif plot_communications == self.form_class.BoolFieldChoice.NO:
                         queryset = queryset.filter(real_estate_DP_fk__communications=False)
 
         square_min = form.cleaned_data.get('square_min')
@@ -1695,15 +1715,15 @@ class ImportRealEstateData(FormView):
         return response
 
 
-class ImportRealtorData(FormView):
+class RealtorStatistics(FormView):
     model = models.Realtor
-    form_class = forms.ImportRealtorDataFilterForm
-    template_name = 'real_estate_agency/import_realtor_data.html'
+    form_class = forms.RealtorStatisticsFilterForm
+    template_name = 'real_estate_agency/download_realtor_statistics.html'
 
     def get_context_data(self, **kwargs):
         base_context = super().get_context_data(**kwargs)
         context = {
-            'title': f'Импорт данных риэлтеров',
+            'title': 'Скачать статистику риэлтеров',
         }
 
         return {**base_context, **context}

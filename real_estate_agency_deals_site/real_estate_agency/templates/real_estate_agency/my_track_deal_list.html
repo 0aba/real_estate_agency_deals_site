@@ -18,7 +18,8 @@
             <div class="track-deal">
                 <img src="{{ el.track_deal.real_estate_deal.main_photo.url }}">
                 <p class="name-deal">Сделка: <a href="{% url 'deal' el.track_deal.title_slug %}">{{ el.track_deal.title }}</a></p>
-                <a href="{% url 'stop_track_deal' el.track_deal.title_slug %}" class="btn">Удалить</a>
+                <a href="{% url 'deal' el.track_deal.title_slug %}" class="btn">Посмотреть сделку</a>
+                <a href="{% url 'stop_track_deal' el.track_deal.title_slug %}" class="btn danger-btn">Удалить</a>
             </div>
         {% endfor %}
     </div>

@@ -19,37 +19,37 @@
         {% csrf_token %}
         {{ form.non_field_errors }}
         <div class="form-group">
-            <label>Фамилия</label>
+            <label>{{ form.last_name.label }}</label>
             {{ form.last_name }}
             {{ form.last_name.errors }}
         </div>
         <div class="form-group">
-            <label>Имя</label>
+            <label>{{ form.first_name.label }}</label>
             {{ form.first_name }}
             {{ form.first_name.errors }}
         </div>
         <div class="form-group">
-            <label>Отчество</label>
+            <label>{{ form.patronymic.label }}</label>
             {{ form.patronymic }}
             {{ form.patronymic.errors }}
         </div>
         <div class="form-group">
-            <label>Фото</label>
+            <label>{{ form.photo.label }}</label>
             {{ form.photo }}
             {{ form.photo.errors }}
         </div>
         <div class="form-group">
-            <label>Отображать контакты</label>
+            <label>{{ form.display_contacts.label }}</label>
             {{ form.display_contacts }}
             {{ form.display_contacts.errors }}
         </div>
         <div class="form-group">
-            <label>Номер телефона</label>
+            <label>{{ form.phone.label }}</label>
             {{ form.phone }}
             {{ form.phone.errors }}
         </div>
         <div class="form-group">
-            <label>О себе</label>
+            <label>{{ form.about.label }}</label>
             {{ form.about }}
             {{ form.about.errors }}
         </div>

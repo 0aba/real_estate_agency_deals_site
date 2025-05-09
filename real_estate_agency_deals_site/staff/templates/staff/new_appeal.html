@@ -18,7 +18,7 @@
         {% csrf_token %}
         {{ form.non_field_errors }}
         <div class="form-group">
-            <label>Апелляция</label>
+            <label>{{ form.message.label }}</label>
             {{ form.message }}
             {{ form.message.errors }}
         </div>

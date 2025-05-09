@@ -21,6 +21,9 @@ def del_review_agency(request, pk):
 
     review.deleted = True
     review.save()
+
+    messages.success(request, 'Отзыв был успешно удален')
+
     return redirect('home', permanent=False)
 
 def del_realtor(request, pk):
@@ -39,6 +42,7 @@ def del_realtor(request, pk):
         return redirect('realtor_list', permanent=False)
 
     realtor.delete()
+    messages.success(request, 'Риэлтор был успешно удален')
 
     return redirect('realtor_list', permanent=False)
 
@@ -66,6 +70,8 @@ def del_real_estate(request, pk):
     real_estate.deleted = True
     real_estate.save()
 
+    messages.success(request, 'Недвижимость была успешно удалена')
+
     return redirect('real_estate_list', permanent=False)
 
 def del_deal(request, title_slug):
@@ -85,6 +91,8 @@ def del_deal(request, title_slug):
 
     deal.deleted = True
     deal.save()
+
+    messages.success(request, 'Сделка была успешно удалена')
 
     return redirect('deal_list', permanent=False)
 
@@ -111,6 +119,7 @@ def reject_deal(request, title_slug):
     current_deal.save()
 
     messages.success(request, 'Сделка была отменена успешно')
+
     return redirect('deal', title_slug=title_slug, permanent=False)
 
 def track_deal(request, title_slug):
@@ -140,7 +149,7 @@ def track_deal(request, title_slug):
 
 def stop_track_deal(request, title_slug):
     if request.user.is_anonymous:
-        messages.warning(request, 'Авторизуйтесь, чтобы следить за сделкой')
+        messages.warning(request, 'Авторизуйтесь, чтобы перестать следить за сделкой')
         return redirect('login', permanent=False)
 
     try:

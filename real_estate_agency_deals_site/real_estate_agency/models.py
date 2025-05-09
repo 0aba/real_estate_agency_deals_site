@@ -43,18 +43,14 @@ class Realtor(models.Model):
         FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png']),
     ], default='default/realtor.png',
        verbose_name='Фото')
-    experience = models.SmallIntegerField(default=0, validators=[MinValueValidator(0)])
+    experience = models.SmallIntegerField(default=0, validators=[MinValueValidator(0)], verbose_name='Опыт (месяцев)')
     phone = models.CharField(validators=[
         RegexValidator(r'^[1-9]\d{1,14}$', 'Номер телефона должен быть в международном формате E.164'
-                                                  ' "+{от 2 до 15 цифр}"')
+                                                  ' "+{от 2 до 15 цифр}" (не надо вводить "+", только цифры)')
     ], max_length=15, verbose_name='Номер телефона')
     email = models.EmailField(verbose_name='Почта')
-    price = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        validators=[MinValueValidator(0.0)],
-        verbose_name='Цена услуг'
-    )
+    price = models.DecimalField(max_digits=10, decimal_places=2,
+                                validators=[MinValueValidator(0.0)], verbose_name='Цена услуг')
     license = models.CharField(max_length=128, unique=True, verbose_name='Лицензия')
 
     objects = models.Manager()
@@ -202,7 +198,8 @@ class Deal(models.Model):
     title_slug = models.CharField(max_length=256, unique=True)
     title = models.CharField(max_length=256, unique=True, verbose_name='Заголовок сделки')
     type = models.SmallIntegerField(choices=DealType.choices, default=DealType.SALE, verbose_name='Тип сделки')
-    current_price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)], verbose_name='Текущая цена')
+    current_price = models.DecimalField(max_digits=10, decimal_places=2,
+                                        validators=[MinValueValidator(0.0)], verbose_name='Текущая цена')
     date_create = models.DateTimeField(auto_now_add=True)
     real_estate_deal = models.ForeignKey(RealEstate, on_delete=models.PROTECT, related_name='real_estate_deal_fk')
     agent = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='agent_fk')

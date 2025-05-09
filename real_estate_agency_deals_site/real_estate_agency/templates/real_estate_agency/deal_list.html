@@ -56,6 +56,34 @@
                     <label>Cделки с агентом (логин)</label>
                     <input id="agent_deals" type="text" name="agent_deals" value="{{ request.GET.agent_deals }}">
                 </div>
+                <fieldset>
+                    <legend>Статуса совершения сделки</legend>
+                    <div class="radio-option">
+                        <input id="completed_status_any" type="radio" name="completed_status" value="completed_status_any"
+                               {% if not request.GET.completed_status or request.GET.completed_status == 'completed_status_any'  %}checked{% endif %}>
+                        <label for="completed_status_any">Любой статус совершения</label>
+                    </div>
+                    <div class="radio-option">
+                        <input id="completed_status_client_search" type="radio" name="completed_status" value="completed_status_client_search"
+                               {% if request.GET.completed_status == 'completed_status_client_search'  %}checked{% endif %}>
+                        <label for="completed_status_client_search">Только в поиске клиента</label>
+                    </div>
+                    <div class="radio-option">
+                        <input id="completed_status_in_progress" type="radio" name="completed_status" value="completed_status_in_progress"
+                               {% if request.GET.completed_status == 'completed_status_in_progress'  %}checked{% endif %}>
+                        <label for="completed_status_in_progress">Только в процессе совершения</label>
+                    </div>
+                    <div class="radio-option">
+                        <input id="completed_status_success" type="radio" name="completed_status" value="completed_status_success"
+                               {% if request.GET.completed_status == 'completed_status_success'  %}checked{% endif %}>
+                        <label for="completed_status_success">Только совершенные успешно</label>
+                    </div>
+                    <div class="radio-option">
+                        <input id="completed_status_rejected" type="radio" name="completed_status" value="completed_status_rejected"
+                               {% if request.GET.completed_status == 'completed_status_rejected'  %}checked{% endif %}>
+                        <label for="completed_status_rejected">Только отклоненные</label>
+                    </div>
+                </fieldset>
             {% endif %}
             <div class="filter-group icontains-string">
                 <label>Название сделки</label>

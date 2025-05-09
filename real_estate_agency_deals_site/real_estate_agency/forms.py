@@ -20,6 +20,7 @@ class ReviewAgencyCreationForm(forms.ModelForm):
     )
     grade = forms.DecimalField(widget=forms.NumberInput(attrs={'min': '0', 'max': '5', 'step': '0.1'}), label='Оценка')
 
+
 class ReviewAgencyUpdateForm(forms.ModelForm):
     class Meta:
         model = models.ReviewAgency
@@ -151,7 +152,7 @@ class DealForm(forms.Form):
     title = forms.CharField(max_length=256, label='Заголовок')
     type = forms.ChoiceField(choices=models.Deal.DealType.choices,
                              initial=models.Deal.DealType.SALE,
-                             label='Тип недвижимости')
+                             label='Тип сделки')
     price = forms.DecimalField(max_digits=10, decimal_places=2, label='Цена')
     real_estate_deal_id = forms.IntegerField(label='Номер недвижимости')
     agent_username = forms.CharField(max_length=150, label='Логин агента недвижимости')
@@ -165,12 +166,13 @@ class DealForm(forms.Form):
     ], label='Документ проекта')
     # end DataConstruction
     # DataRental
-    price_housing_and_municipalities = forms.DecimalField(required=False, max_digits=10, decimal_places=2, label='Цена ЖКХ')
+    price_housing_and_municipalities = forms.DecimalField(required=False, max_digits=10,
+                                                          decimal_places=2, label='Цена ЖКХ')
     prepayment = forms.DecimalField(required=False, max_digits=10, decimal_places=2, label='Предоплата')
     rental_period_days = forms.IntegerField(required=False, validators=[
         MinValueValidator(1),
         MaxValueValidator(2**15)
-    ], label='Срок аренды в днях')
+    ], label='Срок аренды (в днях)')
     # end DataRental
 
     def clean(self):
@@ -178,12 +180,12 @@ class DealForm(forms.Form):
         type_deal = int(cleaned_data.get('type'))
 
         if type_deal == models.Deal.DealType.RENT:
-            plot_fields = ('price_housing_and_municipalities', 'prepayment', 'rental_period_days',)
+            plot_fields = ('rental_period_days',)  # Могу быть пустыми 'price_housing_and_municipalities', 'prepayment',
             for field in plot_fields:
                 if cleaned_data.get(field) is None:
                     raise ValidationError(f'Поле "{self.fields[field].label}" обязательно для аренды')
         elif type_deal == models.Deal.DealType.CONSTRUCTION:
-            apartment_fields = ('construction_company', 'approximate_dates','project_document',)
+            apartment_fields = ('construction_company', 'project_document',)  # Могу быть пустыми 'approximate_dates',
             for field in apartment_fields:
                 if cleaned_data.get(field) is None:
                     raise ValidationError(f'Поле "{self.fields[field].label}" обязательно для строительства')
@@ -209,11 +211,9 @@ class DealStatisticsFilterForm(forms.Form):
     # DataConstruction
     construction_company = forms.CharField(required=False, max_length=256, label='Строительная компания')
     # end DataConstruction
-    # DataRental
-    # end DataRental
 
-    date_create_start = forms.DateTimeField(required=False, label='Минимальная дата создание')
-    date_create_end = forms.DateTimeField(required=False, label='Максимальная дата создания')
+    date_create_start = forms.DateTimeField(required=False, label='Минимальная дата создание (формат "%Y-%m-%d %H:%M:%S")')
+    date_create_end = forms.DateTimeField(required=False, label='Максимальная дата создания (формат "%Y-%m-%d %H:%M:%S")')
     price_min = forms.DecimalField(required=False, max_digits=10, decimal_places=2, label='Минимальная цена')
     price_max = forms.DecimalField(required=False, max_digits=10, decimal_places=2, label='Максимальная цена')
     completed_type_status = forms.ChoiceField(required=False,
@@ -223,7 +223,7 @@ class DealStatisticsFilterForm(forms.Form):
     deleted_deal = forms.BooleanField(required=False, label='Учитывать удаленные')
     agent_username = forms.CharField(required=False, max_length=150, label='Кто ответственный (логин)')
     deal_with = forms.CharField(required=False, max_length=150, label='С кем сделка (логин)')
-    real_estate_deal_id = forms.IntegerField(required=False, label='С какой недвижимостью связано')
+    real_estate_deal_id = forms.IntegerField(required=False, label='С какой недвижимостью связаны')
 
     type_real_estate = forms.ChoiceField(required=False,
                                          choices=(models.RealEstate.RealEstateType.choices + [(NONE, 'Любой тип',)]),
@@ -233,7 +233,7 @@ class DealStatisticsFilterForm(forms.Form):
     square_max = forms.IntegerField(required=False, validators=[MinValueValidator(1)], label='Максимальная площадь')
 
 
-class ImportRealEstateDataFilterForm(forms.Form):
+class RealEstateStatisticsFilterForm(forms.Form):
     class BoolFieldChoice(models.models.IntegerChoices):
         NONE = -1, 'Без разницы'
         YES = 0, 'С'
@@ -242,7 +242,7 @@ class ImportRealEstateDataFilterForm(forms.Form):
     type_real_estate = forms.ChoiceField(required=False,
                                          choices=(models.RealEstate.RealEstateType.choices + [(NONE, 'Любой тип',)]),
                                          initial=NONE,
-                                         label='Тип сделки')
+                                         label='Тип недвижимости')
     # DataPlot
     plot_buildings = forms.ChoiceField(required=False,
                                        choices=BoolFieldChoice.choices,
@@ -299,16 +299,16 @@ class ImportRealEstateDataFilterForm(forms.Form):
     # end DataHouse
     square_min = forms.DateTimeField(required=False, label='Минимальная площадь')
     square_max = forms.DateTimeField(required=False, label='Максимальная площадь')
-    when_added_min = forms.DateTimeField(required=False, label='Была добавлена с')
-    when_added_max = forms.DateTimeField(required=False, label='Была добавлена до')
+    when_added_min = forms.DateTimeField(required=False, label='Была добавлена с (формат "%Y-%m-%d %H:%M:%S")')
+    when_added_max = forms.DateTimeField(required=False, label='Была добавлена до (формат "%Y-%m-%d %H:%M:%S")')
 
 
-class ImportRealtorDataFilterForm(forms.Form):
+class RealtorStatisticsFilterForm(forms.Form):
     experience_min = forms.IntegerField(required=False,
                                         validators=[MinValueValidator(0)],
-                                        label='Опыт минимум месяцев')
+                                        label='Опыт минимум (месяцев)')
     experience_max = forms.IntegerField(required=False,
                                         validators=[MinValueValidator(0)],
-                                        label='Опыт максимум месяцев')
+                                        label='Опыт максимум (месяцев)')
     price_min = forms.DecimalField(required=False, max_digits=10, decimal_places=2, label='Минимальная цена')
     price_max = forms.DecimalField(required=False, max_digits=10, decimal_places=2, label='Максимальная цена')

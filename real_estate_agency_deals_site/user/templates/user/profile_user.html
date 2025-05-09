@@ -40,7 +40,7 @@
         <div class="actions">
             {% if user.is_superuser %}
                 {% if user_profile.is_staff %}
-                    <a href="{% url 'revoke_rights_staff' user_profile.username %}" class="btn">Лишить права агента недвижимости</a>
+                    <a href="{% url 'revoke_rights_staff' user_profile.username %}" class="btn">Лишить прав агента недвижимости</a>
                 {% else %}
                     <a href="{% url 'give_rights_staff' user_profile.username %}" class="btn">Дать права агента недвижимости</a>
                 {% endif %}

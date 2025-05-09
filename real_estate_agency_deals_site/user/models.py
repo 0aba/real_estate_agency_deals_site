@@ -22,10 +22,10 @@ class User(AbstractUser):
 
     email = models.EmailField(unique=True, verbose_name='Почта')
     verification_email = models.BooleanField(default=False)
-    display_contacts = models.BooleanField(default=False, verbose_name='Отображать почту')
+    display_contacts = models.BooleanField(default=False, verbose_name='Отображать контакты')
     phone = models.CharField(null=True, blank=True, validators=[
         RegexValidator(r'^[1-9]\d{1,14}$', 'Номер телефона должен быть в международном формате E.164'
-                                                  ' "+{от 2 до 15 цифр}"')
+                                                  ' "+{от 2 до 15 цифр}" (не надо вводить "+", только цифры)')
     ], max_length=15, verbose_name='Номер телефона')
     date_register = models.DateTimeField(auto_now_add=True)
     banned = models.BooleanField(default=False)
