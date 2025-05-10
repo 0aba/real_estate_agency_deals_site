@@ -30,8 +30,8 @@ DEBUG = True
 load_dotenv(BASE_DIR.parent / ('.env.dev' if DEBUG else '.env.prod'))
 
 ALLOWED_HOSTS = ['*']
-MAIN_HOST = 'http://127.0.0.1:8000' if DEBUG else 'https://todo-host.com'
-
+DEFAULT_HOST = 'http://127.0.0.1:8000'
+MAIN_HOST = DEFAULT_HOST if DEBUG else os.getenv('MAIN_HOST', DEFAULT_HOST)
 
 # Application definition
 
