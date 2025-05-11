@@ -146,20 +146,37 @@ h3 {
     text-decoration: underline;
 }
 
-.edit-btn-have-review {
+.btn-have-review {
     display: flex;
     justify-content: center;
     align-items: center;
     text-decoration: none;
     width: 100%;
-    background-color: #3090ff;
+    background-color: #212421;
     border-radius: 8px;
     color: white;
-    padding: 10px 8px 10px 8px;
+    padding: 10px 8px;
+    margin: 10px 0;
+}
+
+.btn-have-review:hover {
+    background-color: #8b8c8b;
+}
+
+.edit-btn-have-review {
+    background-color: #3090ff;
 }
 
 .edit-btn-have-review:hover {
     background-color: #9cccff;
+}
+
+.delete-btn-have-review {
+    background-color: #d60125;
+}
+
+.delete-btn-have-review:hover {
+    background-color: #ff9ca4;
 }
 
 hr {
