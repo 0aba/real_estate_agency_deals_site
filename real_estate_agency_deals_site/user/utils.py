@@ -209,6 +209,7 @@ def create_bl_action_router(bl_action, default='home', **routes):
         kwargs_redirect = {
             'permanent': False
         }
+
         if route:
             if route[1]:
                 kwargs_redirect['username'] = username
@@ -228,12 +229,12 @@ routes_profile={
 }
 
 routes_my_list={
-    ResultBLAction.SUCCESS.name: ('my_black_list', True,),
-    ResultBLAction.OTHER_ERROR.name: ('my_black_list', True,),
+    ResultBLAction.SUCCESS.name: ('my_black_list', False,),
+    ResultBLAction.OTHER_ERROR.name: ('my_black_list', False,),
     ResultBLAction.NOT_AUTHORIZED.name: ('login', False,),
     ResultBLAction.USER_NOT_FOUND.name: ('home', False,),
-    ResultBLAction.ALREADY_IN_BL.name: ('my_black_list', True,),
-    ResultBLAction.NO_IN_BL.name: ('my_black_list', True,),
+    ResultBLAction.ALREADY_IN_BL.name: ('my_black_list', False,),
+    ResultBLAction.NO_IN_BL.name: ('my_black_list', False,),
 }
 
 
