@@ -19,13 +19,12 @@
             <div class="complaint {% if complaint.reviewed_complaint %} complaint-consider {% else %} complaint-not-consider {% endif %}">
                 <p class="email-write-complaint">
                     Почта написавшего: {% if complaint.feedback_email %} {{ complaint.feedback_email }} {% else %} {{ complaint.wrote_complaint.email }} {% endif %}
-
                 </p>
                 <p class="write-complaint">
                     Время написания: {{ complaint.date_write }}
                 </p>
                 {% if complaint.reviewed_complaint %}
-                    <p class="consider">Рассмотрена: {{ complaint.reviewed_complaint.username }}</p>
+                    <p class="consider">Рассмотрена: <a href="{% url 'user_profile' complaint.reviewed_complaint.username %}">{{ complaint.reviewed_complaint.username }}</a></p>
                     <a href="{% url 'complaint_consider' complaint.pk %}" class="btn">Просмотреть</a>
                 {% else %}
                     <a href="{% url 'complaint_consider' complaint.pk %}" class="btn">Рассмотреть</a>
@@ -60,7 +59,7 @@
                 </div>
             </fieldset>
             <div class="filter-group datetime-interval">
-                <label>Диапазон дат</label>
+                <label>Диапазон даты написания</label>
                 <input id="written_after" type="datetime-local" name="written_after_value" value="{{ request.GET.written_after_value }}">
                 <input id="written_before" type="datetime-local" name="written_before_value" value="{{ request.GET.written_before_value }}">
             </div>

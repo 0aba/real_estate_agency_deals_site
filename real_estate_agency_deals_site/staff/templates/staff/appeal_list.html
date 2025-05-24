@@ -18,7 +18,7 @@
         {% for appeal in appeal_list %}
             <div class="complaint {% if appeal.reviewed_appeal %} complaint-consider {% else %} complaint-not-consider {% endif %}">
                 <p class="email-write-complaint">
-                    Почта написавшего: {{ appeal.write_appeal.username }}
+                    Кто написал: <a href="{% url 'user_profile' appeal.write_appeal.username %}">{{ appeal.write_appeal.username }}</a>
                 </p>
                 <p class="write-complaint">
                     Время написания: {{ appeal.date_write }}
@@ -29,7 +29,7 @@
                     {% else %}
                         <p class="appeal_accepted">Принята</p>
                     {% endif %}
-                    <p class="consider">Рассмотрена: {{ appeal.reviewed_appeal.username }}</p>
+                    <p class="consider">Рассмотрена: <a href="{% url 'user_profile' appeal.reviewed_appeal.username %}">{{ appeal.reviewed_appeal.username }}</a></p>
                     <a href="{% url 'appeal_consider' appeal.pk %}" class="btn">Просмотреть</a>
                 {% else %}
                     <a href="{% url 'appeal_consider' appeal.pk %}" class="btn">Рассмотреть</a>
@@ -66,13 +66,13 @@
                 <div class="radio-option">
                     <input id="considered_rejected" type="radio" name="considered_status" value="considered_rejected"
                            {% if request.GET.considered_status == 'considered_rejected' %}checked{% endif %}>
-                    <label for="considered_rejected">Рассмотренная отклоненная</label>
+                    <label for="considered_rejected">Рассмотренные отклоненные</label>
                 </div>
 
                 <div class="radio-option">
                     <input id="considered_accepted" type="radio" name="considered_status" value="considered_accepted"
                            {% if request.GET.considered_status == 'considered_accepted' %}checked{% endif %}>
-                    <label for="considered_accepted">Рассмотренная принятая</label>
+                    <label for="considered_accepted">Рассмотренные принятые</label>
                 </div>
             </fieldset>
             <div class="filter-group datetime-interval">

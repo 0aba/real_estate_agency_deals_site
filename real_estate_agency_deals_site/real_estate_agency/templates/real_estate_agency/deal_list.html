@@ -57,7 +57,7 @@
                     <input id="agent_deals" type="text" name="agent_deals" value="{{ request.GET.agent_deals }}">
                 </div>
                 <fieldset>
-                    <legend>Статуса совершения сделки</legend>
+                    <legend>Статус совершения сделки</legend>
                     <div class="radio-option">
                         <input id="completed_status_any" type="radio" name="completed_status" value="completed_status_any"
                                {% if not request.GET.completed_status or request.GET.completed_status == 'completed_status_any'  %}checked{% endif %}>
@@ -144,7 +144,7 @@
                     <input id="construction_company" type="text" name="construction_company_value" value="{{ request.GET.construction_company_value}}">
                 </div>
                 <div class="filter-group">
-                    <label>Примерные сроки выполнения работы</label>
+                    <label>Примерные сроки выполнения работы (в днях)</label>
                     <input id="approximate_dates_min" type="number" min="0" name="approximate_dates_min_value" value="{{ request.GET.approximate_dates_min_value }}">
                     <input id="approximate_dates_max" type="number" min="0" name="approximate_dates_max_value" value="{{ request.GET.approximate_dates_max_value }}">
                 </div>
@@ -252,7 +252,7 @@
                     </div>
                 </fieldset>
                 <div class="filter-group">
-                    <label>Диапазон этаж квартиры</label>
+                    <label>Диапазон года строительства дома</label>
                     <input id="year_construction_min" type="number" min="1900" name="year_construction_min_value" value="{{ request.GET.year_construction_min_value }}">
                     <input id="year_construction_max" type="number" min="1900" name="year_construction_max_value" value="{{ request.GET.year_construction_max_value }}">
                 </div>
@@ -322,17 +322,17 @@
             </div>
             <div id="house" class="view-group">
                 <div class="filter-group">
-                    <label>Диапазон этаж квартиры</label>
+                    <label>Диапазон количества этажей у дома</label>
                     <input id="house_number_storeys_min" type="number" min="1" name="house_number_storeys_min" value="{{ request.GET.house_number_storeys_min }}">
                     <input id="house_number_storeys_max" type="number" min="1" name="house_number_storeys_max" value="{{ request.GET.house_number_storeys_max }}">
                 </div>
                 <div class="filter-group">
-                    <label>Площадь дома (м²)</label>
+                    <label>Диапозон площади дома (м²)</label>
                     <input id="house_area_min" type="number" min="1" name="house_area_min" value="{{ request.GET.house_area_min }}">
                     <input id="house_area_max" type="number" min="1" name="house_area_max" value="{{ request.GET.house_area_max }}">
                 </div>
                 <div class="filter-group">
-                    <label>Год постройки домаы</label>
+                    <label>Диапазон года строительства дома</label>
                     <input id="house_year_construction_min" type="number" min="1900" name="house_year_construction_min" value="{{ request.GET.house_year_construction_min }}">
                     <input id="house_year_construction_max" type="number" min="1900" name="house_year_construction_max" value="{{ request.GET.house_year_construction_max }}">
                 </div>

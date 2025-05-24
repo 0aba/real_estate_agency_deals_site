@@ -18,7 +18,7 @@
         <div class="real_estate">
             <img src="{{ real_estate_view.main_photo.url }}">
             <p>Номер: {{ real_estate_view.pk }}</p>
-            <p>Был добавлен: {{ real_estate_view.when_added }}</p>
+            <p>Была добавлен: {{ real_estate_view.when_added }}</p>
             {% if real_estate_view.address_real_estate %}
             <p>
                 Город: {{ real_estate_view.address_real_estate.city }}

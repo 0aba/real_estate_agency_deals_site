@@ -13,10 +13,10 @@
 
 {% block content %}
 <div class="form-container">
-    <a href="{% url 'appeal_list' %}" class="back-button">Обратно к списку жалоб</a>
+    <a href="{% url 'appeal_list' %}" class="back-button">Обратно к списку апелляций</a>
     <h2 class="form-title">{{ title }}</h2>
     <p class="email-write-complaint">
-        Написал: {{ current_appeal.write_appeal.username }}
+        Написал: <a href="{% url 'user_profile' current_appeal.write_appeal.username %}">{{ current_appeal.write_appeal.username }}</a>
     </p>
     <p class="write-complaint">
         Время написания: {{ current_appeal.date_write }}
@@ -47,7 +47,7 @@
     {% else %}
         <p class="appeal_accepted">Апелляция была принята</p>
     {% endif %}
-    <p class="consider">Рассмотрена: {{ current_appeal.reviewed_appeal.username }}</p>
+    <p class="consider">Рассмотрена: <a href="{% url 'user_profile' current_appeal.reviewed_appeal.username %}">{{ current_appeal.reviewed_appeal.username }}</a></p>
 
     <p class="consider-verdict">Вердикт: {{ current_appeal.verdict }}</p>
     {% endif %}

@@ -52,8 +52,8 @@
             </div>
             <div class="filter-group">
                 <label>Диапазон цены риэлтера</label>
-                <input id="price_min" type="number" min="0" name="price_min_value" value="{{ request.GET.price_min_value }}">
-                <input id="price_max" type="number" min="0" name="price_max_value" value="{{ request.GET.price_max_value }}">
+                <input id="price_min" type="number" min="0" step="0.01" name="price_min_value" value="{{ request.GET.price_min_value }}">
+                <input id="price_max" type="number" min="0" step="0.01" name="price_max_value" value="{{ request.GET.price_max_value }}">
             </div>
             <button type="submit" class="btn-filters">Применить фильтры</button>
         </form>

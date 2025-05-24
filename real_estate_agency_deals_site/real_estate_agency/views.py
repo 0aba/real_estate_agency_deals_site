@@ -781,12 +781,12 @@ class DealListView(ListView):
         elif type_deal == 'deal_rent_only':
             queryset = queryset.filter(type=models.Deal.DealType.RENT)
 
-            price_housing_and_municipalities_min = self.request.GET.get('price_housing_and_municipalities_min')
-            price_housing_and_municipalities_max = self.request.GET.get('price_housing_and_municipalities_max')
-            prepayment_min = self.request.GET.get('prepayment_min')
-            prepayment_max = self.request.GET.get('prepayment_max')
-            rental_period_days_min = self.request.GET.get('rental_period_days_min')
-            rental_period_days_max = self.request.GET.get('rental_period_days_max')
+            price_housing_and_municipalities_min = self.request.GET.get('price_housing_and_municipalities_min_value')
+            price_housing_and_municipalities_max = self.request.GET.get('price_housing_and_municipalities_max_value')
+            prepayment_min = self.request.GET.get('prepayment_min_value')
+            prepayment_max = self.request.GET.get('prepayment_max_value')
+            rental_period_days_min = self.request.GET.get('rental_period_days_min_value')
+            rental_period_days_max = self.request.GET.get('rental_period_days_max_value')
 
             if price_housing_and_municipalities_min:
                 queryset = queryset.filter(deal_rental_fk__price_housing_and_municipalities__gte=price_housing_and_municipalities_min)
@@ -805,22 +805,21 @@ class DealListView(ListView):
 
             if rental_period_days_max:
                 queryset = queryset.filter(deal_rental_fk__rental_period_days__lte=rental_period_days_max)
-
         elif type_deal == 'deal_construction_only':
             queryset = queryset.filter(type=models.Deal.DealType.CONSTRUCTION)
 
-            construction_company = self.request.GET.get('construction_company')
-            approximate_dates_min = self.request.GET.get('approximate_dates_min')
-            approximate_dates_max = self.request.GET.get('approximate_dates_max')
+            construction_company = self.request.GET.get('construction_company_value')
+            approximate_dates_min = self.request.GET.get('approximate_dates_min_value')
+            approximate_dates_max = self.request.GET.get('name="approximate_dates_max_value"')
 
             if construction_company:
                 queryset = queryset.filter(deal_construction_fk__construction_company__icontains=construction_company)
 
             if approximate_dates_min:
-                queryset = queryset.filter(deal_rental_fk__approximate_dates__gte=approximate_dates_min)
+                queryset = queryset.filter(deal_construction_fk__approximate_dates__gte=timezone.timedelta(days=int(approximate_dates_min)))
 
             if approximate_dates_max:
-                queryset = queryset.filter(deal_rental_fk__approximate_dates__lte=approximate_dates_max)
+                queryset = queryset.filter(deal_construction_fk__approximate_dates__lte=timezone.timedelta(days=int(approximate_dates_max)))
 
         square_min_value = self.request.GET.get('square_min_value')
         square_max_value = self.request.GET.get('square_max_value')

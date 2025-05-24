@@ -132,7 +132,7 @@ class CreateRestorePasswordView(FormView):
     def get_context_data(self, *, object_list=None, **kwargs):
         base_context = super().get_context_data(**kwargs)
         context = {
-            'title': 'Подтверждение для восстановления пароля',
+            'title': 'Начать восстановление пароля',
         }
 
         return {**base_context, **context}
@@ -195,7 +195,7 @@ class RestorePasswordView(FormView):
     def get_context_data(self, *, object_list=None, **kwargs):
         base_context = super().get_context_data(**kwargs)
         context: dict = {
-            'title': 'Подтверждение для восстановления пароля',
+            'title': 'Восстановление пароля',
         }
 
         return {**base_context, **context}

@@ -176,7 +176,7 @@ class NewAppeal(CreateView):
     def get_context_data(self, *, object_list=None, **kwargs):
         base_context = super().get_context_data(**kwargs)
         context = {
-            'title': 'Написать апелляция',
+            'title': 'Написать апелляцию',
         }
 
         return {**base_context, **context}
@@ -265,7 +265,7 @@ class ConsiderAppeal(UpdateView):
     def get_context_data(self, **kwargs):
         base_context = super().get_context_data(**kwargs)
         context = {
-            'title': 'Рассмотрение апелляции',
+            'title': 'Просмотр рассмотренной апелляции' if self.current_appeal.reviewed_appeal else 'Рассмотрение апелляции',
             'current_appeal': self.current_appeal,
         }
 

@@ -38,7 +38,7 @@
     </form>
     {% else %}
     <p>Жалоба была рассмотрена</p>
-    <p class="consider">Рассмотрена: {{ current_complaint.reviewed_complaint.username }}</p>
+    <p class="consider">Рассмотрена: <a href="{% url 'user_profile' current_complaint.reviewed_complaint.username %}">{{ current_complaint.reviewed_complaint.username }}</a></p>
     <p class="consider-verdict">Вердикт: {{ current_complaint.verdict }}</p>
     {% endif %}
 </div>

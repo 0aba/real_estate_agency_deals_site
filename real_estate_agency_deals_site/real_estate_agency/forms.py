@@ -89,7 +89,7 @@ class RealEstateForm(forms.Form):
     square = forms.IntegerField(validators=[
         MinValueValidator(1),
     ], label='Общая площадь')
-    about = forms.CharField(required=False, max_length=512, label='О недвижимости')
+    about = forms.CharField(widget=forms.Textarea, required=False, max_length=512, label='О недвижимости')
 
     have_address = forms.BooleanField(required=False, label='Добавить адрес (для шаблона недвижимости оставите пустым)')
     # Address

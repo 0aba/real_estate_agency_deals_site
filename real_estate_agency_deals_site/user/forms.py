@@ -76,6 +76,8 @@ class ChangeUserProfileForm(forms.ModelForm):
         model = User
         fields = ('last_name', 'first_name', 'patronymic', 'photo', 'display_contacts', 'phone', 'about',)
 
+    about = forms.CharField(widget=forms.Textarea, required=False, max_length=512, label='О себе')
+
 
 class PrivateMessageForm(forms.ModelForm):
     class Meta:
