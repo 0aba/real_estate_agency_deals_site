@@ -21,7 +21,7 @@
                 <div class="message-header">
                     <img src="{{ message.wrote_PM.photo.url }}" class="message-avatar">
                     <div class="message-info">
-                        <span class="message-author">Отправил: {{ message.wrote_PM.username }}</span>
+                        <span class="message-author">Отправил: <a href="{% url 'user_profile' message.wrote_PM.username %}">{{ message.wrote_PM.username }}</a></span>
                         <span class="message-date">
                             {{ message.date_write }}
                             {% if message.change %}
@@ -37,7 +37,7 @@
                     </div>
                     <img src="{{ message.received_PM.photo.url }}" class="message-avatar">
                     <div class="message-info">
-                        <span class="message-received">Получил: {{ message.received_PM.username }}</span>
+                        <span class="message-received">Получил: <a href="{% url 'user_profile' message.received_PM.username %}">{{ message.received_PM.username }}</a></span>
                     </div>
                 </div>
                 <div class="message-content">
