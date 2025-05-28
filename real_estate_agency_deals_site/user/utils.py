@@ -1,5 +1,6 @@
 from django.db.models import Count, Q, Subquery, OuterRef
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import IntegerField
 from django.contrib.auth import logout
 from django.db import IntegrityError
 from django.shortcuts import redirect
@@ -252,12 +253,19 @@ def get_user_chats(user):
     other_users = models.User.objects.filter(
         Q(wrote_PM_fk__received_PM=user, wrote_PM_fk__deleted=False) |
         Q(received_PM_fk__wrote_PM=user, received_PM_fk__deleted=False)
-    ).distinct().annotate(
-        unread_count=Count('wrote_PM_fk', filter=Q(
-            wrote_PM_fk__received_PM=user,
-            wrote_PM_fk__viewed=False,
-            wrote_PM_fk__deleted=False
-        )),
+    ).distinct()
+
+    unread_count_subquery = models.PrivateMessage.non_deleted.filter(
+        wrote_PM=OuterRef('pk'),
+        received_PM=user,
+        viewed=False,
+        deleted=False
+    ).order_by().values('wrote_PM').annotate(
+        count=Count('*')
+    ).values('count')
+
+    other_users = other_users.annotate(
+        unread_count=Subquery(unread_count_subquery, output_field=IntegerField()),  # info! можно в целом и без `output_field`
         last_message=Subquery(last_message_subquery),
         last_date=Subquery(last_date_subquery)
     ).order_by('-last_date', '-unread_count')
