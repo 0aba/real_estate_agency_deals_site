@@ -297,8 +297,8 @@ class RealEstateStatisticsFilterForm(forms.Form):
                                             initial=BoolFieldChoice.NONE,
                                             label='Есть коммуникации')
     # end DataHouse
-    square_min = forms.DateTimeField(required=False, label='Минимальная площадь')
-    square_max = forms.DateTimeField(required=False, label='Максимальная площадь')
+    square_min = forms.IntegerField(required=False, label='Минимальная площадь')
+    square_max = forms.IntegerField(required=False, label='Максимальная площадь')
     when_added_min = forms.DateTimeField(required=False, label='Была добавлена с (формат "%Y-%m-%d %H:%M:%S")')
     when_added_max = forms.DateTimeField(required=False, label='Была добавлена до (формат "%Y-%m-%d %H:%M:%S")')
 
