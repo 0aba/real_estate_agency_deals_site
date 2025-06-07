@@ -1,0 +1,12 @@
+**/__pycache__/
+*.egg-info/
+.env.prod
+.env.dev
+.idea/
+.venv/
+
+**/migrations/*
+!**/migrations/__init__.py
+
+media/*
+!media/default

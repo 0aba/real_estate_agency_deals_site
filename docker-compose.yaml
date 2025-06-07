@@ -1,0 +1,35 @@
+# INFO! dev сборка без prod зависимостей (nginx, gunicorn и т.д.)
+services:
+  db:
+    image: postgres:17.2
+    environment:
+      POSTGRES_DB: ${NAME_DB}
+      POSTGRES_USER: ${USER_DB}
+      POSTGRES_PASSWORD: ${PASSWORD_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB -h db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  web:
+    image: real-estate-agency-deals-site
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NAME_DB: ${NAME_DB}
+      USER_DB: ${USER_DB}
+      PASSWORD_DB: ${PASSWORD_DB}
+      HOST_DB: db
+      PORT_DB: 5432
+      EMAIL_HOST_USER: ${EMAIL_HOST_USER}
+      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
+
+volumes:
+  postgres_data:
