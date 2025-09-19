@@ -24,10 +24,22 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-+o#)qwq*wu!uf_43bc@)dq=bxb3v=%^86^=o#!h&71j=yn4^d#'
 
+
+# Launch environment
+if not (path_init_env := BASE_DIR.parent / '.env.init').exists(): raise Exception('File .env.init not found in project root')
+load_dotenv(path_init_env)
+
+if not (mod_from_env := os.getenv('MOD')): raise Exception('MOD variable is required in .env.init')
+if mod_from_env not in ('DEV', 'TEST', 'PROD'): raise Exception(f'Invalid MOD value: {mod_from_env}. Must be DEV, TEST or PROD')
+
+if not (also_load_env := os.getenv('ALSO_LOAD_ENV')): raise Exception('ALSO_LOAD_ENV variable is required in .env.init')
+
+if not (path_load_env := BASE_DIR.parent / also_load_env).exists(): raise Exception(f'Env file not found: {also_load_env}')
+
+load_dotenv(path_load_env)
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
-load_dotenv(BASE_DIR.parent / ('.env.dev' if DEBUG else '.env.prod'))
 
 ALLOWED_HOSTS = ['*']
 DEFAULT_HOST = 'http://127.0.0.1:8000'

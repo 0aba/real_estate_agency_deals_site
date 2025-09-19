@@ -2,10 +2,12 @@
 Сайт разрабатывался для курсового проекта по теме «Информационная система учета сделок агентства недвижимости».
 
 ## Содержание
-1. [Требования для работы](#Требования-для-работы)
-2. [Зависимости Python](#Зависисмости-Python)
-3. [Структура .env файлов](#Структура-env-файлов)
-4. [Docker](#Docker)
+- [Описание](#описание)
+  - [Содержание](#содержание)
+  - [Требования для работы](#требования-для-работы)
+  - [Зависимости Python](#зависимости-python)
+  - [Структура .env файлов](#структура-env-файлов)
+  - [Docker](#docker)
 
 ## Требования для работы
 - **Python** ~=3.13.0
@@ -18,21 +20,34 @@ pip install -e .
 ```
 
 ## Структура .env файлов
-Всего есть 2 файла .env, если `DEBUG=True`, то загружается `.env.dev`, иначе `.env.prod`.
-Оба файла имеют следующую структура:
+Основной файл конфигурации `.env.init` в корне проекта. Он содержит опционально метаданные проекта, определяет тип запуска и путь к основному env файлу.
+
+Он имеет следующую структуру:
+```env
+ALSO_LOAD_ENV="envs/.env.example"  # Path to main env running
+
+MOD="TEST"                         # Choice running mod from: "DEV", "TEST" and "PROD"
+```
+
+Основной файл окружения должен иметь в свою очередь следующую структуру вне зависимости от переменных в `.env.init`: 
 ```env
 # PostgreSQL
-NAME_DB="exemple"
-USER_DB="exemple"
-PASSWORD_DB="exemple"
+NAME_DB="example"
+USER_DB="example"
+PASSWORD_DB="example"
 HOST_DB="127.0.0.1"                        # Default PostgreSQL
 PORT_DB="5432"                             # Default PostgreSQL
 # Email
-EMAIL_HOST_USER="exemple@gmail.com"
+EMAIL_HOST_USER="example@gmail.com"
 EMAIL_HOST_PASSWORD="ffff ffff ffff ffff" 
 # Server
-MAIN_HOST='https://exemple-host.com'       # Optional (default 127.0.0.1:8000)
+MAIN_HOST='https://example-host.com'       # Optional (default 127.0.0.1:8000)
 ```
+
+P.S.
+Переменная `DEBUG=True` **больше не связана** с тем какое окружение загружается и окружение на нее так же не влияет!
+Рекомендуется хранить все env файлы в папке `envs/`.
+
 
 ## Docker
 Для сборки Docker-образа информационной системы относительно корневого каталога нужно написать:

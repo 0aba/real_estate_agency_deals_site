@@ -1,7 +1,6 @@
 **/__pycache__/
 *.egg-info/
-.env.prod
-.env.dev
+.env.*
 .idea/
 .venv/
 
