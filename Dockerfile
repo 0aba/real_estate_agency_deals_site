@@ -5,6 +5,7 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /site
 
+RUN touch .env.init
 COPY . .
 
 RUN pip install --no-cache-dir -e .

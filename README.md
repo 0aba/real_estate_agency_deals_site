@@ -20,52 +20,53 @@ pip install -e .
 ```
 
 ## Структура .env файлов
-Основной файл конфигурации `.env.init` в корне проекта. Он содержит опционально метаданные проекта, определяет тип запуска и путь к основному env файлу.
+Основой является файл конфигурации `.env.init` в корне проекта, он должен в любом случае существовать. Он служит только для того, чтобы указать путь к основному env-файлу.
+Сам файл `.env.init` может быть пустым, но важно, чтобы до запуска сайта это основное окружение было создано.
 
 Он имеет следующую структуру:
 ```env
-ALSO_LOAD_ENV="envs/.env.example"  # Path to main env running
-
-MOD="TEST"                         # Choice running mod from: "DEV", "TEST" and "PROD"
+LOAD_MAIN_ENV="envs/.env.example"  # Path to main env running (Optional)
 ```
 
-Основной файл окружения должен иметь в свою очередь следующую структуру вне зависимости от переменных в `.env.init`: 
+Основной файл окружения должен иметь в свою очередь, следующую структуру: 
 ```env
+# Metadata
+MOD="TEST"                                 # Choice from: "DEV", "TEST" and "PROD"
 # PostgreSQL
 NAME_DB="example"
 USER_DB="example"
 PASSWORD_DB="example"
-HOST_DB="127.0.0.1"                        # Default PostgreSQL
-PORT_DB="5432"                             # Default PostgreSQL
+HOST_DB="127.0.0.1"
+PORT_DB="5432"
 # Email
 EMAIL_HOST_USER="example@gmail.com"
 EMAIL_HOST_PASSWORD="ffff ffff ffff ffff" 
 # Server
-MAIN_HOST='https://example-host.com'       # Optional (default 127.0.0.1:8000)
+MAIN_HOST='https://example-host.com'       # Default 127.0.0.1:8000 
 ```
 
 P.S.
 Переменная `DEBUG=True` **больше не связана** с тем какое окружение загружается и окружение на нее так же не влияет!
 Рекомендуется хранить все env файлы в папке `envs/`.
 
-
 ## Docker
-Для сборки Docker-образа написать:
+Для сборки Docker-образа выполните:
 ```sh
 docker build -t real-estate-agency-deals-site .
 ```
-При этом env-файлы также попадают в образ. Сборка образа обязательна для `docker-compose.yaml`, автосборки в нем нет!
+При этом основной env-файл не попадает в образ, а значит при запуске контейнера необходимо его передать!
 
-Для запуска информационной системы используйте `docker-compose.yaml`.
-При запуске Docker Compose необходимо передать env-файл, который был указан по пути в `.env.init` при сборке.
-Для запуска Docker Compose информационной системы сначала соберите Docker-образ, затем из корневого каталога выполните:
+Запуска информационной системы рекомендуется через `docker-compose.yaml`.
+При этом передайте env-файл, соответствующий структуре файла основного окружения так же как с Docker-образом!
+
+Для запуска Docker Compose выполните:
 ```sh
 docker compose --env-file envs/.env.example up
 ```
 
 P.S. 
 **Важно**, текущий `docker-compose.yaml` подходит только для запуска в режиме тестирования или разработки и не более!
-Конфигурация сделана очень криво, и проблема усугубилась после изменений в логике работы с env.
+
 
 <pre>
 ---------------[meow]---------------
