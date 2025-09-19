@@ -14,6 +14,9 @@ dependencies = [
   "python-dotenv == 1.0.1",
   "psycopg[binary,pool] == 3.2.6",
   "transliterate == 1.10.2",
+  "pytest == 8.4.2",
+  "pytest-django == 4.11.1",
+  "selenium == 4.35.0"
 ]
 
 [tool.setuptools]
@@ -21,3 +24,11 @@ py-modules = []
 
 [tool.distutils.egg_info]
 egg_base = "."
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = real_estate_agency_deals_site.real_estate_agency_deals_site.settings
+
+addopts = "-v"
+testpaths = ["tests"]
+filterwarnings = ["ignore::DeprecationWarning"]
+console_output_style = "count"
