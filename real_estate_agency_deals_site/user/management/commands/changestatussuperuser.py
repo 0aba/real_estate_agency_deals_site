@@ -18,4 +18,4 @@ class Command(BaseCommand):
             action_status = 'promoted to superuser' if user_action.is_superuser else 'demoted from superuser'
             self.stdout.write(self.style.SUCCESS(f'User {username} has been {action_status}.'))
         except ObjectDoesNotExist:
-            self.stdout.write(self.style.ERROR(f'Error: user "{username}" not found.'))
+            self.stdout.write(self.style.ERROR(f'User "{username}" not found.'))

@@ -26,8 +26,9 @@ py-modules = []
 egg_base = "."
 
 [tool.pytest.ini_options]
-DJANGO_SETTINGS_MODULE = real_estate_agency_deals_site.real_estate_agency_deals_site.settings
+DJANGO_SETTINGS_MODULE = "real_estate_agency_deals_site.settings"
 
+pythonpath = "./real_estate_agency_deals_site"
 addopts = "-v"
 testpaths = ["tests"]
 filterwarnings = ["ignore::DeprecationWarning"]

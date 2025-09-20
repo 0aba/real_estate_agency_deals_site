@@ -21,9 +21,10 @@ class Command(BaseCommand):
             User.objects.create_user(username=username, password=password, email=f'{str(uuid.uuid4())[:8]}@fake.fake', verification_email=True)
             self.stdout.write(self.style.SUCCESS('User created successfully'))
         except IntegrityError as e:
-            if '(username)=' in str(e):
-                self.stdout.write(self.style.ERROR('Error: username already exists'))
-            elif '(email)=' in str(e):
-                self.stdout.write(self.style.WARNING('Warning: the generated email already existed, which is why the account was not created'))
+            error_msg = str(e)
+            if '(username)=' in error_msg:
+                self.stdout.write(self.style.ERROR('Username already exists'))
+            elif '(email)=' in error_msg:
+                self.stdout.write(self.style.WARNING('The generated email already existed, which is why the account was not created'))
             else:
-                self.stdout.write(self.style.ERROR('Error: could not create user due to an integrity error'))
+                self.stdout.write(self.style.ERROR('Could not create user due to an integrity error'))

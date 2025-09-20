@@ -9,7 +9,7 @@ class Complaint(models.Model):
         verbose_name_plural = 'Жалобы'
         constraints = [
             models.CheckConstraint(
-                check=Q(wrote_complaint__isnull=False) | Q(feedback_email__isnull=False),
+                condition=Q(wrote_complaint__isnull=False) | Q(feedback_email__isnull=False),
                 name='complaint_related_fields_CK',
             ),
         ]
