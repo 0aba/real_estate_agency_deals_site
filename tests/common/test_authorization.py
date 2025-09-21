@@ -1,5 +1,9 @@
 """
-Test cases are groups that were not automated and remained manual: "Creating an account" and "Error entering data when creating an account".
+Test cases are groups that were not automated and remained manual:
+1. "Creating an account";
+2. "Restoring access to your account";
+3. "Error entering data when creating an account";
+4. "Error entering account information when restoring access to an account".
 """
 
 from ..conftest import browser, flush_database, create_test_verify_user, login_user
