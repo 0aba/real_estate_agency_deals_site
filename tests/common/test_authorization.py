@@ -3,8 +3,11 @@ from selenium.webdriver.common.by import By
 
 
 def test_login_account(browser , live_server, flush_database):
-    username='user1'
-    password='12345678'
+    """
+    Test for the "Account Login" test case.
+    """
+    username: str = 'user1'
+    password: str = '12345678'
     _ = create_test_verify_user(username, password)
 
     browser.get(live_server.url)
@@ -32,8 +35,11 @@ def test_login_account(browser , live_server, flush_database):
     _ = browser.find_element(By.CSS_SELECTOR, f'a.btn-header[href="/user/profile/{username}/"]')  # INFO! If the test fails, there is an error. 
 
 def test_invalid_login_account(browser, live_server):
-    username='user1'
-    password='12345678'
+    """
+    Test for the "Login Error for a Non-Existent Account" test case.
+    """
+    username: str = 'user1'
+    password: str = '12345678'
     
     browser.get(live_server.url)
     
