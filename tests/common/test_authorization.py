@@ -1,5 +1,5 @@
 """
-Test cases are groups that were not automated and remained manual: №5 and №6.
+Test cases are groups that were not automated and remained manual: "Creating an account" and "Error entering data when creating an account".
 """
 
 from ..conftest import browser, flush_database, create_test_verify_user, login_user
@@ -8,7 +8,7 @@ from selenium.webdriver.common.by import By
 
 def test_login_account(browser, live_server, flush_database):
     """
-    Test for the "Account Login" test case №1.
+    Test for the "Account Login" test case.
     """
     username: str = 'user1'
     password: str = 'o3m4b2!m'
@@ -41,7 +41,7 @@ def test_login_account(browser, live_server, flush_database):
 
 def test_invalid_login_account(browser, live_server):
     """
-    Test for the "Login Error for a Non-Existent Account" test case №2.
+    Test for the "Login Error for a Non-Existent Account" test case.
     """
     username: str = 'user1'
     password: str = 'o3m4b2!m'
@@ -72,7 +72,7 @@ def test_invalid_login_account(browser, live_server):
 
 def test_logout_account(browser, live_server, flush_database):
     """
-    Test for the "Logout from the authorization session" test case №3.
+    Test for the "Logout from the authorization session" test case.
     """
     username: str = 'user1'
     password: str = 'o3m4b2!m'
