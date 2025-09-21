@@ -1,10 +1,14 @@
-from ..conftest import browser, flush_database, create_test_verify_user
+"""
+Test cases are groups that were not automated and remained manual: №5 and №6.
+"""
+
+from ..conftest import browser, flush_database, create_test_verify_user, login_user
 from selenium.webdriver.common.by import By
 
 
-def test_login_account(browser , live_server, flush_database):
+def test_login_account(browser, live_server, flush_database):
     """
-    Test for the "Account Login" test case.
+    Test for the "Account Login" test case №1.
     """
     username: str = 'user1'
     password: str = 'o3m4b2!m'
@@ -12,6 +16,7 @@ def test_login_account(browser , live_server, flush_database):
 
     browser.get(live_server.url)
     
+    # TEST_CASE! Test case №1 
     # Cause №1
     login_button = browser.find_element(By.CSS_SELECTOR, 'a.btn-header[href="/user/login/"]')
     login_button.click()
@@ -36,7 +41,7 @@ def test_login_account(browser , live_server, flush_database):
 
 def test_invalid_login_account(browser, live_server):
     """
-    Test for the "Login Error for a Non-Existent Account" test case.
+    Test for the "Login Error for a Non-Existent Account" test case №2.
     """
     username: str = 'user1'
     password: str = 'o3m4b2!m'
@@ -64,3 +69,20 @@ def test_invalid_login_account(browser, live_server):
     submit_button.click()
     # Effect №3
     _ = browser.find_element(By.CSS_SELECTOR, 'ul.errorlist.nonfield')  # INFO! If the test fails, there is an error. 
+
+def test_logout_account(browser, live_server, flush_database):
+    """
+    Test for the "Logout from the authorization session" test case №3.
+    """
+    username: str = 'user1'
+    password: str = 'o3m4b2!m'
+    _ = create_test_verify_user(username, password)
+    login_user(browser, username, password)
+    
+    browser.get(live_server.url)
+
+    # Cause №1
+    logout_button = browser.find_element(By.CSS_SELECTOR, 'a.btn-header[href="/user/logout/"]')
+    logout_button.click()
+    # Effect №1
+    _ = browser.find_element(By.CSS_SELECTOR, 'a.btn-header[href="/user/login/"]')  # INFO! If the test fails, there is an error. 

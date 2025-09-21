@@ -4,6 +4,7 @@ from selenium.webdriver.remote.webdriver import WebDriver
 from django.contrib.auth.models import AbstractUser
 from django.core.management import call_command
 from django.contrib.auth import get_user_model
+from selenium.webdriver.common.by import By
 from typing import Generator, Optional
 from django.db import IntegrityError
 from selenium import webdriver
@@ -80,3 +81,19 @@ def create_test_verify_user(username: str, password: str, is_superuser: bool = F
         test_user.save()
     
     return test_user
+
+def login_user(browser: WebDriver, username: str, password: str) -> None:
+    """
+    Entrance to the account through the GUI.
+    """
+    login_button = browser.find_element(By.CSS_SELECTOR, 'a.btn-header[href="/user/login/"]')
+    login_button.click()
+
+    username_input = browser.find_element(By.ID, 'id_username')
+    username_input.send_keys(username)
+    password_input = browser.find_element(By.ID, 'id_password')
+    password_input.send_keys(password)
+    
+    submit_button = browser.find_element(By.CSS_SELECTOR, 'button.form-button')
+    submit_button.click()
+
