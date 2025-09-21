@@ -39,9 +39,8 @@ else:
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-# TODO! Связан с notify, а точнее  с js скриптом. Нужно будет отвязать.
-MAIN_HOST = os.getenv('MAIN_HOST', 'http://127.0.0.1:8000')
-ALLOWED_HOSTS = [MAIN_HOST, '*']
+MAIN_HOST = os.getenv('MAIN_HOST')
+ALLOWED_HOSTS = [MAIN_HOST, '*'] if MAIN_HOST else ['*']
 
 # Application definition
 

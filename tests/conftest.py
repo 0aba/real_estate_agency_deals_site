@@ -12,7 +12,7 @@ import uuid
 import os
 
 
-@pytest.fixture(scope='function', params=['chrome', 'firefox'])
+@pytest.fixture(scope='session', params=['chrome', 'firefox'])
 def browser(request) -> Generator[WebDriver, None, None]:
     """
     Fixture for creating a browser object for testing.
@@ -34,6 +34,10 @@ def browser(request) -> Generator[WebDriver, None, None]:
         yield driver
     finally:
         if driver: driver.quit()
+
+@pytest.fixture(scope="function", autouse=True)
+def cleanup_cookies(browser) -> Generator[None, None, None]:
+    browser.delete_all_cookies()
 
 @pytest.fixture(scope='function')
 def flush_database() -> Generator[None, None, None]:

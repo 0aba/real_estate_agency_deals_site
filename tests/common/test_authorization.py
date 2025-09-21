@@ -7,7 +7,7 @@ def test_login_account(browser , live_server, flush_database):
     Test for the "Account Login" test case.
     """
     username: str = 'user1'
-    password: str = '12345678'
+    password: str = 'o3m4b2!m'
     _ = create_test_verify_user(username, password)
 
     browser.get(live_server.url)
@@ -39,7 +39,7 @@ def test_invalid_login_account(browser, live_server):
     Test for the "Login Error for a Non-Existent Account" test case.
     """
     username: str = 'user1'
-    password: str = '12345678'
+    password: str = 'o3m4b2!m'
     
     browser.get(live_server.url)
     
