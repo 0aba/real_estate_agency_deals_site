@@ -37,6 +37,9 @@ def browser(request) -> Generator[WebDriver, None, None]:
 
 @pytest.fixture(scope="function", autouse=True)
 def cleanup_cookies(browser) -> Generator[None, None, None]:
+    """
+    Fixture for deleting cookies when test is completed.
+    """
     browser.delete_all_cookies()
 
 @pytest.fixture(scope='function')
