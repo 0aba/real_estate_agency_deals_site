@@ -20,7 +20,6 @@ def test_login_account(browser, live_server, flush_database):
 
     browser.get(live_server.url)
     
-    # TEST_CASE! Test case №1 
     # Cause №1
     login_button = browser.find_element(By.CSS_SELECTOR, 'a.btn-header[href="/user/login/"]')
     login_button.click()
@@ -81,9 +80,9 @@ def test_logout_account(browser, live_server, flush_database):
     username: str = 'user1'
     password: str = 'o3m4b2!m'
     _ = create_test_verify_user(username, password)
-    login_user(browser, username, password)
-    
+        
     browser.get(live_server.url)
+    login_user(browser, username, password)
 
     # Cause №1
     logout_button = browser.find_element(By.CSS_SELECTOR, 'a.btn-header[href="/user/logout/"]')

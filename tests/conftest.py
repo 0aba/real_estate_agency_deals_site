@@ -85,6 +85,7 @@ def create_test_verify_user(username: str, password: str, is_superuser: bool = F
 def login_user(browser: WebDriver, username: str, password: str) -> None:
     """
     Entrance to the account through the GUI.
+    Warning: you must set the page first before using this function.
     """
     login_button = browser.find_element(By.CSS_SELECTOR, 'a.btn-header[href="/user/login/"]')
     login_button.click()
