@@ -117,4 +117,26 @@ def test_invalid_change_profile_info(browser, live_server, flush_database):
     submit_button.click()
     # Effect №3
     _ = browser.find_element(By.CSS_SELECTOR, 'ul.errorlist li')  # INFO! If the test fails, there is an error. 
+
+def test_change_blacklist_user(browser, live_server, flush_database):
+    """
+    Test for the "Changing the blacklist status of another account" test case.
+    """
+    username1: str = 'user1'
+    password1: str = 'o3m4b2!m'
+    username2: str = 'user2'
+    password2: str = 'o3m4f2!@'
     
+    _ = create_test_verify_user(username1, password1)
+    _ = create_test_verify_user(username2, password2)
+    
+    browser.get(live_server.url)
+    login_user(browser, username1, password1)
+    
+    browser.get(f'{live_server.url}/user/profile/{username2}/')
+    
+    # Cause №1
+    add_in_blacklist = browser.find_element(By.CSS_SELECTOR, f'a.btn[href="/user/add-bl-profile/{username2}/"]')
+    add_in_blacklist.click()
+    # Effect №1
+    _ = browser.find_element(By.CSS_SELECTOR, f'a.btn[href="/user/del-bl-profile/{username2}/"]')  # INFO! If the test fails, there is an error. 

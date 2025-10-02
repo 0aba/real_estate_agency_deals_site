@@ -43,7 +43,7 @@ PORT_DB="5432"
 EMAIL_HOST_USER="example@gmail.com"
 EMAIL_HOST_PASSWORD="ffff ffff ffff ffff" 
 # Server
-MAIN_HOST='127.0.0.1:8000'                 # Used for notification and testing (Example: 'https://example-host.com')
+MAIN_HOST="127.0.0.1:8000"                 # Included in ALLOWED_HOSTS (Example: "https://example-host.com")
 ```
 
 P.S.
