@@ -219,3 +219,58 @@ def test_change_blocking_status(browser, live_server, flush_database):
     unblock_user.click()
     # Effect №2
     _ = browser.find_element(By.CSS_SELECTOR, f'a.btn[href="/user/ban/{username2}/"]')  # INFO! If the test fails, there is an error.
+
+def test_deactivating_account(browser, live_server, flush_database):
+    """
+    Test for the "Deactivating account" test case.
+    """
+    username: str = 'user'
+    password: str = 'o3m4f2!@'
+    
+    _ = create_test_verify_user(username, password)
+    
+    browser.get(live_server.url)
+    login_user(browser, username, password)
+
+    header_link_profile = browser.find_element(By.CSS_SELECTOR, f'a.btn-header[href="/user/profile/{username}/"]')
+    header_link_profile.click()
+    
+    # Cause №1
+    change_profile_link = browser.find_element(By.CSS_SELECTOR, f'a.btn[href="/user/profile/{username}/change/"]')
+    change_profile_link.click()
+    # Effect №1
+    assert browser.current_url.endswith(f'/user/profile/{username}/change/')
+
+    # Cause №2
+    deactivating_account = browser.find_element(By.ID, 'delete-account-btn')
+    deactivating_account.click()
+    # Effect №2
+    modal_deactivating_account = browser.find_element(By.ID, 'delete-account-modal')
+    assert modal_deactivating_account.is_displayed()
+
+    # Cause №3
+    confirmation_deactivating_account = browser.find_element(By.CSS_SELECTOR, 'a.btn.delete-account[href="/user/disable-account/"]')
+    confirmation_deactivating_account.click()
+    # Effect №3
+    login_button = browser.find_element(By.CSS_SELECTOR, 'a.btn-header[href="/user/login/"]')
+
+    # Cause №4
+    login_button.click()
+    # Effect №4
+    assert browser.current_url.endswith('/user/login/')
+
+    # Cause №5
+    username_input = browser.find_element(By.ID, 'id_username')
+    username_input.send_keys(username)
+
+    password_input = browser.find_element(By.ID, 'id_password')
+    password_input.send_keys(password)
+    # Effect №5
+    assert username_input.get_attribute('value') == username
+    assert password_input.get_attribute('value') == password
+
+    # Cause №6
+    submit_button = browser.find_element(By.CSS_SELECTOR, 'button.form-button')
+    submit_button.click()
+    # Effect №6
+    _ = browser.find_element(By.CSS_SELECTOR, 'ul.errorlist.nonfield')  # INFO! If the test fails, there is an error. 
