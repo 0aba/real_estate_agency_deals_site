@@ -185,4 +185,9 @@ def test_change_rights_agent(browser, live_server, flush_database):
     give_rights_staff = browser.find_element(By.CSS_SELECTOR, f'a.btn[href="/user/give-rights-staff/{username2}/"]')
     give_rights_staff.click()
     # Effect №1
-    _ = browser.find_element(By.CSS_SELECTOR, f'a.btn[href="/user/revoke-rights-staff/{username2}/"]')  # INFO! If the test fails, there is an error. 
+    revoke_rights_staff = browser.find_element(By.CSS_SELECTOR, f'a.btn[href="/user/revoke-rights-staff/{username2}/"]')  # INFO! If the test fails, there is an error. 
+
+    # Cause №2
+    revoke_rights_staff.click()
+    # Effect №2
+    _ = browser.find_element(By.CSS_SELECTOR, f'a.btn[href="/user/give-rights-staff/{username2}/"]')  # INFO! If the test fails, there is an error.
