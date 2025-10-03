@@ -191,3 +191,31 @@ def test_change_rights_agent(browser, live_server, flush_database):
     revoke_rights_staff.click()
     # Effect №2
     _ = browser.find_element(By.CSS_SELECTOR, f'a.btn[href="/user/give-rights-staff/{username2}/"]')  # INFO! If the test fails, there is an error.
+
+def test_change_blocking_status(browser, live_server, flush_database):
+    """
+    Test for the "Changing the block status of another account" test case.
+    """
+    username1: str = 'admin'
+    password1: str = 'o3m4b2!m'
+    username2: str = 'user'
+    password2: str = 'o3m4f2!@'
+    
+    _ = create_test_verify_user(username1, password1, is_superuser=True)
+    _ = create_test_verify_user(username2, password2)
+    
+    browser.get(live_server.url)
+    login_user(browser, username1, password1)
+
+    browser.get(f'{live_server.url}/user/profile/{username2}/')
+    
+    # Cause №1
+    block_user = browser.find_element(By.CSS_SELECTOR, f'a.btn[href="/user/ban/{username2}/"]')
+    block_user.click()
+    # Effect №1
+    unblock_user = browser.find_element(By.CSS_SELECTOR, f'a.btn[href="/user/unban/{username2}/"]')  # INFO! If the test fails, there is an error. 
+
+    # Cause №2
+    unblock_user.click()
+    # Effect №2
+    _ = browser.find_element(By.CSS_SELECTOR, f'a.btn[href="/user/ban/{username2}/"]')  # INFO! If the test fails, there is an error.
