@@ -132,7 +132,7 @@ def test_change_blacklist_user(browser, live_server, flush_database):
     
     browser.get(live_server.url)
     login_user(browser, username1, password1)
-    
+
     browser.get(f'{live_server.url}/user/profile/{username2}/')
     
     # Cause №1
@@ -140,3 +140,49 @@ def test_change_blacklist_user(browser, live_server, flush_database):
     add_in_blacklist.click()
     # Effect №1
     _ = browser.find_element(By.CSS_SELECTOR, f'a.btn[href="/user/del-bl-profile/{username2}/"]')  # INFO! If the test fails, there is an error. 
+
+def test_change_blacklist_user(browser, live_server, flush_database):
+    """
+    Test for the "Changing the blacklist status of another account" test case.
+    """
+    username1: str = 'user1'
+    password1: str = 'o3m4b2!m'
+    username2: str = 'user2'
+    password2: str = 'o3m4f2!@'
+    
+    _ = create_test_verify_user(username1, password1)
+    _ = create_test_verify_user(username2, password2)
+    
+    browser.get(live_server.url)
+    login_user(browser, username1, password1)
+
+    browser.get(f'{live_server.url}/user/profile/{username2}/')
+    
+    # Cause №1
+    add_in_blacklist = browser.find_element(By.CSS_SELECTOR, f'a.btn[href="/user/add-bl-profile/{username2}/"]')
+    add_in_blacklist.click()
+    # Effect №1
+    _ = browser.find_element(By.CSS_SELECTOR, f'a.btn[href="/user/del-bl-profile/{username2}/"]')  # INFO! If the test fails, there is an error. 
+
+def test_change_rights_agent(browser, live_server, flush_database):
+    """
+    Test for the "Changes to another account's real estate agent rights" test case.
+    """
+    username1: str = 'admin'
+    password1: str = 'o3m4b2!m'
+    username2: str = 'user'
+    password2: str = 'o3m4f2!@'
+    
+    _ = create_test_verify_user(username1, password1, is_superuser=True)
+    _ = create_test_verify_user(username2, password2)
+    
+    browser.get(live_server.url)
+    login_user(browser, username1, password1)
+
+    browser.get(f'{live_server.url}/user/profile/{username2}/')
+    
+    # Cause №1
+    give_rights_staff = browser.find_element(By.CSS_SELECTOR, f'a.btn[href="/user/give-rights-staff/{username2}/"]')
+    give_rights_staff.click()
+    # Effect №1
+    _ = browser.find_element(By.CSS_SELECTOR, f'a.btn[href="/user/revoke-rights-staff/{username2}/"]')  # INFO! If the test fails, there is an error. 
