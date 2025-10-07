@@ -39,7 +39,8 @@ else:
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-MAIN_HOST = os.getenv('MAIN_HOST')
+# INFO! без MAIN_HOST не будут работать письма, поэтому по умолчанию будет 127.0.0.1:8000
+MAIN_HOST = os.getenv('MAIN_HOST', '127.0.0.1:8000')
 ALLOWED_HOSTS = [MAIN_HOST, '*'] if MAIN_HOST else ['*']
 
 # Application definition

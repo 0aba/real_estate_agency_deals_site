@@ -26,6 +26,7 @@ services:
       db:
         condition: service_healthy
     environment:
+      MOD: ${MOD}
       NAME_DB: ${NAME_DB}
       USER_DB: ${USER_DB}
       PASSWORD_DB: ${PASSWORD_DB}
@@ -33,6 +34,6 @@ services:
       PORT_DB: 5432
       EMAIL_HOST_USER: ${EMAIL_HOST_USER}
       EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
-
+      MAIN_HOST: ${MAIN_HOST}
 volumes:
   postgres_data:

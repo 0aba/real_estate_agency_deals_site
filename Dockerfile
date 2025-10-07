@@ -1,5 +1,5 @@
 # INFO! dev сборка
-FROM python:3.13.4-bookworm
+FROM python:3.12.11
 
 ENV PYTHONUNBUFFERED=1
 
